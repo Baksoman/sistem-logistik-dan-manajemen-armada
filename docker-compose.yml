@@ -1,0 +1,71 @@
+services:
+  # -------------------------------------------
+  # MySQL Database
+  # -------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: logistik_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sistem-logistik-dan-manajemen-armada
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - logistik_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  # -------------------------------------------
+  # Redis (Cache & Queue & Realtime support)
+  # -------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: logistik_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - logistik_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # -------------------------------------------
+  # FastAPI Searoute Microservice
+  # -------------------------------------------
+  searoute:
+    build:
+      context: ./microservices/searoute
+      dockerfile: Dockerfile
+    container_name: logistik_searoute
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    networks:
+      - logistik_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  logistik_network:
+    driver: bridge
