@@ -8,6 +8,8 @@ use App\Http\Controllers\DriverProfileController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\VehicleMaintenanceController;
+use App\Http\Controllers\Warehouse\WarehouseController;
+use App\Http\Controllers\Warehouse\InventoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -54,6 +56,24 @@ Route::middleware('auth')->group(function () {
             Route::get('/maintenances', [VehicleMaintenanceController::class, 'index'])->name('fleet.maintenances.index');
             Route::post('/maintenances', [VehicleMaintenanceController::class, 'store'])->name('fleet.maintenances.store');
             Route::put('/maintenances/{maintenance}', [VehicleMaintenanceController::class, 'update'])->name('fleet.maintenances.update');
+        });
+    });
+
+    Route::middleware('permission:manage_inventory')->group(function () {
+        Route::prefix('warehouse')->group(function () {
+            Route::prefix('warehouses')->group(function () {
+                Route::get('/', [WarehouseController::class, 'index'])->name('warehouse.warehouses.index');
+                Route::post('/', [WarehouseController::class, 'store'])->name('warehouse.warehouses.store');
+                Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('warehouse.warehouses.update');
+                Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouse.warehouses.destroy');
+            });
+
+            Route::prefix('inventory')->group(function () {
+                Route::get('/', [InventoryController::class, 'index'])->name('warehouse.inventory.index');
+                Route::post('/', [InventoryController::class, 'store'])->name('warehouse.inventory.store');
+                Route::put('/{inventory}', [InventoryController::class, 'update'])->name('warehouse.inventory.update');
+                Route::delete('/{inventory}', [InventoryController::class, 'destroy'])->name('warehouse.inventory.destroy');
+            });
         });
     });
 });
