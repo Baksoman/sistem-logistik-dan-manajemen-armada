@@ -18,6 +18,7 @@ class StoreStockItemRequest extends FormRequest
             'category_id' => ['required', 'exists:item_categories,id'],
             'unit_type_id' => ['required', 'exists:unit_types,id'],
             'sku' => ['required', 'string', 'max:255', 'unique:stock_items,sku'],
+            'gtin' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'numeric', 'min:0'],
             'min_quantity' => ['required', 'numeric', 'min:0'],

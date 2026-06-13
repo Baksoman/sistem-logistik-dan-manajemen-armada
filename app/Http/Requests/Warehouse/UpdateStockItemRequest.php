@@ -19,6 +19,7 @@ class UpdateStockItemRequest extends FormRequest
             'category_id' => ['required', 'exists:item_categories,id'],
             'unit_type_id' => ['required', 'exists:unit_types,id'],
             'sku' => ['required', 'string', 'max:255', Rule::unique('stock_items')->ignore($this->route('inventory'))],
+            'gtin' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'numeric', 'min:0'],
             'min_quantity' => ['required', 'numeric', 'min:0'],
