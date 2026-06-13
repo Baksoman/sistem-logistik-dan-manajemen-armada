@@ -6,15 +6,18 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItemCategory extends Model
+class Rack extends Model
 {
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'zone_id',
         'name',
-        'description'
+        'description',
     ];
 
-    public function stockItems() { return $this->hasMany(StockItem::class); }
-
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
+    }
 }
