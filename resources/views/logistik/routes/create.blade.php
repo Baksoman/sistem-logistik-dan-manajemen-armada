@@ -76,7 +76,7 @@
                             </div>
                             <div class="p-4 rounded-2xl bg-gray-100 shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] text-center">
                                 <p class="text-xs font-bold text-gray-500 uppercase">Duration</p>
-                                <p class="text-lg font-bold text-gray-800" x-text="calculationResult ? Math.round(calculationResult.duration_min) + ' min' : '-'"></p>
+                                <p class="text-lg font-bold text-gray-800" x-text="calculationResult ? formatDuration(calculationResult.duration_min) : '-'"></p>
                             </div>
                         </div>
                     </div>
@@ -118,6 +118,19 @@
 
                 get waypointsJson() {
                     return JSON.stringify(this.waypoints);
+                },
+
+                formatDuration(totalMinutes) {
+                    if (!totalMinutes) return '0 menit';
+                    let days = Math.floor(totalMinutes / (24 * 60));
+                    let hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+                    let minutes = Math.round(totalMinutes % 60);
+                    
+                    let parts = [];
+                    if (days > 0) parts.push(days + ' hari');
+                    if (hours > 0) parts.push(hours + ' jam');
+                    if (minutes > 0 || parts.length === 0) parts.push(minutes + ' menit');
+                    return parts.join(' ');
                 },
 
                 init() {

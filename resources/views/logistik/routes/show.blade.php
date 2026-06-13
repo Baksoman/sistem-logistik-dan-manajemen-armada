@@ -61,7 +61,19 @@
                         </div>
                         <div class="flex justify-between items-center border-b border-gray-200 pb-2">
                             <span class="text-sm font-bold text-gray-500">Est. Duration</span>
-                            <span class="text-sm font-bold text-gray-800">{{ number_format($latestVersion->duration_min, 0) }} min</span>
+                            @php
+                                $duration = $latestVersion->duration_min;
+                                $days = floor($duration / (24 * 60));
+                                $hours = floor(($duration % (24 * 60)) / 60);
+                                $minutes = round($duration % 60);
+                                
+                                $parts = [];
+                                if ($days > 0) $parts[] = $days . ' hari';
+                                if ($hours > 0) $parts[] = $hours . ' jam';
+                                if ($minutes > 0 || empty($parts)) $parts[] = $minutes . ' menit';
+                                $durationFormatted = implode(' ', $parts);
+                            @endphp
+                            <span class="text-sm font-bold text-gray-800">{{ $durationFormatted }}</span>
                         </div>
                         <div class="flex justify-between items-center pb-2">
                             <span class="text-sm font-bold text-gray-500">Calculated At</span>
