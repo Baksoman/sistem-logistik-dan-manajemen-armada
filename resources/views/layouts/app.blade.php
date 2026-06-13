@@ -9,17 +9,35 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700|outfit:600,700,800,900&display=swap" rel="stylesheet" />
 
-        <!-- Tailwind CDN & Alpine (For immediate frontend shell rendering) -->
+        <!-- Toastify & SweetAlert2 -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Tailwind CDN & Alpine -->
         <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Poppins', 'sans-serif'],
+                            heading: ['Outfit', 'sans-serif'],
+                        }
+                    }
+                }
+            }
+        </script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-        <!-- Scripts (Vite for Laravel) -->
+        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
         <style>
             body { font-family: 'Poppins', sans-serif; }
+            h1, h2, h3, h4, h5, h6, .is-title { font-family: 'Outfit', sans-serif; }
             [x-cloak] { display: none !important; }
         </style>
     </head>
@@ -43,7 +61,7 @@
                     
                     // Default menu for all
                     $navItems = [
-                        ['name' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                        ['name' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
                     ];
 
                     // Check if role method exists to prevent crashes
@@ -52,16 +70,17 @@
                     };
 
                     if ($hasRole('Super Admin')) {
-                        $navItems[] = ['name' => 'User Management', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
-                        $navItems[] = ['name' => 'Finance & Reports', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'];
-                        $navItems[] = ['name' => 'Analytics', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'];
-                        $navItems[] = ['name' => 'Warehouse', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
-                        $navItems[] = ['name' => 'Fleet & Drivers', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+                        $navItems[] = ['name' => 'User Management', 'route' => 'users.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
+                        $navItems[] = ['name' => 'Finance & Reports', 'route' => null, 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'];
+                        $navItems[] = ['name' => 'Analytics', 'route' => null, 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'];
+                        $navItems[] = ['name' => 'Warehouse', 'route' => null, 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
+                        $navItems[] = ['name' => 'Drivers List', 'route' => 'drivers.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
+                    $navItems[] = ['name' => 'Vehicles List', 'route' => 'fleet.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
                     } elseif ($hasRole('Admin Logistik')) {
-                        $navItems[] = ['name' => 'Orders', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
-                        $navItems[] = ['name' => 'Shipments', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
-                        $navItems[] = ['name' => 'Route Opt.', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
-                        $navItems[] = ['name' => 'Fleet & Drivers', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+                        $navItems[] = ['name' => 'Orders', 'route' => null, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
+                        $navItems[] = ['name' => 'Shipments', 'route' => null, 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
+                        $navItems[] = ['name' => 'Route Opt.', 'route' => null, 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
+                        $navItems[] = ['name' => 'Vehicles & Drivers', 'route' => 'fleet.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
                     } elseif ($hasRole('Warehouse')) {
                         $navItems[] = ['name' => 'Stock Mgmt', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
                         $navItems[] = ['name' => 'Putaway/Pick', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'];
@@ -74,7 +93,7 @@
                 @endphp
 
                 @foreach($navItems as $item)
-                    <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ $loop->first ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
+                    <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" class="flex items-center gap-4 px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ request()->routeIs($item['route'] ?? '') ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
                         <span class="text-sm font-semibold">{{ $item['name'] }}</span>
                     </a>
@@ -102,7 +121,89 @@
                 </div>
             </main>
         </div>
-            </main>
-        </div>
+
+        <script>
+            function confirmDelete(formId, message = 'Apakah Anda yakin ingin menghapus data ini?') {
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    background: '#f3f4f6',
+                    backdrop: 'rgba(243, 244, 246, 0.85)', // Blend Neumorphism shadow with light backdrop
+                    color: '#374151',
+                    customClass: {
+                        popup: 'rounded-[2rem] shadow-[12px_12px_24px_#d1d5db,-12px_-12px_24px_#ffffff] border border-white/40',
+                        confirmButton: 'rounded-2xl font-bold text-gray-100 bg-red-500 shadow-[4px_4px_8px_#d1d5db] active:shadow-[inset_2px_2px_4px_#991b1b] px-6 py-3 ml-4 border-none hover:bg-red-600 transition',
+                        cancelButton: 'rounded-2xl font-bold text-gray-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db] active:shadow-[inset_2px_2px_4px_#d1d5db] px-6 py-3 border-none hover:text-blue-600 transition'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(formId).submit();
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                @if(session('success'))
+                    Toastify({
+                        text: "{{ session('success') }}",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#dcfce7",
+                            color: "#166534",
+                            boxShadow: "4px 4px 8px #d1d5db, -4px -4px 8px #ffffff",
+                            borderRadius: "1rem",
+                            padding: "16px 24px",
+                            fontWeight: "bold",
+                            border: "2px solid #bbf7d0"
+                        }
+                    }).showToast();
+                @endif
+
+                @if(session('error'))
+                    Toastify({
+                        text: "{{ session('error') }}",
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "#fee2e2",
+                            color: "#991b1b",
+                            boxShadow: "4px 4px 8px #d1d5db, -4px -4px 8px #ffffff",
+                            borderRadius: "1rem",
+                            padding: "16px 24px",
+                            fontWeight: "bold",
+                            border: "2px solid #fecaca"
+                        }
+                    }).showToast();
+                @endif
+
+                @if($errors->any())
+                    @foreach($errors->all() as $error)
+                        Toastify({
+                            text: "{{ str_replace('"', '\"', $error) }}",
+                            duration: 5000,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#fee2e2",
+                                color: "#991b1b",
+                                boxShadow: "4px 4px 8px #d1d5db, -4px -4px 8px #ffffff",
+                                borderRadius: "1rem",
+                                padding: "16px 24px",
+                                fontWeight: "bold",
+                                border: "2px solid #fecaca"
+                            }
+                        }).showToast();
+                    @endforeach
+                @endif
+            });
+        </script>
     </body>
 </html>
