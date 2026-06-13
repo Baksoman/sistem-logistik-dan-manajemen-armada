@@ -14,14 +14,15 @@
                 category_id: '{{ old('category_id') }}', 
                 unit_type_id: '{{ old('unit_type_id') }}', 
                 sku: '{{ old('sku') }}', 
-                gtin: '{{ old('gtin') }}', 
+                upc: '{{ old('upc') }}', 
+                brand: '{{ old('brand') }}',
                 name: '{{ old('name') }}', 
                 quantity: '{{ old('quantity') }}', 
                 min_quantity: '{{ old('min_quantity') }}', 
                 weight_kg: '{{ old('weight_kg') }}', 
                 volume_cbm: '{{ old('volume_cbm') }}', 
-                zone: '{{ old('zone') }}', 
-                bin_location: '{{ old('bin_location') }}' 
+                zone_id: '{{ old('zone_id') }}', 
+                rack_id: '{{ old('rack_id') }}' 
             },
             scannerActive: false,
             scannerTarget: 'create',
@@ -38,10 +39,10 @@
                             scanner.stop().then(() => {
                                 this.scannerActive = false;
                                 if (target === 'create') {
-                                    document.querySelector('[name=gtin]').value = decodedText;
-                                    document.querySelector('[name=gtin]').dispatchEvent(new Event('input'));
+                                    document.querySelector('[name=upc]').value = decodedText;
+                                    document.querySelector('[name=upc]').dispatchEvent(new Event('input'));
                                 } else {
-                                    this.editData.gtin = decodedText;
+                                    this.editData.upc = decodedText;
                                 }
                                 Toastify({ text: 'Barcode detected: ' + decodedText, duration: 3000, gravity: 'top', position: 'right', style: { background: '#10b981', borderRadius: '12px', fontWeight: 'bold' } }).showToast();
                             });
@@ -79,7 +80,8 @@
                 <thead>
                     <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
                         <th class="py-4 px-4 font-bold">SKU</th>
-                        <th class="py-4 px-4 font-bold">GTIN</th>
+                        <th class="py-4 px-4 font-bold">UPC</th>
+                        <th class="py-4 px-4 font-bold">Brand</th>
                         <th class="py-4 px-4 font-bold">Name</th>
                         <th class="py-4 px-4 font-bold">Warehouse</th>
                         <th class="py-4 px-4 font-bold">Category</th>
@@ -92,7 +94,8 @@
                     @forelse($inventory as $item)
                         <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
                             <td class="py-4 px-4 font-bold text-gray-800 tracking-wider">{{ $item->sku }}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500 font-mono">{{ $item->gtin ?? '-' }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-500 font-mono">{{ $item->upc ?? '-' }}</td>
+                            <td class="py-4 px-4">{{ $item->brand ?? '-' }}</td>
                             <td class="py-4 px-4 font-bold">{{ $item->name }}</td>
                             <td class="py-4 px-4">{{ $item->warehouse->name ?? '-' }}</td>
                             <td class="py-4 px-4">{{ $item->category->name ?? '-' }}</td>
@@ -102,11 +105,11 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4 text-sm text-gray-500">
-                                Zone: {{ $item->zone ?? '-' }} | Bin: {{ $item->bin_location ?? '-' }}
+                                Zone: {{ $item->zone->name ?? '-' }} | Rack: {{ $item->rack->name ?? '-' }}
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $item->id }}', warehouse_id: '{{ $item->warehouse_id }}', category_id: '{{ $item->category_id }}', unit_type_id: '{{ $item->unit_type_id }}', sku: '{{ $item->sku }}', gtin: '{{ $item->gtin }}', name: '{{ $item->name }}', quantity: '{{ $item->quantity }}', min_quantity: '{{ $item->min_quantity }}', weight_kg: '{{ $item->weight_kg }}', volume_cbm: '{{ $item->volume_cbm }}', zone: '{{ $item->zone }}', bin_location: '{{ $item->bin_location }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $item->id }}', warehouse_id: '{{ $item->warehouse_id }}', category_id: '{{ $item->category_id }}', unit_type_id: '{{ $item->unit_type_id }}', sku: '{{ $item->sku }}', upc: '{{ $item->upc }}', brand: '{{ $item->brand }}', name: '{{ $item->name }}', quantity: '{{ $item->quantity }}', min_quantity: '{{ $item->min_quantity }}', weight_kg: '{{ $item->weight_kg }}', volume_cbm: '{{ $item->volume_cbm }}', zone_id: '{{ $item->zone_id }}', rack_id: '{{ $item->rack_id }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form id="delete-form-{{ $item->id }}" action="{{ route('warehouse.inventory.destroy', $item->id) }}" method="POST" class="inline">
@@ -153,11 +156,11 @@
             <form action="{{ route('warehouse.inventory.store') }}" method="POST" class="space-y-6">
                 @csrf
 
-                <!-- GTIN with Scanner -->
+                <!-- UPC with Scanner -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">GTIN <span class="text-gray-400 font-normal">(Global Trade Item Number)</span></label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">UPC <span class="text-gray-400 font-normal">(Universal Product Code)</span></label>
                     <div class="flex gap-2">
-                        <x-input type="text" name="gtin" placeholder="Scan or type GTIN" class="flex-1" />
+                        <x-input type="text" name="upc" placeholder="Scan or type UPC" class="flex-1" />
                         <button type="button" @click="startScanner('create')" class="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                         </button>
@@ -166,8 +169,8 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">SKU</label>
-                        <x-input type="text" name="sku" required />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Brand</label>
+                        <x-input type="text" name="brand" placeholder="e.g. Samsung" />
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Item Name</label>
@@ -177,7 +180,7 @@
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Warehouse</label>
-                    <x-select name="warehouse_id" required>
+                    <x-select name="warehouse_id" required class="select2-enable" id="create_warehouse">
                         <option value="">Select Warehouse</option>
                         @foreach($warehouses as $warehouse)
                             <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
@@ -188,21 +191,21 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
-                        <x-select name="category_id" required>
+                        <select name="category_id" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none select2-enable">
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
-                        </x-select>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Unit Type</label>
-                        <x-select name="unit_type_id" required>
+                        <select name="unit_type_id" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none select2-enable">
                             <option value="">Select Unit</option>
                             @foreach($unitTypes as $unitType)
                                 <option value="{{ $unitType->id }}">{{ $unitType->name }}</option>
                             @endforeach
-                        </x-select>
+                        </select>
                     </div>
                 </div>
 
@@ -231,11 +234,21 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Zone</label>
-                        <x-input type="text" name="zone" />
+                        <select name="zone_id" id="create_zone_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none select2-enable">
+                            <option value="">Select Zone</option>
+                            @foreach($zones as $z)
+                                <option value="{{ $z->id }}" data-warehouse="{{ $z->warehouse_id }}">{{ $z->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Bin Location</label>
-                        <x-input type="text" name="bin_location" />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Rack Location</label>
+                        <select name="rack_id" id="create_rack_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none select2-enable">
+                            <option value="">Select Rack</option>
+                            @foreach($racks as $r)
+                                <option value="{{ $r->id }}" data-zone="{{ $r->zone_id }}">{{ $r->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 
@@ -254,11 +267,11 @@
                 @method('PUT')
                 <input type="hidden" name="inventory_id" x-model="editData.id">
 
-                <!-- GTIN with Scanner -->
+                <!-- UPC with Scanner -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">GTIN <span class="text-gray-400 font-normal">(Global Trade Item Number)</span></label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">UPC <span class="text-gray-400 font-normal">(Universal Product Code)</span></label>
                     <div class="flex gap-2">
-                        <input type="text" name="gtin" x-model="editData.gtin" placeholder="Scan or type GTIN" class="flex-1 w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                        <input type="text" name="upc" x-model="editData.upc" placeholder="Scan or type UPC" class="flex-1 w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
                         <button type="button" @click="startScanner('edit')" class="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                         </button>
@@ -267,8 +280,8 @@
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">SKU</label>
-                        <input type="text" name="sku" x-model="editData.sku" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Brand</label>
+                        <input type="text" name="brand" x-model="editData.brand" placeholder="e.g. Samsung" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Item Name</label>
@@ -329,11 +342,21 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Zone</label>
-                        <input type="text" name="zone" x-model="editData.zone" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                        <select name="zone_id" x-model="editData.zone_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none">
+                            <option value="">Select Zone</option>
+                            @foreach($zones as $z)
+                                <option value="{{ $z->id }}">{{ $z->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Bin Location</label>
-                        <input type="text" name="bin_location" x-model="editData.bin_location" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Rack Location</label>
+                        <select name="rack_id" x-model="editData.rack_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none">
+                            <option value="">Select Rack</option>
+                            @foreach($racks as $r)
+                                <option value="{{ $r->id }}">{{ $r->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
@@ -347,3 +370,43 @@
 
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.select2-enable').each(function() {
+            $(this).select2({
+                width: '100%'
+            });
+        });
+
+        // Filter zones by warehouse
+        $('#create_warehouse').on('change', function() {
+            let warehouseId = $(this).val();
+            $('#create_zone_id option').each(function() {
+                if ($(this).val() == '') return;
+                if ($(this).data('warehouse') == warehouseId) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $('#create_zone_id').val('').trigger('change');
+        });
+
+        // Filter racks by zone
+        $('#create_zone_id').on('change', function() {
+            let zoneId = $(this).val();
+            $('#create_rack_id option').each(function() {
+                if ($(this).val() == '') return;
+                if ($(this).data('zone') == zoneId) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $('#create_rack_id').val('').trigger('change');
+        });
+    });
+</script>
+@endpush

@@ -8,8 +8,8 @@
     <div x-data="{ 
             slideOverOpen: false,
             selectedWarehouse: '',
-            filteredItems: @js($stockItems->groupBy('warehouse_id')->map(fn($items) => $items->map(fn($item) => ['id' => $item->id, 'name' => $item->sku . ' - ' . $item->name, 'gtin' => $item->gtin ?? '', 'unit' => $item->unitType->name ?? '', 'qty' => $item->quantity]))->toArray()),
-            allItems: @js($stockItems->map(fn($item) => ['id' => $item->id, 'gtin' => $item->gtin ?? '', 'sku' => $item->sku, 'name' => $item->name, 'warehouse_id' => $item->warehouse_id, 'qty' => $item->quantity])->toArray()),
+            filteredItems: @js($stockItems->groupBy('warehouse_id')->map(fn($items) => $items->map(fn($item) => ['id' => $item->id, 'name' => $item->sku . ' - ' . $item->name, 'upc' => $item->upc ?? '', 'unit' => $item->unitType->name ?? '', 'qty' => $item->quantity]))->toArray()),
+            allItems: @js($stockItems->map(fn($item) => ['id' => $item->id, 'upc' => $item->upc ?? '', 'sku' => $item->sku, 'name' => $item->name, 'warehouse_id' => $item->warehouse_id, 'qty' => $item->quantity])->toArray()),
             scannerActive: false,
             startScanner() {
                 this.scannerActive = true;
@@ -40,7 +40,7 @@
                 }
             },
             handleScannedCode(code) {
-                const found = this.allItems.find(i => i.gtin === code);
+                const found = this.allItems.find(i => i.upc === code);
                 if (found) {
                     this.selectedWarehouse = found.warehouse_id;
                     this.$nextTick(() => {

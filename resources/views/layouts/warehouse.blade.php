@@ -19,6 +19,11 @@
         <!-- Barcode / QR Scanner -->
         <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
+        <!-- jQuery and Select2 -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
         <!-- Tailwind CDN & Alpine -->
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
@@ -42,6 +47,67 @@
             body { font-family: 'Poppins', sans-serif; }
             h1, h2, h3, h4, h5, h6, .is-title { font-family: 'Outfit', sans-serif; }
             [x-cloak] { display: none !important; }
+
+            /* Select2 Neomorphism Styling */
+            .select2-container--default .select2-selection--single {
+                background-color: #f3f4f6 !important;
+                border: none !important;
+                border-radius: 1rem !important;
+                height: 3.5rem !important;
+                padding: 0.875rem 1.25rem !important;
+                box-shadow: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            .select2-container--default.select2-container--focus .select2-selection--single {
+                outline: none !important;
+                box-shadow: inset 6px 6px 12px #d1d5db, inset -6px -6px 12px #ffffff !important;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                color: #4b5563 !important;
+                font-weight: 500 !important;
+                padding-left: 0 !important;
+                line-height: normal !important;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 100% !important;
+                right: 1.25rem !important;
+            }
+            .select2-dropdown {
+                background-color: #f3f4f6 !important;
+                border: none !important;
+                border-radius: 1rem !important;
+                box-shadow: 8px 8px 16px #d1d5db, -8px -8px 16px #ffffff !important;
+                overflow: hidden !important;
+                margin-top: 0.5rem !important;
+                z-index: 999999 !important;
+            }
+            .select2-search--dropdown {
+                padding: 1rem !important;
+            }
+            .select2-search--dropdown .select2-search__field {
+                background-color: #f3f4f6 !important;
+                border: none !important;
+                border-radius: 0.75rem !important;
+                padding: 0.75rem 1rem !important;
+                box-shadow: inset 3px 3px 6px #d1d5db, inset -3px -3px 6px #ffffff !important;
+                outline: none !important;
+                color: #4b5563 !important;
+            }
+            .select2-results__option {
+                padding: 0.75rem 1.25rem !important;
+                color: #4b5563 !important;
+                font-weight: 500 !important;
+                transition: all 0.2s !important;
+            }
+            .select2-results__option--highlighted.select2-results__option--selectable {
+                background-color: #e5e7eb !important;
+                color: #1f2937 !important;
+            }
+            .select2-results__option--selected {
+                background-color: #d1d5db !important;
+                color: #1f2937 !important;
+            }
         </style>
     </head>
     <body class="font-sans antialiased bg-gray-100 min-h-screen text-gray-800 flex overflow-hidden" x-data="{ sidebarOpen: false }">
@@ -63,6 +129,9 @@
                     $warehouseNav = [
                         ['name' => 'Dashboard', 'route' => 'warehouse.dashboard', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
                         ['name' => 'Warehouses', 'route' => 'warehouse.warehouses.index', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+                        ['name' => 'Categories', 'route' => 'warehouse.categories.index', 'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
+                        ['name' => 'Zones', 'route' => 'warehouse.zones.index', 'icon' => 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'],
+                        ['name' => 'Racks', 'route' => 'warehouse.racks.index', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
                         ['name' => 'Stock Inventory', 'route' => 'warehouse.inventory.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
                         ['name' => 'Inbound (Putaway)', 'route' => 'warehouse.inbound.index', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'],
                         ['name' => 'Outbound (Pick & Pack)', 'route' => 'warehouse.outbound.index', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
@@ -188,5 +257,6 @@
                 @endif
             });
         </script>
+        @stack('scripts')
     </body>
 </html>
