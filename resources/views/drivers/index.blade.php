@@ -7,8 +7,23 @@
 
 
 
-    <div x-data="{ slideOverOpen: {{ $errors->any() && !old('_method') ? 'true' : 'false' }}, editSlideOverOpen: false, editData: {} }" 
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $refs.editForm.action = '/drivers/' + editData.id"
+    <div x-data="{ 
+            slideOverOpen: {{ $errors->any() && !old('driver_id') ? 'true' : 'false' }}, 
+            editSlideOverOpen: {{ $errors->any() && old('driver_id') ? 'true' : 'false' }}, 
+            editData: { 
+                id: '{{ old('driver_id') }}', 
+                user_id: '{{ old('user_id') }}', 
+                nik: '{{ old('nik') }}', 
+                phone: '{{ old('phone') }}', 
+                address: '{{ addslashes(old('address')) }}', 
+                license_number: '{{ old('license_number') }}', 
+                license_type: '{{ old('license_type') }}', 
+                license_expired_at: '{{ old('license_expired_at') }}', 
+                status: '{{ old('status') }}', 
+                joined_at: '{{ old('joined_at') }}' 
+            } 
+         }" 
+         @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
          
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -80,7 +95,7 @@
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $driver->id }}', user_id: '{{ $driver->user_id }}', nik: '{{ $driver->nik }}', phone: '{{ $driver->phone }}', address: '{{ addslashes($driver->address) }}', license_number: '{{ $driver->license_number }}', license_type: '{{ $driver->license_type }}', license_expired_at: '{{ $driver->license_expired_at }}', status: '{{ $driver->status }}', joined_at: '{{ $driver->joined_at }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $driver->id }}', user_id: '{{ $driver->user_id }}', nik: '{{ $driver->nik }}', phone: '{{ $driver->phone }}', address: '{{ addslashes($driver->address) }}', license_number: '{{ $driver->license_number }}', license_type: '{{ $driver->license_type }}', license_expired_at: '{{ $driver->license_expired_at ? \Carbon\Carbon::parse($driver->license_expired_at)->format('Y-m-d') : '' }}', status: '{{ $driver->status }}', joined_at: '{{ $driver->joined_at ? \Carbon\Carbon::parse($driver->joined_at)->format('Y-m-d') : '' }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form id="delete-form-{{ $driver->id }}" action="{{ route('drivers.destroy', $driver->id) }}" method="POST" class="inline">
@@ -163,8 +178,9 @@
                         <button type="button" @click="editSlideOverOpen = false" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 bg-gray-100 shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     </div>
                     <div class="flex-1 overflow-y-auto px-8 py-8 z-0">
-                        <form x-ref="editForm" method="POST" class="space-y-6">
+                        <form :action="'{{ route('drivers.index') }}/' + editData.id" method="POST" class="space-y-6">
                             @csrf @method('PUT')
+                            <input type="hidden" name="driver_id" x-model="editData.id">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Linked User Account</label>
                                 <!-- Cannot edit user_id safely easily without breaking relations, but let's allow it as requested -->
@@ -197,7 +213,12 @@
                                     <x-select name="status" x-model="editData.status" required>
                                         <option value="available">Available</option><option value="on_trip">On Trip</option><option value="inactive">Inactive</option>
                                     </x-select>
-                                </div></div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Joined At</label>
+                                    <input type="date" name="joined_at" x-model="editData.joined_at" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                                </div>
+                            </div>
                             <div class="pt-6 mt-6 border-t border-gray-300">
                                 <button type="submit" class="w-full py-4 rounded-2xl font-bold text-gray-100 bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#4b5563] transition-all uppercase tracking-widest">Update</button>
                             </div>
