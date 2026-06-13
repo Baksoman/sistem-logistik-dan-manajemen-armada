@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             ItemCategorySeeder::class,
             UnitTypeSeeder::class,
             StockItemSeeder::class,
+            StockMovementSeeder::class,
             
             // General / Master Domain
             CustomerSeeder::class,
