@@ -15,6 +15,7 @@ class StockItem extends Model
         'category_id',
         'unit_type_id',
         'sku',
+        'gtin',
         'name',
         'quantity',
         'min_quantity',
