@@ -6,24 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('item_categories', function (Blueprint $table) {
+        Schema::create('racks', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name')->unique();
+            $table->foreignUuid('zone_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
             $table->text('description')->nullable();
             $table->timestamps();
+
+            $table->unique(['zone_id', 'name']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('item_categories');
+        Schema::dropIfExists('racks');
     }
 };

@@ -17,14 +17,15 @@ return new class extends Migration
             $table->foreignUuid('category_id')->constrained('item_categories')->cascadeOnDelete();
             $table->foreignUuid('unit_type_id')->constrained('unit_types')->cascadeOnDelete();
             $table->string('sku')->unique();
-            $table->string('gtin')->nullable();
+            $table->string('upc')->nullable();
+            $table->string('brand')->nullable();
             $table->string('name');
             $table->decimal('quantity', 10, 2)->default(0);
             $table->decimal('min_quantity', 10, 2)->default(0);
             $table->decimal('weight_kg', 10, 2);
             $table->decimal('volume_cbm', 10, 2);
-            $table->string('zone')->nullable();
-            $table->string('bin_location')->nullable();
+            $table->foreignUuid('zone_id')->nullable()->constrained('zones')->nullOnDelete();
+            $table->foreignUuid('rack_id')->nullable()->constrained('racks')->nullOnDelete();
             $table->timestamps();
         });
     }
