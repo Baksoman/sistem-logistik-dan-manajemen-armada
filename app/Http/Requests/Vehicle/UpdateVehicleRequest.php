@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Vehicle;
 
+use App\Models\VehicleMaintenance;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateVehicleRequest extends FormRequest
@@ -27,5 +28,27 @@ class UpdateVehicleRequest extends FormRequest
             'kir_expired_at' => 'required|date',
             'stnk_expired_at' => 'required|date',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $status = $this->input('status');
+            $vehicleId = $this->route('vehicle');
+            
+            if (!$vehicleId) return;
+
+            $hasInProgress = VehicleMaintenance::where('vehicle_id', $vehicleId)
+                ->where('status', 'In Progress')
+                ->exists();
+
+            if ($status === 'maintenance' && !$hasInProgress) {
+                $validator->errors()->add('status', 'Kendaraan tidak dapat diubah ke Maintenance. Silakan buat catatan Maintenance dengan status In Progress terlebih dahulu.');
+            }
+
+            if ($status !== 'maintenance' && $hasInProgress) {
+                $validator->errors()->add('status', 'Kendaraan sedang dalam proses Maintenance. Anda harus menyelesaikan catatan Maintenance terlebih dahulu.');
+            }
+        });
     }
 }

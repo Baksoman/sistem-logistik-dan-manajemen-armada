@@ -22,7 +22,7 @@ class StoreVehicleRequest extends FormRequest
             'capacity_kg' => 'required|numeric|min:0',
             'capacity_volume_cbm' => 'required|numeric|min:0',
             'fuel_type' => 'required|string',
-            'status' => 'required|in:available,maintenance,on_trip,inactive',
+            'status' => 'required|in:available,inactive',
             'kir_expired_at' => 'required|date',
             'stnk_expired_at' => 'required|date',
         ];

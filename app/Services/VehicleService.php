@@ -12,6 +12,11 @@ class VehicleService
         return Vehicle::with('vehicleType')->latest()->paginate($perPage);
     }
 
+    public function getAllVehicles()
+    {
+        return Vehicle::orderBy('plate_number')->get();
+    }
+
     public function getVehicleTypes()
     {
         return \App\Models\VehicleType::all();
