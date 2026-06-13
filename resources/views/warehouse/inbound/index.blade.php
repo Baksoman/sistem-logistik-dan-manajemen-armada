@@ -8,18 +8,80 @@
     <div x-data="{ 
             slideOverOpen: false,
             selectedWarehouse: '',
-            filteredItems: @js($stockItems->groupBy('warehouse_id')->map(fn($items) => $items->map(fn($item) => ['id' => $item->id, 'name' => $item->sku . ' - ' . $item->name, 'unit' => $item->unitType->name ?? '']))->toArray())
+            filteredItems: @js($stockItems->groupBy('warehouse_id')->map(fn($items) => $items->map(fn($item) => ['id' => $item->id, 'name' => $item->sku . ' - ' . $item->name, 'gtin' => $item->gtin ?? '', 'unit' => $item->unitType->name ?? '']))->toArray()),
+            allItems: @js($stockItems->map(fn($item) => ['id' => $item->id, 'gtin' => $item->gtin ?? '', 'sku' => $item->sku, 'name' => $item->name, 'warehouse_id' => $item->warehouse_id])->toArray()),
+            scannerActive: false,
+            startScanner() {
+                this.scannerActive = true;
+                this.$nextTick(() => {
+                    const scanner = new Html5Qrcode('inbound-barcode-reader');
+                    window.__inboundScanner = scanner;
+                    scanner.start(
+                        { facingMode: 'environment' },
+                        { fps: 10, qrbox: { width: 250, height: 150 } },
+                        (decodedText) => {
+                            scanner.stop().then(() => {
+                                this.scannerActive = false;
+                                this.handleScannedCode(decodedText);
+                            });
+                        },
+                        (err) => {}
+                    ).catch((err) => {
+                        this.scannerActive = false;
+                        Swal.fire('Camera Error', 'Unable to access camera. Please ensure camera permissions are granted and you are using HTTPS or localhost.', 'error');
+                    });
+                });
+            },
+            stopScanner() {
+                if (window.__inboundScanner) {
+                    window.__inboundScanner.stop().then(() => { this.scannerActive = false; }).catch(() => { this.scannerActive = false; });
+                } else {
+                    this.scannerActive = false;
+                }
+            },
+            handleScannedCode(code) {
+                const found = this.allItems.find(i => i.gtin === code);
+                if (found) {
+                    this.selectedWarehouse = found.warehouse_id;
+                    this.$nextTick(() => {
+                        const selectEl = document.querySelector('select[name=stock_item_id]');
+                        if (selectEl) { selectEl.value = found.id; selectEl.dispatchEvent(new Event('change')); }
+                    });
+                    Toastify({ text: 'Item found: ' + found.sku + ' - ' + found.name, duration: 3000, gravity: 'top', position: 'right', style: { background: '#10b981', borderRadius: '12px', fontWeight: 'bold' } }).showToast();
+                    this.slideOverOpen = true;
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Item Not Registered',
+                        html: '<b>Code:</b> ' + code + '<br><br>Item\'s code is not registered in stock inventory.<br>Please register it in <b>Stock Inventory</b> first.',
+                        confirmButtonText: 'Go to Stock Inventory',
+                        showCancelButton: true,
+                        cancelButtonText: 'Close',
+                        confirmButtonColor: '#4f46e5'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '{{ route('warehouse.inventory.index') }}';
+                        }
+                    });
+                }
+            }
          }" 
-         @keydown.escape.window="slideOverOpen = false">
+         @keydown.escape.window="slideOverOpen = false; stopScanner();">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
                 <p class="text-gray-500 text-lg font-medium">Penerimaan barang masuk (Putaway) ke gudang.</p>
             </div>
-            <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-emerald-600 shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
-                Record Inbound
-            </button>
+            <div class="flex items-center gap-3">
+                <button @click="startScanner()" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-indigo-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-indigo-500 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    Scan Item
+                </button>
+                <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-emerald-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    Record Inbound
+                </button>
+            </div>
         </div>
 
         <!-- Stats Cards -->
@@ -106,6 +168,22 @@
                 {{ $movements->links() }}
             </div>
         </x-card>
+
+        <!-- Barcode Scanner Modal -->
+        <template x-if="scannerActive">
+            <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" @click.self="stopScanner()">
+                <div class="bg-gray-100 rounded-3xl shadow-2xl p-6 w-full max-w-md mx-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">📷 Scan Item Barcode</h3>
+                        <button @click="stopScanner()" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:text-red-500 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div id="inbound-barcode-reader" class="rounded-2xl overflow-hidden shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]"></div>
+                    <p class="text-sm text-gray-500 mt-4 text-center font-medium">Scan the item's barcode to auto-fill the form.</p>
+                </div>
+            </div>
+        </template>
 
         <!-- Record Inbound Slide-Over -->
         <x-slide-over title="Record Inbound (Putaway)">

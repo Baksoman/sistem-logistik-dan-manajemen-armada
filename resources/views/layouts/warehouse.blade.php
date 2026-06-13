@@ -16,6 +16,9 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+        <!-- Barcode / QR Scanner -->
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
         <!-- Tailwind CDN & Alpine -->
         <script src="https://cdn.tailwindcss.com"></script>
         <script>

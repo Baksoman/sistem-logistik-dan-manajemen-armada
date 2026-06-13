@@ -14,6 +14,7 @@
                 category_id: '{{ old('category_id') }}', 
                 unit_type_id: '{{ old('unit_type_id') }}', 
                 sku: '{{ old('sku') }}', 
+                gtin: '{{ old('gtin') }}', 
                 name: '{{ old('name') }}', 
                 quantity: '{{ old('quantity') }}', 
                 min_quantity: '{{ old('min_quantity') }}', 
@@ -21,10 +22,47 @@
                 volume_cbm: '{{ old('volume_cbm') }}', 
                 zone: '{{ old('zone') }}', 
                 bin_location: '{{ old('bin_location') }}' 
-            } 
+            },
+            scannerActive: false,
+            scannerTarget: 'create',
+            startScanner(target) {
+                this.scannerTarget = target;
+                this.scannerActive = true;
+                this.$nextTick(() => {
+                    const scanner = new Html5Qrcode('barcode-reader');
+                    window.__barcodeScanner = scanner;
+                    scanner.start(
+                        { facingMode: 'environment' },
+                        { fps: 10, qrbox: { width: 250, height: 150 } },
+                        (decodedText) => {
+                            scanner.stop().then(() => {
+                                this.scannerActive = false;
+                                if (target === 'create') {
+                                    document.querySelector('[name=gtin]').value = decodedText;
+                                    document.querySelector('[name=gtin]').dispatchEvent(new Event('input'));
+                                } else {
+                                    this.editData.gtin = decodedText;
+                                }
+                                Toastify({ text: 'Barcode detected: ' + decodedText, duration: 3000, gravity: 'top', position: 'right', style: { background: '#10b981', borderRadius: '12px', fontWeight: 'bold' } }).showToast();
+                            });
+                        },
+                        (err) => {}
+                    ).catch((err) => {
+                        this.scannerActive = false;
+                        Swal.fire('Camera Error', 'Unable to access camera. Please ensure camera permissions are granted and you are using HTTPS or localhost.', 'error');
+                    });
+                });
+            },
+            stopScanner() {
+                if (window.__barcodeScanner) {
+                    window.__barcodeScanner.stop().then(() => { this.scannerActive = false; }).catch(() => { this.scannerActive = false; });
+                } else {
+                    this.scannerActive = false;
+                }
+            }
          }" 
          @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
-         @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
+         @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false; stopScanner();">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <p class="text-gray-500 text-lg font-medium">Manage stock items, quantities, and their storage locations.</p>
@@ -41,6 +79,7 @@
                 <thead>
                     <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
                         <th class="py-4 px-4 font-bold">SKU</th>
+                        <th class="py-4 px-4 font-bold">GTIN</th>
                         <th class="py-4 px-4 font-bold">Name</th>
                         <th class="py-4 px-4 font-bold">Warehouse</th>
                         <th class="py-4 px-4 font-bold">Category</th>
@@ -53,6 +92,7 @@
                     @forelse($inventory as $item)
                         <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
                             <td class="py-4 px-4 font-bold text-gray-800 tracking-wider">{{ $item->sku }}</td>
+                            <td class="py-4 px-4 text-sm text-gray-500 font-mono">{{ $item->gtin ?? '-' }}</td>
                             <td class="py-4 px-4 font-bold">{{ $item->name }}</td>
                             <td class="py-4 px-4">{{ $item->warehouse->name ?? '-' }}</td>
                             <td class="py-4 px-4">{{ $item->category->name ?? '-' }}</td>
@@ -66,7 +106,7 @@
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $item->id }}', warehouse_id: '{{ $item->warehouse_id }}', category_id: '{{ $item->category_id }}', unit_type_id: '{{ $item->unit_type_id }}', sku: '{{ $item->sku }}', name: '{{ $item->name }}', quantity: '{{ $item->quantity }}', min_quantity: '{{ $item->min_quantity }}', weight_kg: '{{ $item->weight_kg }}', volume_cbm: '{{ $item->volume_cbm }}', zone: '{{ $item->zone }}', bin_location: '{{ $item->bin_location }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $item->id }}', warehouse_id: '{{ $item->warehouse_id }}', category_id: '{{ $item->category_id }}', unit_type_id: '{{ $item->unit_type_id }}', sku: '{{ $item->sku }}', gtin: '{{ $item->gtin }}', name: '{{ $item->name }}', quantity: '{{ $item->quantity }}', min_quantity: '{{ $item->min_quantity }}', weight_kg: '{{ $item->weight_kg }}', volume_cbm: '{{ $item->volume_cbm }}', zone: '{{ $item->zone }}', bin_location: '{{ $item->bin_location }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form id="delete-form-{{ $item->id }}" action="{{ route('warehouse.inventory.destroy', $item->id) }}" method="POST" class="inline">
@@ -81,7 +121,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-gray-400">No stock items found.</td>
+                            <td colspan="8" class="py-8 text-center text-gray-400">No stock items found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -92,10 +132,38 @@
             </div>
         </x-card>
 
+        <!-- Barcode Scanner Modal -->
+        <template x-if="scannerActive">
+            <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" @click.self="stopScanner()">
+                <div class="bg-gray-100 rounded-3xl shadow-2xl p-6 w-full max-w-md mx-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">📷 Scan Barcode / QR Code</h3>
+                        <button @click="stopScanner()" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:text-red-500 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div id="barcode-reader" class="rounded-2xl overflow-hidden shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]"></div>
+                    <p class="text-sm text-gray-500 mt-4 text-center font-medium">Point your camera at a barcode or QR code.</p>
+                </div>
+            </div>
+        </template>
+
         <!-- Create Form Slide-Over -->
         <x-slide-over title="Create New Stock Item">
             <form action="{{ route('warehouse.inventory.store') }}" method="POST" class="space-y-6">
                 @csrf
+
+                <!-- GTIN with Scanner -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">GTIN <span class="text-gray-400 font-normal">(Global Trade Item Number)</span></label>
+                    <div class="flex gap-2">
+                        <x-input type="text" name="gtin" placeholder="Scan or type GTIN" class="flex-1" />
+                        <button type="button" @click="startScanner('create')" class="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">SKU</label>
@@ -185,6 +253,17 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="inventory_id" x-model="editData.id">
+
+                <!-- GTIN with Scanner -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">GTIN <span class="text-gray-400 font-normal">(Global Trade Item Number)</span></label>
+                    <div class="flex gap-2">
+                        <input type="text" name="gtin" x-model="editData.gtin" placeholder="Scan or type GTIN" class="flex-1 w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                        <button type="button" @click="startScanner('edit')" class="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-indigo-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
