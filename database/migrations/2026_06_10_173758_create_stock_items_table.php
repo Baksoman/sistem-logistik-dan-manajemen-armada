@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('category_id')->constrained('item_categories')->cascadeOnDelete();
             $table->foreignUuid('unit_type_id')->constrained('unit_types')->cascadeOnDelete();
             $table->string('sku')->unique();
+            $table->string('gtin')->nullable();
             $table->string('name');
             $table->decimal('quantity', 10, 2)->default(0);
             $table->decimal('min_quantity', 10, 2)->default(0);
