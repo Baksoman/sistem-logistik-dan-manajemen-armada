@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DriverProfileController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\VehicleMaintenanceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +50,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [VehicleController::class, 'store'])->name('fleet.store');
             Route::put('/{vehicle}', [VehicleController::class, 'update'])->name('fleet.update');
             Route::delete('/{vehicle}', [VehicleController::class, 'destroy'])->name('fleet.destroy');
+
+            Route::get('/maintenances', [VehicleMaintenanceController::class, 'index'])->name('fleet.maintenances.index');
+            Route::post('/maintenances', [VehicleMaintenanceController::class, 'store'])->name('fleet.maintenances.store');
+            Route::put('/maintenances/{maintenance}', [VehicleMaintenanceController::class, 'update'])->name('fleet.maintenances.update');
         });
     });
 });
