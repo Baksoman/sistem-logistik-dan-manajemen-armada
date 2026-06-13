@@ -1,8 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import searoute as sr
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Searoute Microservice",
@@ -44,13 +48,21 @@ def calculate_sea_route(request: RouteRequest):
     Kalkulasi rute laut antara dua koordinat.
     Gunakan format [longitude, latitude].
     """
-    origin = [request.origin_lon, request.origin_lat]
-    destination = [request.destination_lon, request.destination_lat]
+    try:
+        origin = [request.origin_lon, request.origin_lat]
+        destination = [request.destination_lon, request.destination_lat]
 
-    route = sr.searoute(origin, destination, units=request.units)
+        # Calculate the route using the searoute library
+        route = sr.searoute(origin, destination, units=request.units)
 
-    return RouteResponse(
-        distance=route["properties"]["length"],
-        units=route["properties"]["units"],
-        geojson=route
-    )
+        if not route or 'properties' not in route:
+            raise ValueError("Invalid route calculation result from searoute library.")
+
+        return RouteResponse(
+            distance=route["properties"]["length"],
+            units=route["properties"]["units"],
+            geojson=route
+        )
+    except Exception as e:
+        logger.error(f"Error calculating sea route: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to calculate sea route: {str(e)}")
