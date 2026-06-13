@@ -52,6 +52,7 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 * ✅ Proses Inbound (Putaway) dan Outbound (Picking, Packing)
 * ✅ Integrasi **GTIN & Barcode/QR Scanner** (menggunakan *html5-qrcode*) untuk modul registrasi Inventory, Inbound, dan Outbound.
 * ✅ Modul diisolasi dengan Standalone Layout pada `/warehouse-panel/*` dengan sistem multi-tenancy (hanya melihat gudang yang di-assign)
+* ✅ CRUD Data Kategori, Zona, Rak Gudang
 
 ### **B. Customer & Order Management**
 * ❌ CRUD Data Customer
