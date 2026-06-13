@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             VehicleTypeSeeder::class,
             VehicleSeeder::class,
             DriverProfileSeeder::class,
+            VehicleMaintenanceSeeder::class,
             
             // Warehouse Domain
             WarehouseSeeder::class,
