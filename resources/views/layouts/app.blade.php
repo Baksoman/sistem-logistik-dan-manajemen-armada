@@ -76,7 +76,14 @@
                         $navItems[] = ['name' => 'Analytics', 'route' => null, 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'];
                         $navItems[] = ['name' => 'Warehouse', 'route' => null, 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
                         $navItems[] = ['name' => 'Drivers List', 'route' => 'drivers.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
-                    $navItems[] = ['name' => 'Vehicles List', 'route' => 'fleet.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+                        $navItems[] = [
+                            'name' => 'Fleet Management',
+                            'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
+                            'items' => [
+                                ['name' => 'Vehicles List', 'route' => 'fleet.index'],
+                                ['name' => 'Maintenance', 'route' => 'fleet.maintenances.index']
+                            ]
+                        ];
                     } elseif ($hasRole('Admin Logistik')) {
                         $navItems[] = ['name' => 'Orders', 'route' => null, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
                         $navItems[] = ['name' => 'Shipments', 'route' => null, 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
@@ -94,10 +101,29 @@
                 @endphp
 
                 @foreach($navItems as $item)
-                    <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" class="flex items-center gap-4 px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ request()->routeIs($item['route'] ?? '') ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
-                        <span class="text-sm font-semibold">{{ $item['name'] }}</span>
-                    </a>
+                    @if(isset($item['items']))
+                        <div x-data="{ open: {{ request()->routeIs('fleet.*') ? 'true' : 'false' }} }" class="space-y-1">
+                            <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ request()->routeIs('fleet.*') ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
+                                <div class="flex items-center gap-4">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
+                                    <span class="text-sm font-semibold">{{ $item['name'] }}</span>
+                                </div>
+                                <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div x-show="open" x-collapse class="pl-12 pr-4 space-y-1 py-1">
+                                @foreach($item['items'] as $subItem)
+                                    <a href="{{ isset($subItem['route']) ? route($subItem['route']) : '#' }}" class="block px-4 py-2 text-sm text-gray-600 rounded-xl transition-all duration-200 {{ request()->routeIs($subItem['route'] ?? '') ? 'shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] text-blue-600 font-bold bg-gray-200/30' : 'hover:shadow-[2px_2px_4px_#d1d5db,-2px_-2px_4px_#ffffff] hover:text-gray-900' }}">
+                                        {{ $subItem['name'] }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" class="flex items-center gap-4 px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ request()->routeIs($item['route'] ?? '') ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
+                            <span class="text-sm font-semibold">{{ $item['name'] }}</span>
+                        </a>
+                    @endif
                 @endforeach
             </nav>
 
