@@ -11,6 +11,9 @@ use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\Logistik\RouteController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\InventoryController;
+use App\Http\Controllers\Warehouse\InboundController;
+use App\Http\Controllers\Warehouse\OutboundController;
+use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -61,7 +64,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:manage_inventory')->group(function () {
-        Route::prefix('warehouse')->group(function () {
+        Route::prefix('warehouse-panel')->group(function () {
+            Route::get('/', [WarehouseDashboardController::class, 'index'])->name('warehouse.dashboard');
+            
             Route::prefix('warehouses')->group(function () {
                 Route::get('/', [WarehouseController::class, 'index'])->name('warehouse.warehouses.index');
                 Route::post('/', [WarehouseController::class, 'store'])->name('warehouse.warehouses.store');
@@ -74,6 +79,16 @@ Route::middleware('auth')->group(function () {
                 Route::post('/', [InventoryController::class, 'store'])->name('warehouse.inventory.store');
                 Route::put('/{inventory}', [InventoryController::class, 'update'])->name('warehouse.inventory.update');
                 Route::delete('/{inventory}', [InventoryController::class, 'destroy'])->name('warehouse.inventory.destroy');
+            });
+
+            Route::prefix('inbound')->group(function () {
+                Route::get('/', [InboundController::class, 'index'])->name('warehouse.inbound.index');
+                Route::post('/', [InboundController::class, 'store'])->name('warehouse.inbound.store');
+            });
+
+            Route::prefix('outbound')->group(function () {
+                Route::get('/', [OutboundController::class, 'index'])->name('warehouse.outbound.index');
+                Route::post('/', [OutboundController::class, 'store'])->name('warehouse.outbound.store');
             });
         });
     });
