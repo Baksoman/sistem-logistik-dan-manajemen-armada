@@ -8,7 +8,16 @@ class WarehouseService
 {
     public function getPaginatedWarehouses($perPage = 10)
     {
-        return Warehouse::latest()->paginate($perPage);
+        $user = auth()->user();
+        $query = Warehouse::latest();
+        
+        if ($user && !$user->hasRole('Super Admin')) {
+            $query->whereHas('users', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+        
+        return $query->paginate($perPage);
     }
 
     public function createWarehouse(array $data)

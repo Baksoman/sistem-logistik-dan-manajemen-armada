@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboard;
-use App\Http\Controllers\Warehouse\DashboardController as WarehouseDashboard;
 use App\Http\Controllers\Driver\DashboardController as DriverDashboard;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboard;
 
@@ -25,8 +24,8 @@ class DashboardController extends Controller
             return app(LogistikDashboard::class)->index();
         }
 
-        if ($user->hasRole('Warehouse')) {
-            return app(WarehouseDashboard::class)->index();
+        if ($user->hasRole('Staff Warehouse')) {
+            return redirect()->route('warehouse.dashboard');
         }
 
         if ($user->hasRole('Driver')) {

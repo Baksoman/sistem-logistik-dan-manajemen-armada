@@ -11,12 +11,30 @@ class InventoryService
 {
     public function getPaginatedStockItems($perPage = 10)
     {
-        return StockItem::with(['warehouse', 'category', 'unitType'])->latest()->paginate($perPage);
+        $user = auth()->user();
+        $query = StockItem::with(['warehouse', 'category', 'unitType'])->latest();
+
+        if ($user && !$user->hasRole('Super Admin')) {
+            $query->whereHas('warehouse.users', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function getWarehouses()
     {
-        return Warehouse::where('is_active', true)->get();
+        $user = auth()->user();
+        $query = Warehouse::where('is_active', true);
+
+        if ($user && !$user->hasRole('Super Admin')) {
+            $query->whereHas('users', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+
+        return $query->get();
     }
 
     public function getItemCategories()
