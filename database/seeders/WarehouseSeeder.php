@@ -44,13 +44,29 @@ class WarehouseSeeder extends Seeder
 
         // Mapping user ke gudang (staff warehouse)
         $warehouseUser = DB::table('users')->where('email', 'warehouse@logistik.app')->first();
+        $budi = DB::table('users')->where('email', 'budi@logistik.app')->first();
+        $andi = DB::table('users')->where('email', 'andi@logistik.app')->first();
+
         $warehouseSby = DB::table('warehouses')->where('code', 'WH-SUB-01')->first();
+        $warehouseSda = DB::table('warehouses')->where('code', 'WH-SDA-01')->first();
+        $warehouseMlg = DB::table('warehouses')->where('code', 'WH-MLG-01')->first();
 
         if ($warehouseUser && $warehouseSby) {
-            DB::table('warehouse_users')->insert([
-                'warehouse_id' => $warehouseSby->id,
-                'user_id' => $warehouseUser->id,
-            ]);
+            DB::table('warehouse_users')->updateOrInsert(
+                ['warehouse_id' => $warehouseSby->id, 'user_id' => $warehouseUser->id]
+            );
+        }
+
+        if ($budi && $warehouseSda) {
+            DB::table('warehouse_users')->updateOrInsert(
+                ['warehouse_id' => $warehouseSda->id, 'user_id' => $budi->id]
+            );
+        }
+
+        if ($andi && $warehouseMlg) {
+            DB::table('warehouse_users')->updateOrInsert(
+                ['warehouse_id' => $warehouseMlg->id, 'user_id' => $andi->id]
+            );
         }
     }
 }

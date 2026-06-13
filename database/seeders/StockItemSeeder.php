@@ -64,6 +64,42 @@ class StockItemSeeder extends Seeder
                 ]
             ];
 
+            $warehouseSda = DB::table('warehouses')->where('code', 'WH-SDA-01')->first();
+            if ($warehouseSda) {
+                $items[] = [
+                    'id' => Str::uuid(),
+                    'warehouse_id' => $warehouseSda->id,
+                    'category_id' => $catMakanan->id,
+                    'unit_type_id' => $unitBox->id,
+                    'sku' => 'SDA-BKS-001',
+                    'name' => 'Biskuit Kaleng',
+                    'quantity' => 500,
+                    'min_quantity' => 50,
+                    'weight_kg' => 2.0,
+                    'volume_cbm' => 0.03,
+                    'zone' => 'B',
+                    'bin_location' => 'B-01-01',
+                ];
+            }
+
+            $warehouseMlg = DB::table('warehouses')->where('code', 'WH-MLG-01')->first();
+            if ($warehouseMlg) {
+                $items[] = [
+                    'id' => Str::uuid(),
+                    'warehouse_id' => $warehouseMlg->id,
+                    'category_id' => $catElektronik->id,
+                    'unit_type_id' => $unitPcs->id,
+                    'sku' => 'MLG-KPS-001',
+                    'name' => 'Kipas Angin Berdiri',
+                    'quantity' => 200,
+                    'min_quantity' => 20,
+                    'weight_kg' => 5.0,
+                    'volume_cbm' => 0.1,
+                    'zone' => 'A',
+                    'bin_location' => 'A-03-01',
+                ];
+            }
+
             DB::table('stock_items')->insert($items);
         }
     }

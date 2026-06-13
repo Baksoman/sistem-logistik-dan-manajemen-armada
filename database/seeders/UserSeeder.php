@@ -34,6 +34,20 @@ class UserSeeder extends Seeder
                 'role' => 'Staff Warehouse',
             ],
             [
+                'name' => 'Budi (Staff Sidoarjo)',
+                'email' => 'budi@logistik.app',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+                'role' => 'Staff Warehouse',
+            ],
+            [
+                'name' => 'Andi (Staff Malang)',
+                'email' => 'andi@logistik.app',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+                'role' => 'Staff Warehouse',
+            ],
+            [
                 'name' => 'Driver Budi',
                 'email' => 'driver@logistik.app',
                 'password' => Hash::make('password'),
