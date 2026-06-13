@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             
             // Warehouse Domain
             WarehouseSeeder::class,
+            ZoneAndRackSeeder::class,
             ItemCategorySeeder::class,
             UnitTypeSeeder::class,
             StockItemSeeder::class,

@@ -14,8 +14,8 @@ class StockMovementSeeder extends Seeder
         $warehouseUser = DB::table('users')->where('email', 'warehouse@logistik.app')->first();
         $budi = DB::table('users')->where('email', 'budi@logistik.app')->first();
         
-        $stockTV = DB::table('stock_items')->where('sku', 'ELK-TV-001')->first();
-        $stockBiskuit = DB::table('stock_items')->where('sku', 'SDA-BKS-001')->first();
+        $stockTV = DB::table('stock_items')->where('name', 'LED TV 43 Inch')->first();
+        $stockBiskuit = DB::table('stock_items')->where('name', 'Biskuit Kaleng')->first();
 
         $movements = [];
 
