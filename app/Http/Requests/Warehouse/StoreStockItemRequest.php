@@ -17,15 +17,15 @@ class StoreStockItemRequest extends FormRequest
             'warehouse_id' => ['required', 'exists:warehouses,id'],
             'category_id' => ['required', 'exists:item_categories,id'],
             'unit_type_id' => ['required', 'exists:unit_types,id'],
-            'sku' => ['required', 'string', 'max:255', 'unique:stock_items,sku'],
-            'gtin' => ['nullable', 'string', 'max:255'],
+            'upc' => ['nullable', 'string', 'max:255'],
+            'brand' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'numeric', 'min:0'],
             'min_quantity' => ['required', 'numeric', 'min:0'],
             'weight_kg' => ['required', 'numeric', 'min:0'],
             'volume_cbm' => ['required', 'numeric', 'min:0'],
-            'zone' => ['nullable', 'string', 'max:255'],
-            'bin_location' => ['nullable', 'string', 'max:255']
+            'zone_id' => ['nullable', 'exists:zones,id'],
+            'rack_id' => ['nullable', 'exists:racks,id']
         ];
     }
 }

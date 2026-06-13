@@ -6,6 +6,8 @@ use App\Models\StockItem;
 use App\Models\ItemCategory;
 use App\Models\UnitType;
 use App\Models\Warehouse;
+use App\Models\Zone;
+use App\Models\Rack;
 
 class InventoryService
 {
@@ -45,6 +47,16 @@ class InventoryService
     public function getUnitTypes()
     {
         return UnitType::all();
+    }
+
+    public function getZones()
+    {
+        return Zone::all();
+    }
+
+    public function getRacks()
+    {
+        return Rack::all();
     }
 
     public function createStockItem(array $data)

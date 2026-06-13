@@ -18,8 +18,10 @@ class InventoryController extends Controller
         $warehouses = $this->inventoryService->getWarehouses();
         $categories = $this->inventoryService->getItemCategories();
         $unitTypes = $this->inventoryService->getUnitTypes();
+        $zones = $this->inventoryService->getZones();
+        $racks = $this->inventoryService->getRacks();
         
-        return view('warehouse.inventory.index', compact('inventory', 'warehouses', 'categories', 'unitTypes'));
+        return view('warehouse.inventory.index', compact('inventory', 'warehouses', 'categories', 'unitTypes', 'zones', 'racks'));
     }
 
     public function store(StoreStockItemRequest $request)
