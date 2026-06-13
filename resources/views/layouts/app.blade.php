@@ -1,15 +1,108 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sistem Logistik') - {{ config('app.name') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @stack('styles')
-</head>
-<body class="min-h-screen bg-gray-50">
-    @yield('content')
-    @stack('scripts')
-</body>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Logistik') }} - Dashboard</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700&display=swap" rel="stylesheet" />
+
+        <!-- Tailwind CDN & Alpine (For immediate frontend shell rendering) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+        <!-- Scripts (Vite for Laravel) -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <style>
+            body { font-family: 'Poppins', sans-serif; }
+            [x-cloak] { display: none !important; }
+        </style>
+    </head>
+    <body class="font-sans antialiased bg-gray-100 min-h-screen text-gray-800 flex overflow-hidden" x-data="{ sidebarOpen: false }">
+        
+        <!-- Mobile sidebar backdrop -->
+        <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-20 bg-gray-900/50 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
+
+        <!-- Sidebar -->
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-30 w-72 bg-gray-100 shadow-[8px_0_16px_#d1d5db] transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 lg:flex lg:flex-col">
+            <div class="flex items-center justify-center h-24 shadow-[0_4px_6px_-1px_#d1d5db]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center font-bold text-2xl text-gray-800">L</div>
+                    <span class="text-2xl font-bold tracking-widest text-gray-800 uppercase">Logistik</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
+                @php
+                    $user = auth()->user();
+                    
+                    // Default menu for all
+                    $navItems = [
+                        ['name' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                    ];
+
+                    // Check if role method exists to prevent crashes
+                    $hasRole = function($role) use ($user) {
+                        return $user && method_exists($user, 'hasRole') && $user->hasRole($role);
+                    };
+
+                    if ($hasRole('Super Admin')) {
+                        $navItems[] = ['name' => 'User Management', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
+                        $navItems[] = ['name' => 'Finance & Reports', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'];
+                        $navItems[] = ['name' => 'Analytics', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'];
+                        $navItems[] = ['name' => 'Warehouse', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
+                        $navItems[] = ['name' => 'Fleet & Drivers', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+                    } elseif ($hasRole('Admin Logistik')) {
+                        $navItems[] = ['name' => 'Orders', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
+                        $navItems[] = ['name' => 'Shipments', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
+                        $navItems[] = ['name' => 'Route Opt.', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
+                        $navItems[] = ['name' => 'Fleet & Drivers', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+                    } elseif ($hasRole('Warehouse')) {
+                        $navItems[] = ['name' => 'Stock Mgmt', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
+                        $navItems[] = ['name' => 'Putaway/Pick', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'];
+                        $navItems[] = ['name' => 'Packing', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'];
+                    } elseif ($hasRole('Driver')) {
+                        $navItems[] = ['name' => 'My Schedule', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'];
+                        $navItems[] = ['name' => 'Navigation', 'icon' => 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z'];
+                        $navItems[] = ['name' => 'Upload POD', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'];
+                    }
+                @endphp
+
+                @foreach($navItems as $item)
+                    <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ $loop->first ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
+                        <span class="text-sm font-semibold">{{ $item['name'] }}</span>
+                    </a>
+                @endforeach
+            </nav>
+
+            <div class="p-6 pt-0">
+                <form method="POST" action="{{ route('logout') ?? '#' }}">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-gray-600 font-bold hover:text-red-500 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Log Out
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 overflow-hidden p-4 lg:p-6 lg:pl-0 lg:pb-6 h-screen">
+            <!-- Unified Parent -->
+            <main class="h-full flex flex-col bg-gray-100 overflow-hidden">
+                <!-- Page Content Area -->
+                <div class="flex-1 overflow-x-hidden overflow-y-auto px-6 lg:px-8 pb-8 pt-4">
+                    @yield('content')
+                </div>
+            </main>
+        </div>
+            </main>
+        </div>
+    </body>
 </html>
