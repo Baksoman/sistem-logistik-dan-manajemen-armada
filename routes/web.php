@@ -8,6 +8,7 @@ use App\Http\Controllers\DriverProfileController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\VehicleMaintenanceController;
+use App\Http\Controllers\Logistik\RouteController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\InventoryController;
 
@@ -74,6 +75,17 @@ Route::middleware('auth')->group(function () {
                 Route::put('/{inventory}', [InventoryController::class, 'update'])->name('warehouse.inventory.update');
                 Route::delete('/{inventory}', [InventoryController::class, 'destroy'])->name('warehouse.inventory.destroy');
             });
+        });
+    });
+
+    Route::middleware('permission:manage_routes')->group(function () {
+        Route::prefix('logistik/routes')->group(function () {
+            Route::get('/', [RouteController::class, 'index'])->name('routes.index');
+            Route::get('/create', [RouteController::class, 'create'])->name('routes.create');
+            Route::post('/', [RouteController::class, 'store'])->name('routes.store');
+            Route::get('/{route}', [RouteController::class, 'show'])->name('routes.show');
+            Route::delete('/{route}', [RouteController::class, 'destroy'])->name('routes.destroy');
+            Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
         });
     });
 });
