@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.warehouse')
 
 @section('title', 'Warehouse Management')
 
@@ -15,14 +15,15 @@
                 address: '{{ old('address') }}', 
                 latitude: '{{ old('latitude') }}', 
                 longitude: '{{ old('longitude') }}', 
-                is_active: '{{ old('is_active', 1) }}' 
+                is_active: '{{ old('is_active', 1) }}',
+                user_ids: [] 
             } 
          }" 
          @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <p class="text-gray-500 text-lg font-medium">Manage warehouse locations and details.</p>
+            <p class="text-gray-500 text-lg font-medium">Manage warehouse locations and staff assignments.</p>
             <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600 shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Add Warehouse
@@ -38,6 +39,7 @@
                         <th class="py-4 px-4 font-bold">Code</th>
                         <th class="py-4 px-4 font-bold">Name</th>
                         <th class="py-4 px-4 font-bold">Address</th>
+                        <th class="py-4 px-4 font-bold">Assigned Staff</th>
                         <th class="py-4 px-4 font-bold">Status</th>
                         <th class="py-4 px-4 font-bold text-center">Action</th>
                     </tr>
@@ -49,13 +51,24 @@
                             <td class="py-4 px-4 font-bold">{{ $warehouse->name }}</td>
                             <td class="py-4 px-4 whitespace-normal min-w-[200px]">{{ $warehouse->address }}</td>
                             <td class="py-4 px-4">
+                                @if($warehouse->users->count() > 0)
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($warehouse->users as $user)
+                                            <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 shadow-[inset_1px_1px_2px_#d1d5db,inset_-1px_-1px_2px_#ffffff]">{{ $user->name }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 text-sm">No staff</span>
+                                @endif
+                            </td>
+                            <td class="py-4 px-4">
                                 <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $warehouse->is_active ? 'text-emerald-600' : 'text-red-500' }}">
                                     {{ $warehouse->is_active ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $warehouse->id }}', code: '{{ $warehouse->code }}', name: '{{ $warehouse->name }}', address: '{{ str_replace(["\r", "\n"], ["", " "], $warehouse->address) }}', latitude: '{{ $warehouse->latitude }}', longitude: '{{ $warehouse->longitude }}', is_active: '{{ $warehouse->is_active }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $warehouse->id }}', code: '{{ $warehouse->code }}', name: '{{ $warehouse->name }}', address: '{{ str_replace(["\r", "\n"], ["", " "], $warehouse->address) }}', latitude: '{{ $warehouse->latitude }}', longitude: '{{ $warehouse->longitude }}', is_active: '{{ $warehouse->is_active }}', user_ids: {{ json_encode($warehouse->users->pluck('id')->toArray()) }} })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form id="delete-form-{{ $warehouse->id }}" action="{{ route('warehouse.warehouses.destroy', $warehouse->id) }}" method="POST" class="inline">
@@ -70,7 +83,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-gray-400">No warehouses found.</td>
+                            <td colspan="6" class="py-8 text-center text-gray-400">No warehouses found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -113,6 +126,22 @@
                         <option value="1">Active</option>
                         <option value="0">Inactive</option>
                     </x-select>
+                </div>
+
+                <!-- User Mapping -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Assign Staff</label>
+                    <div class="bg-gray-100 rounded-2xl p-4 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] max-h-48 overflow-y-auto space-y-2">
+                        @forelse($assignableUsers as $user)
+                            <label class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-200/50 cursor-pointer transition">
+                                <input type="checkbox" name="user_ids[]" value="{{ $user->id }}" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">{{ $user->name }}</span>
+                                <span class="text-xs text-gray-400 ml-auto">{{ $user->email }}</span>
+                            </label>
+                        @empty
+                            <p class="text-sm text-gray-400 text-center py-2">No Staff Warehouse users found.</p>
+                        @endforelse
+                    </div>
                 </div>
                 
                 <div class="pt-6 mt-6 border-t border-gray-300">
@@ -157,6 +186,22 @@
                         <option value="1">Active</option>
                         <option value="0">Inactive</option>
                     </select>
+                </div>
+
+                <!-- User Mapping -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Assign Staff</label>
+                    <div class="bg-gray-100 rounded-2xl p-4 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] max-h-48 overflow-y-auto space-y-2">
+                        @forelse($assignableUsers as $user)
+                            <label class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-200/50 cursor-pointer transition">
+                                <input type="checkbox" name="user_ids[]" value="{{ $user->id }}" :checked="editData.user_ids && editData.user_ids.includes('{{ $user->id }}')" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">{{ $user->name }}</span>
+                                <span class="text-xs text-gray-400 ml-auto">{{ $user->email }}</span>
+                            </label>
+                        @empty
+                            <p class="text-sm text-gray-400 text-center py-2">No Staff Warehouse users found.</p>
+                        @endforelse
+                    </div>
                 </div>
                 
                 <div class="pt-6 mt-6 border-t border-gray-300">
