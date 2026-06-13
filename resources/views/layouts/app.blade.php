@@ -81,6 +81,7 @@
                             ]
                         ];
                         $navItems[] = ['name' => 'Drivers List', 'route' => 'drivers.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
+                        $navItems[] = ['name' => 'Route Opt.', 'route' => 'routes.index', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
                         $navItems[] = [
                             'name' => 'Fleet Management',
                             'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
@@ -92,7 +93,7 @@
                     } elseif ($hasRole('Admin Logistik')) {
                         $navItems[] = ['name' => 'Orders', 'route' => null, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
                         $navItems[] = ['name' => 'Shipments', 'route' => null, 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
-                        $navItems[] = ['name' => 'Route Opt.', 'route' => null, 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
+                        $navItems[] = ['name' => 'Route Opt.', 'route' => 'routes.index', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
                         $navItems[] = ['name' => 'Vehicles & Drivers', 'route' => 'fleet.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
                     } elseif ($hasRole('Warehouse')) {
                         $navItems[] = [
