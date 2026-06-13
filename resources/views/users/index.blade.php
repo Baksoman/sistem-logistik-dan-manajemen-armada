@@ -8,8 +8,17 @@
     <!-- Error/Success Alerts -->
 
 
-    <div x-data="{ slideOverOpen: {{ $errors->any() && !old('_method') ? 'true' : 'false' }}, editSlideOverOpen: false, editData: { id: '', name: '', email: '', role: '' } }" 
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $refs.editForm.action = '/users/' + editData.id"
+    <div x-data="{ 
+            slideOverOpen: {{ $errors->any() && !old('user_id') ? 'true' : 'false' }}, 
+            editSlideOverOpen: {{ $errors->any() && old('user_id') ? 'true' : 'false' }}, 
+            editData: { 
+                id: '{{ old('user_id') }}', 
+                name: '{{ old('name') }}', 
+                email: '{{ old('email') }}', 
+                role: '{{ old('role') }}' 
+            } 
+         }" 
+         @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -114,49 +123,39 @@
         </x-slide-over>
 
         <!-- Edit Form Slide-Over -->
-        <div x-show="editSlideOverOpen" class="fixed inset-0 z-50 overflow-hidden" x-cloak>
-            <div x-show="editSlideOverOpen" x-transition.opacity class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" @click="editSlideOverOpen = false"></div>
-            <div class="fixed inset-y-0 right-0 max-w-md w-full flex">
-                <div x-show="editSlideOverOpen" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" class="w-full h-full bg-gray-100 flex flex-col shadow-[-12px_0_24px_rgba(0,0,0,0.1)]">
-                    <div class="flex items-center justify-between px-8 py-6 shrink-0 shadow-[0_4px_6px_-1px_#d1d5db,0_2px_4px_-1px_#ffffff] z-10 bg-gray-100">
-                        <h2 class="text-xl font-bold text-gray-800 tracking-tight">Edit User</h2>
-                        <button type="button" @click="editSlideOverOpen = false" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 bg-gray-100 shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                    </div>
-                    <div class="flex-1 overflow-y-auto px-8 py-8 z-0">
-                        <form x-ref="editForm" method="POST" class="space-y-6">
-                            @csrf
-                            @method('PUT')
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
-                                <input type="text" name="name" x-model="editData.name" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                                <input type="email" name="email" x-model="editData.email" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Role</label>
-                                <select name="role" x-model="editData.role" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
-                                    <option value="Super Admin">Super Admin</option>
-                                    <option value="Admin Logistik">Admin Logistik</option>
-                                    <option value="Warehouse">Warehouse</option>
-                                    <option value="Driver">Driver</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Password (Leave blank to keep)</label>
-                                <input type="password" name="password" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
-                            </div>
-                            <div class="pt-6 mt-6 border-t border-gray-300">
-                                <button type="submit" class="w-full py-4 rounded-2xl font-bold text-gray-100 bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#4b5563,inset_-2px_-2px_4px_#1f2937] transition-all uppercase tracking-widest">
-                                    Update User
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <x-slide-over title="Edit User" model="editSlideOverOpen">
+            <form :action="'{{ route('users.index') }}/' + editData.id" method="POST" class="space-y-6">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="user_id" x-model="editData.id">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
+                    <input type="text" name="name" x-model="editData.name" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
                 </div>
-            </div>
-        </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                    <input type="email" name="email" x-model="editData.email" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Role</label>
+                    <select name="role" x-model="editData.role" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Admin Logistik">Admin Logistik</option>
+                        <option value="Warehouse">Warehouse</option>
+                        <option value="Driver">Driver</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Password (Leave blank to keep)</label>
+                    <input type="password" name="password" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+                </div>
+                <div class="pt-6 mt-6 border-t border-gray-300">
+                    <button type="submit" class="w-full py-4 rounded-2xl font-bold text-gray-100 bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#4b5563,inset_-2px_-2px_4px_#1f2937] transition-all uppercase tracking-widest">
+                        Update User
+                    </button>
+                </div>
+            </form>
+        </x-slide-over>
 
     </div>
 @endsection

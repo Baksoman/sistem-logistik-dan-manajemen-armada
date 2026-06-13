@@ -7,8 +7,25 @@
 
 
 
-    <div x-data="{ slideOverOpen: false, editSlideOverOpen: false, editData: {} }" 
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $refs.editForm.action = '/fleet/' + editData.id"
+    <div x-data="{ 
+            slideOverOpen: {{ $errors->any() && !old('vehicle_id') ? 'true' : 'false' }}, 
+            editSlideOverOpen: {{ $errors->any() && old('vehicle_id') ? 'true' : 'false' }}, 
+            editData: { 
+                id: '{{ old('vehicle_id') }}', 
+                vehicle_type_id: '{{ old('vehicle_type_id') }}', 
+                plate_number: '{{ old('plate_number') }}', 
+                brand: '{{ old('brand') }}', 
+                model: '{{ old('model') }}', 
+                year: '{{ old('year') }}', 
+                capacity_kg: '{{ old('capacity_kg') }}', 
+                capacity_volume_cbm: '{{ old('capacity_volume_cbm') }}', 
+                fuel_type: '{{ old('fuel_type') }}', 
+                status: '{{ old('status') }}', 
+                kir_expired_at: '{{ old('kir_expired_at') }}', 
+                stnk_expired_at: '{{ old('stnk_expired_at') }}' 
+            } 
+         }" 
+         @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
          
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -99,7 +116,7 @@
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $vehicle->id }}', vehicle_type_id: '{{ $vehicle->vehicle_type_id }}', plate_number: '{{ $vehicle->plate_number }}', brand: '{{ $vehicle->brand }}', model: '{{ $vehicle->model }}', year: '{{ $vehicle->year }}', capacity_kg: '{{ $vehicle->capacity_kg }}', capacity_volume_cbm: '{{ $vehicle->capacity_volume_cbm }}', fuel_type: '{{ $vehicle->fuel_type }}', status: '{{ $vehicle->status }}', kir_expired_at: '{{ $vehicle->kir_expired_at }}', stnk_expired_at: '{{ $vehicle->stnk_expired_at }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $vehicle->id }}', vehicle_type_id: '{{ $vehicle->vehicle_type_id }}', plate_number: '{{ $vehicle->plate_number }}', brand: '{{ $vehicle->brand }}', model: '{{ $vehicle->model }}', year: '{{ $vehicle->year }}', capacity_kg: '{{ $vehicle->capacity_kg }}', capacity_volume_cbm: '{{ $vehicle->capacity_volume_cbm }}', fuel_type: '{{ $vehicle->fuel_type }}', status: '{{ $vehicle->status }}', kir_expired_at: '{{ $vehicle->kir_expired_at ? \Carbon\Carbon::parse($vehicle->kir_expired_at)->format('Y-m-d') : '' }}', stnk_expired_at: '{{ $vehicle->stnk_expired_at ? \Carbon\Carbon::parse($vehicle->stnk_expired_at)->format('Y-m-d') : '' }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form id="delete-form-{{ $vehicle->id }}" action="{{ route('fleet.destroy', $vehicle->id) }}" method="POST" class="inline">
@@ -153,8 +170,6 @@
                     <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
                     <x-select name="status" required>
                         <option value="available">Available</option>
-                        <option value="on_trip">On Trip</option>
-                        <option value="maintenance">Maintenance</option>
                         <option value="inactive">Inactive</option>
                     </x-select>
                 </div>
@@ -178,8 +193,10 @@
                         <button type="button" @click="editSlideOverOpen = false" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 bg-gray-100 shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] focus:outline-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     </div>
                     <div class="flex-1 overflow-y-auto px-8 py-8 z-0">
-                        <form x-ref="editForm" method="POST" class="space-y-6">
-                            @csrf @method('PUT')
+                        <form :action="'{{ route('fleet.index') }}/' + editData.id" method="POST" class="space-y-6">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="vehicle_id" x-model="editData.id">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Vehicle Type</label>
                                 <x-select name="vehicle_type_id" x-model="editData.vehicle_type_id" required>
