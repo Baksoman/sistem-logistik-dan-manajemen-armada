@@ -11,6 +11,9 @@ use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\Logistik\RouteController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\InventoryController;
+use App\Http\Controllers\Warehouse\ZoneController;
+use App\Http\Controllers\Warehouse\RackController;
+use App\Http\Controllers\Warehouse\ItemCategoryController;
 use App\Http\Controllers\Warehouse\InboundController;
 use App\Http\Controllers\Warehouse\OutboundController;
 use App\Http\Controllers\Warehouse\WarehouseDashboardController;
@@ -72,6 +75,27 @@ Route::middleware('auth')->group(function () {
                 Route::post('/', [WarehouseController::class, 'store'])->name('warehouse.warehouses.store');
                 Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('warehouse.warehouses.update');
                 Route::delete('/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouse.warehouses.destroy');
+            });
+
+            Route::prefix('categories')->group(function () {
+                Route::get('/', [ItemCategoryController::class, 'index'])->name('warehouse.categories.index');
+                Route::post('/', [ItemCategoryController::class, 'store'])->name('warehouse.categories.store');
+                Route::put('/{category}', [ItemCategoryController::class, 'update'])->name('warehouse.categories.update');
+                Route::delete('/{category}', [ItemCategoryController::class, 'destroy'])->name('warehouse.categories.destroy');
+            });
+
+            Route::prefix('zones')->group(function () {
+                Route::get('/', [ZoneController::class, 'index'])->name('warehouse.zones.index');
+                Route::post('/', [ZoneController::class, 'store'])->name('warehouse.zones.store');
+                Route::put('/{zone}', [ZoneController::class, 'update'])->name('warehouse.zones.update');
+                Route::delete('/{zone}', [ZoneController::class, 'destroy'])->name('warehouse.zones.destroy');
+            });
+
+            Route::prefix('racks')->group(function () {
+                Route::get('/', [RackController::class, 'index'])->name('warehouse.racks.index');
+                Route::post('/', [RackController::class, 'store'])->name('warehouse.racks.store');
+                Route::put('/{rack}', [RackController::class, 'update'])->name('warehouse.racks.update');
+                Route::delete('/{rack}', [RackController::class, 'destroy'])->name('warehouse.racks.destroy');
             });
 
             Route::prefix('inventory')->group(function () {
