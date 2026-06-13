@@ -72,7 +72,14 @@
                     if ($hasRole('Super Admin')) {
                         $navItems[] = ['name' => 'User Management', 'route' => 'users.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
                         $navItems[] = ['name' => 'Access Control', 'route' => 'rbac.index', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'];
-                        $navItems[] = ['name' => 'Warehouse', 'route' => null, 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
+                        $navItems[] = [
+                            'name' => 'Warehouse',
+                            'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+                            'items' => [
+                                ['name' => 'Warehouses List', 'route' => 'warehouse.warehouses.index'],
+                                ['name' => 'Stock Inventory', 'route' => 'warehouse.inventory.index']
+                            ]
+                        ];
                         $navItems[] = ['name' => 'Drivers List', 'route' => 'drivers.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
                         $navItems[] = [
                             'name' => 'Fleet Management',
@@ -88,7 +95,14 @@
                         $navItems[] = ['name' => 'Route Opt.', 'route' => null, 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
                         $navItems[] = ['name' => 'Vehicles & Drivers', 'route' => 'fleet.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
                     } elseif ($hasRole('Warehouse')) {
-                        $navItems[] = ['name' => 'Stock Mgmt', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'];
+                        $navItems[] = [
+                            'name' => 'Warehouse & Stock',
+                            'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+                            'items' => [
+                                ['name' => 'Warehouses List', 'route' => 'warehouse.warehouses.index'],
+                                ['name' => 'Stock Inventory', 'route' => 'warehouse.inventory.index']
+                            ]
+                        ];
                         $navItems[] = ['name' => 'Putaway/Pick', 'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'];
                         $navItems[] = ['name' => 'Packing', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'];
                     } elseif ($hasRole('Driver')) {
@@ -100,8 +114,19 @@
 
                 @foreach($navItems as $item)
                     @if(isset($item['items']))
-                        <div x-data="{ open: {{ request()->routeIs('fleet.*') ? 'true' : 'false' }} }" class="space-y-1">
-                            <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ request()->routeIs('fleet.*') ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
+                        @php
+                            $isActiveGroup = false;
+                            if (isset($item['items'])) {
+                                foreach($item['items'] as $subItem) {
+                                    if (request()->routeIs($subItem['route'] ?? '')) {
+                                        $isActiveGroup = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+                        <div x-data="{ open: {{ $isActiveGroup ? 'true' : 'false' }} }" class="space-y-1">
+                            <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-2xl transition-all duration-200 {{ $isActiveGroup ? 'shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] text-gray-900 font-bold bg-gray-200/50' : 'hover:shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] hover:text-gray-900' }}">
                                 <div class="flex items-center gap-4">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"></path></svg>
                                     <span class="text-sm font-semibold">{{ $item['name'] }}</span>
