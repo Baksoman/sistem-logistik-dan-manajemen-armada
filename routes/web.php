@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DriverProfileController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\RolePermissionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,6 +24,13 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [UserController::class, 'store'])->name('users.store');
             Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        });
+        
+        Route::prefix('rbac')->group(function () {
+            Route::get('/', [RolePermissionController::class, 'index'])->name('rbac.index');
+            Route::post('/roles', [RolePermissionController::class, 'storeRole'])->name('rbac.roles.store');
+            Route::post('/permissions', [RolePermissionController::class, 'storePermission'])->name('rbac.permissions.store');
+            Route::put('/{role}', [RolePermissionController::class, 'update'])->name('rbac.update');
         });
     });
 
