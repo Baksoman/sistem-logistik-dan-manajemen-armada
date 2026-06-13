@@ -61,4 +61,215 @@
         </x-card>
     </div>
 
+    <!-- Charts and Secondary Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        
+        <!-- Trend Chart -->
+        <x-card class="lg:col-span-2">
+            <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                Inbound vs Outbound Trend (Last 7 Days)
+            </h3>
+            <div class="relative h-72 w-full">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </x-card>
+
+        <!-- Low Stock Alerts -->
+        <x-card>
+            <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Low Stock Alerts
+            </h3>
+            
+            <div class="space-y-4">
+                @forelse($lowStockItems as $item)
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-gray-100 shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff]">
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">{{ $item->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $item->sku }} • {{ $item->warehouse->name ?? '-' }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-2 py-1 text-xs font-bold rounded-full text-red-700 bg-red-100">
+                                {{ $item->quantity }} left
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="flex flex-col items-center justify-center h-40 text-gray-400">
+                        <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <p class="text-sm font-medium">All items are sufficiently stocked.</p>
+                    </div>
+                @endforelse
+            </div>
+            
+            @if(count($lowStockItems) > 0)
+            <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+                <a href="{{ route('warehouse.inventory.index') }}" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Manage Inventory &rarr;</a>
+            </div>
+            @endif
+        </x-card>
+    </div>
+
+    <!-- Recent Activities -->
+    <x-card>
+        <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Recent Activities
+        </h3>
+        <div class="overflow-x-auto pb-4">
+            <table class="w-full text-left border-collapse min-w-max whitespace-nowrap">
+                <thead>
+                    <tr class="border-b border-gray-300 text-gray-500 text-xs tracking-widest uppercase">
+                        <th class="py-3 px-4 font-bold">Time</th>
+                        <th class="py-3 px-4 font-bold">Type</th>
+                        <th class="py-3 px-4 font-bold">Item</th>
+                        <th class="py-3 px-4 font-bold">Qty</th>
+                        <th class="py-3 px-4 font-bold">By</th>
+                        <th class="py-3 px-4 font-bold">Ref</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 font-medium text-sm">
+                    @forelse($recentActivities as $activity)
+                        <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
+                            <td class="py-3 px-4 text-gray-500">{{ $activity->created_at->diffForHumans() }}</td>
+                            <td class="py-3 px-4">
+                                @if($activity->type === 'inbound')
+                                    <span class="px-2 py-1 text-xs font-bold rounded-md shadow-[inset_1px_1px_2px_#d1d5db,inset_-1px_-1px_2px_#ffffff] text-emerald-700 bg-emerald-50">Inbound</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-bold rounded-md shadow-[inset_1px_1px_2px_#d1d5db,inset_-1px_-1px_2px_#ffffff] text-red-700 bg-red-50">Outbound</span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="font-bold text-gray-800">{{ $activity->stockItem->name ?? '-' }}</span>
+                                <span class="text-xs text-gray-400 block">{{ $activity->stockItem->sku ?? '' }}</span>
+                            </td>
+                            <td class="py-3 px-4 font-bold {{ $activity->type === 'inbound' ? 'text-emerald-600' : 'text-red-600' }}">
+                                {{ $activity->type === 'inbound' ? '+' : '-' }}{{ number_format($activity->quantity) }}
+                            </td>
+                            <td class="py-3 px-4">{{ $activity->creator->name ?? '-' }}</td>
+                            <td class="py-3 px-4 text-gray-500">{{ $activity->reference_number ?? '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-gray-400">No recent activities found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </x-card>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trendData = @json($trendData);
+            
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // Gradient for Inbound
+            const inboundGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            inboundGradient.addColorStop(0, 'rgba(16, 185, 129, 0.5)'); // Emerald 500
+            inboundGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+            
+            // Gradient for Outbound
+            const outboundGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            outboundGradient.addColorStop(0, 'rgba(239, 68, 68, 0.5)'); // Red 500
+            outboundGradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+
+            Chart.defaults.font.family = "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+            Chart.defaults.color = '#6b7280'; // Gray 500
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.labels,
+                    datasets: [
+                        {
+                            label: 'Inbound (Qty)',
+                            data: trendData.inbound,
+                            borderColor: '#10b981', // Emerald 500
+                            backgroundColor: inboundGradient,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Outbound (Qty)',
+                            data: trendData.outbound,
+                            borderColor: '#ef4444', // Red 500
+                            backgroundColor: outboundGradient,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#ef4444',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)', // Gray 900
+                            titleFont: { size: 13, family: 'Inter', weight: 'bold' },
+                            bodyFont: { size: 13, family: 'Inter' },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            boxPadding: 4
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.1)', // Gray 400 with 0.1 opacity
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                font: { weight: '500' },
+                                padding: 8
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                font: { weight: '500' },
+                                padding: 8
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endsection
