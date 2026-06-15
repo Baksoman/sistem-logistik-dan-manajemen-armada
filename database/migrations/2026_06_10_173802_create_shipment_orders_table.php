@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('shipment_orders', function (Blueprint $table) {
             $table->foreignUuid('shipment_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
+            $table->enum('status', ['Loaded', 'Unloaded', 'Delivered', 'Failed'])->default('Loaded');
+            $table->foreignUuid('dropoff_warehouse_id')->nullable()->constrained('warehouses')->nullOnDelete();
             $table->primary(['shipment_id', 'order_id']);
         });
     }
