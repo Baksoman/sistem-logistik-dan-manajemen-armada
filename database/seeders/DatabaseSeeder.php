@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             // RouteSeeder::class,
             CostCategorySeeder::class,
-            // TariffSeeder::class,
+            TariffSeeder::class,
         ]);
     }
 }
