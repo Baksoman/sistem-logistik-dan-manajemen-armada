@@ -72,23 +72,8 @@
                     if ($hasRole('Super Admin')) {
                         $navItems[] = ['name' => 'User Management', 'route' => 'users.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
                         $navItems[] = ['name' => 'Access Control', 'route' => 'rbac.index', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'];
-
-                        $navItems[] = ['name' => 'Drivers List', 'route' => 'drivers.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'];
-                        $navItems[] = ['name' => 'Route Opt.', 'route' => 'routes.index', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
                         $navItems[] = [
-                            'name' => 'Fleet Management',
-                            'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
-                            'items' => [
-                                ['name' => 'Vehicles List', 'route' => 'fleet.index'],
-                                ['name' => 'Maintenance', 'route' => 'fleet.maintenances.index']
-                            ]
-                        ];
-                    } elseif ($hasRole('Admin Logistik')) {
-                        $navItems[] = ['name' => 'Orders', 'route' => 'orders.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'];
-                        $navItems[] = ['name' => 'Shipments', 'route' => 'shipments.index', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'];
-                        $navItems[] = ['name' => 'Route Opt.', 'route' => 'routes.index', 'icon' => 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l6-2 5.447 2.724A1 1 0 0121 8.618v10.764a1 1 0 01-1.447.894L15 17l-6 2z'];
-                        $navItems[] = [
-                            'name' => 'Fleet Management',
+                            'name' => 'Fleet & Drivers',
                             'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
                             'items' => [
                                 ['name' => 'Vehicles List', 'route' => 'fleet.index'],
@@ -96,11 +81,6 @@
                                 ['name' => 'Maintenance', 'route' => 'fleet.maintenances.index']
                             ]
                         ];
-
-                    } elseif ($hasRole('Driver')) {
-                        $navItems[] = ['name' => 'My Schedule', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'];
-                        $navItems[] = ['name' => 'Navigation', 'icon' => 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z'];
-                        $navItems[] = ['name' => 'Upload POD', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'];
                     }
                 @endphp
 
@@ -144,9 +124,15 @@
 
             <div class="p-6 pt-0 space-y-3">
                 @if($hasRole('Super Admin') || $hasRole('Staff Warehouse'))
-                    <a href="{{ route('warehouse.dashboard') }}" class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-gray-100 font-bold bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:bg-gray-700 transition-all text-sm">
+                    <a href="{{ route('warehouse.dashboard') }}" class="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-2xl text-gray-100 font-bold bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:bg-gray-700 transition-all text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        Menuju Panel Warehouse
+                        Panel Warehouse
+                    </a>
+                @endif
+                @if($hasRole('Super Admin') || $hasRole('Admin Logistik'))
+                    <a href="{{ route('dashboard.logistik.index') }}" class="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-2xl text-gray-100 font-bold bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:bg-gray-700 transition-all text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V14l-3-3h-4v-4zM13 7v4h5l3 3M7 16a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"></path></svg>
+                            Panel Logistik
                     </a>
                 @endif
                 <form method="POST" action="{{ route('logout') ?? '#' }}">
