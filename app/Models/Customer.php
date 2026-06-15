@@ -11,6 +11,7 @@ class Customer extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'user_id',
         'code',
         'company_name',
         'contact_person',
@@ -20,6 +21,8 @@ class Customer extends Model
         'latitude',
         'longitude'
     ];
+
+    public function user() { return $this->belongsTo(User::class); }
 
     public function orders() { return $this->hasMany(Order::class); }
 
