@@ -85,7 +85,7 @@
                         <th class="py-4 px-4 font-bold">Name</th>
                         <th class="py-4 px-4 font-bold">Warehouse</th>
                         <th class="py-4 px-4 font-bold">Category</th>
-                        <th class="py-4 px-4 font-bold">Quantity</th>
+                        <th class="py-4 px-4 font-bold">Qty (Fisik|Alokasi|Tersedia)</th>
                         <th class="py-4 px-4 font-bold">Location</th>
                         <th class="py-4 px-4 font-bold text-center">Action</th>
                     </tr>
@@ -100,9 +100,16 @@
                             <td class="py-4 px-4">{{ $item->warehouse->name ?? '-' }}</td>
                             <td class="py-4 px-4">{{ $item->category->name ?? '-' }}</td>
                             <td class="py-4 px-4">
-                                <span class="font-bold {{ $item->quantity <= $item->min_quantity ? 'text-red-600' : 'text-emerald-600' }}">
-                                    {{ number_format($item->quantity, 0) }} {{ $item->unitType->name ?? '' }}
-                                </span>
+                                @php
+                                    $availableQty = $item->quantity - $item->allocated_quantity;
+                                @endphp
+                                <div class="flex flex-col text-sm">
+                                    <span class="text-gray-500">Fisik: {{ number_format($item->quantity, 0) }} {{ $item->unitType->name ?? '' }}</span>
+                                    <span class="text-amber-600">Alokasi: {{ number_format($item->allocated_quantity, 0) }}</span>
+                                    <span class="font-bold {{ $availableQty <= $item->min_quantity ? 'text-red-600' : 'text-emerald-600' }}">
+                                        Tersedia: {{ number_format($availableQty, 0) }}
+                                    </span>
+                                </div>
                             </td>
                             <td class="py-4 px-4 text-sm text-gray-500">
                                 Zone: {{ $item->zone->name ?? '-' }} | Rack: {{ $item->rack->name ?? '-' }}

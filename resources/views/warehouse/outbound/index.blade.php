@@ -211,7 +211,7 @@
                         </template>
                         @if(!$stockItems->isEmpty())
                             @foreach($stockItems as $item)
-                                <option value="{{ $item->id }}" x-show="!selectedWarehouse">{{ $item->sku }} - {{ $item->name }} (Avail: {{ $item->quantity }} {{ $item->unitType->name ?? '' }})</option>
+                                <option value="{{ $item->id }}" x-show="!selectedWarehouse">{{ $item->sku }} - {{ $item->name }} (Avail: {{ $item->quantity - $item->allocated_quantity }} {{ $item->unitType->name ?? '' }})</option>
                             @endforeach
                         @endif
                     </select>
