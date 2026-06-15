@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('route_type', ['land', 'sea', 'combined']);
             $table->string('origin_name');
             $table->string('destination_name');
+            $table->boolean('is_master')->default(true);
             $table->timestamps();
         });
     }

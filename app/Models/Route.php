@@ -24,7 +24,8 @@ class Route extends Model
         'route_code',
         'route_type',
         'origin_name',
-        'destination_name'
+        'destination_name',
+        'is_master'
     ];
 
     public function routeVersions() { return $this->hasMany(RouteVersion::class); }
