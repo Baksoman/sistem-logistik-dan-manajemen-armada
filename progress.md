@@ -55,21 +55,23 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 * ✅ CRUD Data Kategori, Zona, Rak Gudang
 
 ### **B. Customer & Order Management**
-* ❌ CRUD Data Customer
-* ❌ Pembuatan Order Pengiriman
-* ❌ Penambahan Item Barang ke dalam Order
+* ✅ CRUD Data Customer
+* ✅ Pembuatan Order Pengiriman
+* ✅ Penambahan Item Barang ke dalam Order
+* ✅ Update Status Order Pengiriman
 
 ### **C. Route Optimization & Management**
-* ✅ Integrasi OpenRouteService / OSRM untuk rute darat
+* ✅ Integrasi OpenRouteService / OSRM untuk rute darat (termasuk Direct Route)
 * ✅ Integrasi ke Microservice Searoute untuk rute laut
 * ✅ Kalkulasi jarak, durasi, dan optimasi multi-stop (Multimodal Otomatis)
 * ✅ Penyimpanan dan visualisasi rute menggunakan GeoJSON (Leaflet.js)
 
 ### **D. Shipment Management (Core Engine)**
-* ❌ Pembuatan Shipment (Assign Order ke Shipment)
-* ❌ Assign Driver dan Kendaraan ke Shipment
-* ❌ Penentuan Route Version untuk Shipment
-* ❌ Update Status Pengiriman (Pending -> On Process -> Delivered)
+* ✅ Pembuatan Shipment (Assign Order ke Shipment dengan UI Neumorphism)
+* ✅ Assign Driver dan Kendaraan ke Shipment
+* ✅ Penentuan Route Version & Mode Rute (Transit vs Direct)
+* ✅ Perhitungan Estimasi Biaya Berdasarkan Tarif (Tariff Module)
+* ✅ Update Status Pengiriman (Pending -> On Process -> Delivered)
 * ❌ Event-driven architecture (Events & Listeners) untuk notifikasi perubahan status
 
 ### **E. Realtime Tracking (GPS) & WebSocket**
@@ -83,8 +85,9 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 * ❌ Konfirmasi dan validasi penerimaan barang
 
 ### **G. Analytics & Operational Costs**
+* ✅ Modul CRUD Tarif (Tariffs) untuk penentuan harga dasar pengiriman (Spesifik per Rute/Kendaraan atau Berlaku Semua)
 * ❌ Pencatatan Biaya Operasional (BBM, Tol, Parkir, dll)
-* ❌ Kalkulasi *Cost Per KM* dan Statistik Pengiriman
+* ✅ Kalkulasi *Cost* Pengiriman
 * ❌ Report Generation (Mungkin membutuhkan Background Jobs / Queue)
 
 ### **H. Infrastruktur & CI/CD**
@@ -95,10 +98,9 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 
 ## 🎯 3. Kesimpulan & Rekomendasi Langkah Selanjutnya (Next Steps)
 
-Proyek ini telah memiliki pondasi database yang sangat kuat (sudah mencakup 90% dari ERD) dan pondasi untuk sistem Authentication, RBAC, Master Data Fleet (Driver & Vehicle), Warehouse & Inventory Management (Panel Terisolasi), serta Algoritma Route Optimization Multimodal (Darat & Laut).
+Proyek ini telah memiliki pondasi database yang sangat kuat (sudah mencakup 95% dari ERD) dan pondasi untuk sistem Authentication, RBAC, Master Data Fleet, Warehouse, Customer, Order, Tariff, Route Optimization, dan Shipment Management (Assigning). Seluruh fungsionalitas inti logistik sudah berjalan dengan baik.
 
 **Rekomendasi prioritas pengerjaan selanjutnya:**
-1. **Master Data Sisa**: Selesaikan CRUD untuk `Customer`.
-2. **Order Management**: Buat alur transaksional utama pembuatan `Order` pelanggan beserta penambahan `OrderItem`.
-3. **Shipment Management (Core Engine)**: Setelah Order siap, buat alur untuk *Assign* Order menjadi `Shipment`, penentuan Kendaraan & Supir, dan integrasikan rute (Route Version) ke Shipment tersebut.
-4. **Realtime System & POD**: Implementasikan *Proof of Delivery* (Upload foto & ttd oleh supir) dan pelacakan GPS secara *real-time*.
+1. **Realtime System & Tracking**: Implementasikan pelacakan GPS secara *real-time* menggunakan WebSockets/Reverb untuk memantau armada di jalan.
+2. **Driver Interface & POD**: Buat tampilan khusus atau API untuk aplikasi supir (Driver) agar dapat melakukan *update checkpoint* dan *Upload Proof of Delivery* (POD).
+3. **Analytics & Reporting**: Buat grafik dashboard dan laporan biaya operasional (BBM, Tol) yang lebih terperinci.
