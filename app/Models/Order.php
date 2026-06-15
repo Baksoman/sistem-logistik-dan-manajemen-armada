@@ -20,7 +20,13 @@ class Order extends Model
         'destination_longitude',
         'total_weight',
         'total_volume',
-        'status'
+        'status',
+        'current_warehouse_id',
+        'tracking_status'
+    ];
+
+    protected $casts = [
+        'tracking_status' => \App\Enums\OrderTrackingStatus::class,
     ];
 
     public function customer() { return $this->belongsTo(Customer::class); }
@@ -29,8 +35,12 @@ class Order extends Model
 
     public function originWarehouse() { return $this->belongsTo(Warehouse::class, 'origin_warehouse_id'); }
 
-    public function orderItems() { return $this->hasMany(OrderItem::class); }
+    public function currentWarehouse() { return $this->belongsTo(Warehouse::class, 'current_warehouse_id'); }
 
-    public function shipments() { return $this->belongsToMany(Shipment::class, 'shipment_orders'); }
+    public function orderItems() { return $this->hasMany(OrderItem::class); }
+    public function items() { return $this->hasMany(OrderItem::class); }
+
+    public function shipments() { return $this->belongsToMany(Shipment::class, 'shipment_orders')
+                                        ->withPivot('status', 'dropoff_warehouse_id'); }
 
 }
