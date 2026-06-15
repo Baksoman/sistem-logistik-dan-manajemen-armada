@@ -49,7 +49,7 @@ class DashboardController extends Controller
         }
 
         // 4. Recent Pending Shipments
-        $recentShipments = Shipment::with(['driver.user', 'vehicle', 'routeVersion'])
+        $recentShipments = Shipment::with(['driver.user', 'vehicle', 'routeVersion.route'])
             ->where('status', 'Pending')
             ->latest()
             ->take(5)
