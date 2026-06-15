@@ -33,6 +33,27 @@ class Shipment extends Model
         ];
     }
 
+    protected $appends = ['sla_status'];
+
+    public function getSlaStatusAttribute()
+    {
+        if (!$this->sla_target_at) {
+            return 'No Target';
+        }
+
+        if (!$this->completed_at) {
+            if (now() > $this->sla_target_at) {
+                return 'Late (Ongoing)';
+            }
+            if (now()->addHours(2) >= $this->sla_target_at) {
+                return 'At Risk';
+            }
+            return 'On Track';
+        }
+
+        return $this->completed_at <= $this->sla_target_at ? 'On Time' : 'Late';
+    }
+
     public function driver() { return $this->belongsTo(DriverProfile::class, 'driver_id'); }
 
     public function vehicle() { return $this->belongsTo(Vehicle::class); }
