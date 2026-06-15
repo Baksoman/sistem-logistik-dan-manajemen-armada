@@ -41,12 +41,16 @@
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Origin Name</label>
-                        <x-input type="text" name="origin_name" placeholder="Warehouse A" required />
+                        <div @origin-selected.window="addWaypoint([parseFloat($event.detail.lng), parseFloat($event.detail.lat)])">
+                            <x-omni-search name="origin_name" placeholder="Search Origin (Warehouse, Customer, Address)..." event-name="origin-selected" />
+                        </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Destination Name</label>
-                        <x-input type="text" name="destination_name" placeholder="Warehouse B" required />
+                        <div @dest-selected.window="addWaypoint([parseFloat($event.detail.lng), parseFloat($event.detail.lat)])">
+                            <x-omni-search name="destination_name" placeholder="Search Destination..." event-name="dest-selected" />
+                        </div>
                     </div>
 
                     <div class="pt-4 border-t border-gray-300">
