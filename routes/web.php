@@ -156,6 +156,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/create', [ShipmentController::class, 'create'])->name('shipments.create');
                 Route::post('/', [ShipmentController::class, 'store'])->name('shipments.store');
                 Route::get('/{shipment}', [ShipmentController::class, 'show'])->name('shipments.show');
+                Route::post('/{shipment}/start', [ShipmentController::class, 'start'])->name('shipments.start');
                 Route::post('/{shipment}/complete', [ShipmentController::class, 'complete'])->name('shipments.complete');
             });
         });

@@ -24,9 +24,10 @@
                         <th class="py-4 px-4 font-bold">Shipment No.</th>
                         <th class="py-4 px-4 font-bold">Vehicle</th>
                         <th class="py-4 px-4 font-bold">Driver</th>
-                        <th class="py-4 px-4 font-bold">Total Orders</th>
-                        <th class="py-4 px-4 font-bold">Status</th>
-                        <th class="py-4 px-4 font-bold text-center">Action</th>
+                        <th class="py-4 px-4 font-bold text-gray-500 uppercase tracking-widest border-b-2 border-gray-200">Orders</th>
+                        <th class="py-4 px-4 font-bold text-gray-500 uppercase tracking-widest border-b-2 border-gray-200">Status</th>
+                        <th class="py-4 px-4 font-bold text-gray-500 uppercase tracking-widest border-b-2 border-gray-200">SLA</th>
+                        <th class="py-4 px-4 font-bold text-gray-500 uppercase tracking-widest text-center border-b-2 border-gray-200">Action</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-700 font-medium">
@@ -51,6 +52,18 @@
                                 @endphp
                                 <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $badgeClass }} uppercase">
                                     {{ $shipment->status }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                @php
+                                    $slaClass = 'text-gray-700 bg-gray-100';
+                                    if ($shipment->sla_status === 'On Time') $slaClass = 'text-emerald-700 bg-emerald-100';
+                                    if ($shipment->sla_status === 'Late' || $shipment->sla_status === 'Late (Ongoing)') $slaClass = 'text-red-700 bg-red-100';
+                                    if ($shipment->sla_status === 'At Risk') $slaClass = 'text-orange-700 bg-orange-100';
+                                    if ($shipment->sla_status === 'On Track') $slaClass = 'text-blue-700 bg-blue-100';
+                                @endphp
+                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $slaClass }} uppercase">
+                                    {{ $shipment->sla_status }}
                                 </span>
                             </td>
                             <td class="py-4 px-4">

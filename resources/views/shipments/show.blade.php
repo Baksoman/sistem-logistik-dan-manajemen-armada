@@ -21,11 +21,21 @@
         </div>
         
         <div class="flex items-center gap-4">
+            @if($shipment->status === 'Pending')
+            <form action="{{ route('shipments.start', $shipment->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="px-6 py-3 bg-blue-500 text-white font-black rounded-2xl shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:bg-blue-600 transition-all uppercase tracking-widest text-sm flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Start Journey
+                </button>
+            </form>
+            @endif
+
             @if(in_array($shipment->status, ['Pending', 'On Process']))
             <form action="{{ route('shipments.complete', $shipment->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="px-6 py-3 bg-emerald-500 text-white font-black rounded-2xl shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:bg-emerald-600 transition-all uppercase tracking-widest text-sm flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     Mark as Completed
                 </button>
             </form>
@@ -82,19 +92,37 @@
 
                 <!-- Status & Route -->
                 <x-card class="h-full border border-gray-100 bg-gradient-to-br from-blue-50 to-white">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Route Status</h3>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800">Route Status</h3>
+                        @php
+                            $slaClass = 'text-gray-700 bg-gray-200';
+                            if ($shipment->sla_status === 'On Time') $slaClass = 'text-emerald-700 bg-emerald-100';
+                            if ($shipment->sla_status === 'Late' || $shipment->sla_status === 'Late (Ongoing)') $slaClass = 'text-red-700 bg-red-100';
+                            if ($shipment->sla_status === 'At Risk') $slaClass = 'text-orange-700 bg-orange-100';
+                            if ($shipment->sla_status === 'On Track') $slaClass = 'text-blue-700 bg-blue-100';
+                        @endphp
+                        <span class="px-3 py-1 text-xs font-black uppercase tracking-widest rounded-xl {{ $slaClass }}">
+                            SLA: {{ $shipment->sla_status }}
+                        </span>
                     </div>
                     
                     <div class="space-y-4 text-sm mt-6">
-                        <div>
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Current Status</p>
-                            <span class="inline-block font-black tracking-widest text-xs px-3 py-1 rounded-lg uppercase {{ $shipment->status === 'Delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
-                                {{ $shipment->status }}
-                            </span>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Current Status</p>
+                                <span class="inline-block font-black tracking-widest text-xs px-3 py-1 rounded-lg uppercase {{ $shipment->status === 'Delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
+                                    {{ $shipment->status }}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">SLA Target Time</p>
+                                <p class="font-bold text-gray-800">{{ $shipment->sla_target_at ? $shipment->sla_target_at->format('d M, H:i') : 'Not Started' }}</p>
+                            </div>
                         </div>
                         <div>
                             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Route Path</p>

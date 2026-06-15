@@ -22,7 +22,7 @@ class ShipmentController extends Controller
 
     public function index()
     {
-        $shipments = Shipment::with(['driver', 'vehicle', 'orders'])->latest()->paginate(10);
+        $shipments = Shipment::with(['driver.user', 'vehicle', 'orders'])->latest()->paginate(10);
         return view('shipments.index', compact('shipments'));
     }
 
@@ -104,8 +104,41 @@ class ShipmentController extends Controller
 
     public function show(Shipment $shipment)
     {
-        $shipment->load(['driver', 'vehicle', 'routeVersion.route', 'orders.customer', 'orders.originWarehouse']);
+        $shipment->load(['driver.user', 'vehicle', 'routeVersion.route', 'orders.customer', 'orders.originWarehouse']);
         return view('shipments.show', compact('shipment'));
+    }
+
+    public function start(Shipment $shipment)
+    {
+        if ($shipment->status !== 'Pending') {
+            return back()->with('error', 'Only Pending shipments can be started.');
+        }
+
+        $shipment->load('routeVersion');
+        
+        $shipment->status = 'On Process';
+        $shipment->started_at = now();
+        
+        // Calculate SLA target
+        // Get duration in minutes, add 20% buffer for traffic/rest
+        $durationMin = $shipment->routeVersion->duration_min ?? 0;
+        $bufferedDuration = $durationMin * 1.2;
+        
+        $shipment->sla_target_at = now()->addMinutes($bufferedDuration);
+        $shipment->save();
+
+        if ($shipment->vehicle) {
+            $shipment->vehicle->status = 'on_trip';
+            $shipment->vehicle->save();
+        }
+
+        // Update underlying orders
+        foreach ($shipment->orders as $order) {
+            $order->status = 'In Transit';
+            $order->save();
+        }
+
+        return back()->with('success', 'Shipment has started. SLA target set to ' . $shipment->sla_target_at->format('d M Y, H:i'));
     }
 
     public function complete(Shipment $shipment)
