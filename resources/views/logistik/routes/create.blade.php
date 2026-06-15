@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.logistik')
 
 @section('title', 'Create Route')
 
