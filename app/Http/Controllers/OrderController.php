@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Warehouse;
 use App\Models\StockItem;
+use App\Models\Tariff;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,8 +34,9 @@ class OrderController extends Controller
     {
         $customers = Customer::all();
         $warehouses = Warehouse::all();
+        $defaultTariff = Tariff::whereNull('route_id')->whereNull('vehicle_type_id')->first();
         
-        return view('orders.create', compact('customers', 'warehouses'));
+        return view('orders.create', compact('customers', 'warehouses', 'defaultTariff'));
     }
 
     public function store(Request $request)
@@ -48,6 +50,8 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.stock_item_id' => 'required|exists:stock_items,id',
             'items.*.quantity' => 'required|numeric|min:1',
+            'quoted_price' => 'nullable|numeric',
+            'estimated_distance_km' => 'nullable|numeric',
         ]);
 
         try {
@@ -56,7 +60,9 @@ class OrderController extends Controller
                 'origin_warehouse_id', 
                 'destination_address',
                 'destination_latitude',
-                'destination_longitude'
+                'destination_longitude',
+                'quoted_price',
+                'estimated_distance_km'
             ]);
             $orderData['created_by'] = auth()->id();
 
@@ -81,7 +87,9 @@ class OrderController extends Controller
                     'sku' => $item->sku,
                     'name' => $item->name,
                     'available_qty' => $item->quantity - ($item->allocated_quantity ?? 0),
-                    'unit' => $item->unitType->name ?? 'pcs'
+                    'unit' => $item->unitType->name ?? 'pcs',
+                    'weight_kg' => $item->weight_kg,
+                    'volume_cbm' => $item->volume_cbm
                 ];
             });
 

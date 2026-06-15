@@ -25,6 +25,7 @@
                         <th class="py-4 px-4 font-bold">Customer</th>
                         <th class="py-4 px-4 font-bold">Origin</th>
                         <th class="py-4 px-4 font-bold">Dest. / Location</th>
+                        <th class="py-4 px-4 font-bold">Quotation</th>
                         <th class="py-4 px-4 font-bold">Status</th>
                         <th class="py-4 px-4 font-bold text-center">Action</th>
                     </tr>
@@ -45,6 +46,11 @@
                                             🚚 In Transit
                                         @endif
                                     </span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="font-black text-emerald-600">
+                                    {{ $order->quoted_price ? 'Rp ' . number_format($order->quoted_price, 0, ',', '.') : '-' }}
                                 </div>
                             </td>
                             <td class="py-4 px-4">

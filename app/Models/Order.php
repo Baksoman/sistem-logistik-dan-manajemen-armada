@@ -20,6 +20,8 @@ class Order extends Model
         'destination_longitude',
         'total_weight',
         'total_volume',
+        'quoted_price',
+        'estimated_distance_km',
         'status',
         'current_warehouse_id',
         'tracking_status'

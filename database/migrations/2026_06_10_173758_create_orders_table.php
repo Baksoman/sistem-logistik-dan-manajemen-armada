@@ -22,6 +22,8 @@ return new class extends Migration
             $table->decimal('destination_longitude', 11, 8)->nullable();
             $table->decimal('total_weight', 10, 2)->default(0);
             $table->decimal('total_volume', 10, 2)->default(0);
+            $table->decimal('quoted_price', 15, 2)->nullable()->after('total_volume');
+            $table->decimal('estimated_distance_km', 10, 2)->nullable()->after('total_volume');
             $table->enum('status', ['Pending Approval', 'Draft', 'Confirmed', 'Assigned', 'In Transit', 'Arrived at Hub', 'Completed', 'Cancelled'])->default('Draft');
             $table->foreignUuid('current_warehouse_id')->nullable()->constrained('warehouses')->nullOnDelete();
             $table->string('tracking_status')->nullable();

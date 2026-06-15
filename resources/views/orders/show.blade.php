@@ -120,6 +120,8 @@
                         <div class="pt-2 border-t border-gray-200">
                             <p class="font-bold text-gray-800">Weight: {{ $order->total_weight }} kg</p>
                             <p class="font-bold text-gray-800">Volume: {{ $order->total_volume }} cbm</p>
+                            <p class="font-bold text-gray-800 mt-2">Est. Distance: <span class="text-blue-600">{{ $order->estimated_distance_km ? $order->estimated_distance_km . ' KM' : '-' }}</span></p>
+                            <p class="font-bold text-gray-800">Quoted Price: <span class="text-emerald-600 text-lg font-black">{{ $order->quoted_price ? 'Rp ' . number_format($order->quoted_price, 0, ',', '.') : '-' }}</span></p>
                         </div>
                     </div>
                 </x-card>
