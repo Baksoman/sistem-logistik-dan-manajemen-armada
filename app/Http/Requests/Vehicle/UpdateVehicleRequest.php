@@ -23,6 +23,7 @@ class UpdateVehicleRequest extends FormRequest
             'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'capacity_kg' => 'required|numeric|min:0',
             'capacity_volume_cbm' => 'required|numeric|min:0',
+            'fuel_cost_per_km' => 'required|numeric|min:0',
             'fuel_type' => 'required|string',
             'status' => 'required|in:available,maintenance,on_trip,inactive',
             'kir_expired_at' => 'required|date',

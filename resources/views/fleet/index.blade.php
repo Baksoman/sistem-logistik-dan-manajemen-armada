@@ -165,7 +165,10 @@
                     <div><label class="block text-sm font-bold text-gray-700 mb-2">Cap (KG)</label><x-input type="number" step="0.01" name="capacity_kg" required /></div>
                     <div><label class="block text-sm font-bold text-gray-700 mb-2">Vol (CBM)</label><x-input type="number" step="0.01" name="capacity_volume_cbm" required /></div>
                 </div>
-                <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Type</label><x-input type="text" name="fuel_type" required /></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Type</label><x-input type="text" name="fuel_type" required /></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Rp/KM</label><x-input type="number" step="0.01" name="fuel_cost_per_km" required value="0" /></div>
+                </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
                     <x-select name="status" required>
@@ -215,7 +218,10 @@
                                 <div><label class="block text-sm font-bold text-gray-700 mb-2">Cap (KG)</label><input type="number" step="0.01" name="capacity_kg" x-model="editData.capacity_kg" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" /></div>
                                 <div><label class="block text-sm font-bold text-gray-700 mb-2">Vol (CBM)</label><input type="number" step="0.01" name="capacity_volume_cbm" x-model="editData.capacity_volume_cbm" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" /></div>
                             </div>
-                            <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Type</label><input type="text" name="fuel_type" x-model="editData.fuel_type" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" /></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Type</label><input type="text" name="fuel_type" x-model="editData.fuel_type" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" /></div>
+                                <div><label class="block text-sm font-bold text-gray-700 mb-2">Fuel Rp/KM</label><input type="number" step="0.01" name="fuel_cost_per_km" x-model="editData.fuel_cost_per_km" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" /></div>
+                            </div>
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
                                 <x-select name="status" x-model="editData.status" required>

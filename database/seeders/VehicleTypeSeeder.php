@@ -10,12 +10,18 @@ class VehicleTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        $types = ['Truck', 'Pickup', 'Van', 'Kapal'];
+        $types = [
+            'Truck' => 200000, 
+            'Pickup' => 100000, 
+            'Van' => 120000, 
+            'Kapal' => 500000
+        ];
 
-        foreach ($types as $type) {
+        foreach ($types as $type => $driverFee) {
             DB::table('vehicle_types')->insert([
                 'id' => Str::uuid(),
                 'name' => $type,
+                'driver_fee' => $driverFee,
             ]);
         }
     }
