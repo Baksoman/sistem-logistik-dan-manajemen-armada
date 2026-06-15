@@ -19,6 +19,7 @@ class StockItem extends Model
         'brand',
         'name',
         'quantity',
+        'allocated_quantity',
         'min_quantity',
         'weight_kg',
         'volume_cbm',

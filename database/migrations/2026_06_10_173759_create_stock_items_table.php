@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('name');
             $table->decimal('quantity', 10, 2)->default(0);
+            $table->decimal('allocated_quantity', 10, 2)->default(0);
             $table->decimal('min_quantity', 10, 2)->default(0);
             $table->decimal('weight_kg', 10, 2);
             $table->decimal('volume_cbm', 10, 2);
