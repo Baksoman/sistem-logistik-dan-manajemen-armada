@@ -11,7 +11,8 @@ class VehicleType extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'name'
+        'name',
+        'driver_fee'
     ];
 
     public function vehicles() { return $this->hasMany(Vehicle::class); }

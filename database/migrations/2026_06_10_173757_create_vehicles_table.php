@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('year');
             $table->decimal('capacity_kg', 10, 2);
             $table->decimal('capacity_volume_cbm', 10, 2);
+            $table->decimal('fuel_cost_per_km', 15, 2)->default(0);
             $table->string('fuel_type');
             $table->enum('status', ['available', 'maintenance', 'on_trip', 'inactive'])->default('available');
             $table->date('kir_expired_at')->nullable();

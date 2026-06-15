@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vehicle_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->unique();
+            $table->decimal('driver_fee', 15, 2)->default(0);
             $table->timestamps();
         });
     }

@@ -25,6 +25,8 @@ class Route extends Model
         'route_type',
         'origin_name',
         'destination_name',
+        'toll_cost',
+        'ferry_cost',
         'is_master'
     ];
 

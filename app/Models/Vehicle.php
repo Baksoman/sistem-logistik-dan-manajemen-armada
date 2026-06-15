@@ -18,6 +18,7 @@ class Vehicle extends Model
         'year',
         'capacity_kg',
         'capacity_volume_cbm',
+        'fuel_cost_per_km',
         'fuel_type',
         'status',
         'kir_expired_at',
