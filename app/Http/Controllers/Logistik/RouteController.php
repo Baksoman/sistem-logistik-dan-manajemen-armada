@@ -33,6 +33,8 @@ class RouteController extends Controller
             'route_type' => 'required|in:land,sea,combined',
             'origin_name' => 'required|string|max:255',
             'destination_name' => 'required|string|max:255',
+            'toll_cost' => 'nullable|numeric|min:0',
+            'ferry_cost' => 'nullable|numeric|min:0',
             'waypoints' => 'required|json'
         ]);
 

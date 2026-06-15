@@ -28,6 +28,8 @@ class RouteService
             'route_type' => $data['route_type'],
             'origin_name' => $data['origin_name'],
             'destination_name' => $data['destination_name'],
+            'toll_cost' => $data['toll_cost'] ?? 0,
+            'ferry_cost' => $data['ferry_cost'] ?? 0,
         ]);
 
         $this->createRouteVersion($route, $waypoints);
