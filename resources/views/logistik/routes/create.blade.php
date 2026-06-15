@@ -30,12 +30,12 @@
                         <x-input type="text" name="route_code" placeholder="RTE-001" required />
                     </div>
 
-                    <div class="hidden">
+                    <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Route Type</label>
                         <select x-model="routeType" name="route_type" @change="resetWaypoints()" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none">
                             <option value="combined">Auto Multimodal (Land + Sea)</option>
-                            <option value="land">Land (OSRM)</option>
-                            <option value="sea">Sea (Searoute)</option>
+                            <option value="land">Land Only (Truk Darat)</option>
+                            <option value="sea">Sea Only (Port-to-Port)</option>
                         </select>
                     </div>
 
@@ -50,6 +50,17 @@
                         <label class="block text-sm font-bold text-gray-700 mb-2">Destination Name</label>
                         <div @dest-selected.window="addWaypoint([parseFloat($event.detail.lng), parseFloat($event.detail.lat)])">
                             <x-omni-search name="destination_name" placeholder="Search Destination..." event-name="dest-selected" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 border-t border-gray-300 pt-4 mt-4">
+                        <div x-show="routeType === 'land' || routeType === 'combined'" x-transition>
+                            <label class="block text-xs font-bold text-gray-700 mb-2">Tol Cost (Rp)</label>
+                            <x-input type="number" name="toll_cost" placeholder="0" value="0" min="0" />
+                        </div>
+                        <div x-show="routeType === 'sea' || routeType === 'combined'" x-transition>
+                            <label class="block text-xs font-bold text-gray-700 mb-2">Ferry Cost (Rp)</label>
+                            <x-input type="number" name="ferry_cost" placeholder="0" value="0" min="0" />
                         </div>
                     </div>
 
@@ -99,13 +110,15 @@
         </div>
 
         <!-- Map Section -->
-        <div class="lg:col-span-2">
-            <x-card class="h-[600px] p-0 overflow-hidden relative">
-                <div id="map" class="w-full h-full z-0"></div>
+        <div class="lg:col-span-2 relative">
+            <div class="sticky top-24">
+                <x-card class="h-[600px] p-0 overflow-hidden relative">
+                    <div id="map" class="w-full h-full z-0"></div>
                 <div class="absolute bottom-4 right-4 z-10 bg-white/80 backdrop-blur px-4 py-2 rounded-xl shadow-lg border border-gray-200 text-xs text-gray-600 font-bold pointer-events-none">
                     <span x-text="routeType === 'combined' ? 'Auto Multimodal Routing' : (routeType === 'land' ? 'OSRM Routing' : 'Searoute Microservice')"></span>
                 </div>
             </x-card>
+            </div>
         </div>
     </div>
 

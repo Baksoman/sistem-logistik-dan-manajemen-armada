@@ -40,6 +40,14 @@
                         <p class="text-xs font-bold text-gray-500 uppercase">Destination</p>
                         <p class="text-md font-medium text-gray-800">{{ $route->destination_name }}</p>
                     </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Toll Cost</span>
+                        <span class="text-sm font-bold text-emerald-600">Rp {{ number_format($route->toll_cost, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Ferry Cost</span>
+                        <span class="text-sm font-bold text-emerald-600">Rp {{ number_format($route->ferry_cost, 0, ',', '.') }}</span>
+                    </div>
                 </div>
             </x-card>
 
