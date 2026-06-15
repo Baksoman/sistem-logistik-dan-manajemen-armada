@@ -9,6 +9,9 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\Logistik\RouteController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\TariffController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\InventoryController;
 use App\Http\Controllers\Warehouse\ZoneController;
@@ -17,6 +20,7 @@ use App\Http\Controllers\Warehouse\ItemCategoryController;
 use App\Http\Controllers\Warehouse\InboundController;
 use App\Http\Controllers\Warehouse\OutboundController;
 use App\Http\Controllers\Warehouse\WarehouseDashboardController;
+use App\Http\Controllers\Logistik\DashboardController as LogistikDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -117,14 +121,43 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    Route::middleware('permission:manage_routes')->group(function () {
-        Route::prefix('logistik/routes')->group(function () {
-            Route::get('/', [RouteController::class, 'index'])->name('routes.index');
-            Route::get('/create', [RouteController::class, 'create'])->name('routes.create');
-            Route::post('/', [RouteController::class, 'store'])->name('routes.store');
-            Route::get('/{route}', [RouteController::class, 'show'])->name('routes.show');
-            Route::delete('/{route}', [RouteController::class, 'destroy'])->name('routes.destroy');
-            Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
+    Route::prefix('/logistik-panel')->group(function () {
+        Route::get('/', [LogistikDashboardController::class, 'index'])->name('dashboard.logistik.index');
+        
+        Route::middleware('permission:manage_routes')->group(function () {
+            Route::prefix('/routes')->group(function () {
+                Route::get('/', [RouteController::class, 'index'])->name('routes.index');
+                Route::get('/create', [RouteController::class, 'create'])->name('routes.create');
+                Route::post('/', [RouteController::class, 'store'])->name('routes.store');
+                Route::get('/{route}', [RouteController::class, 'show'])->name('routes.show');
+                Route::delete('/{route}', [RouteController::class, 'destroy'])->name('routes.destroy');
+                Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
+            });
+    
+            Route::resource('tariffs', TariffController::class);
+        });
+
+        Route::middleware('permission:manage_orders')->group(function () {
+            Route::prefix('orders')->group(function () {
+                Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+                Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
+                Route::post('/', [OrderController::class, 'store'])->name('orders.store');
+                Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
+                Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+                Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
+                Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+                Route::get('/warehouse-items/{warehouse}', [OrderController::class, 'getWarehouseItems'])->name('orders.warehouse-items');
+            });
+        });
+    
+        Route::middleware('permission:manage_shipments')->group(function () {
+            Route::prefix('shipments')->group(function () {
+                Route::get('/', [ShipmentController::class, 'index'])->name('shipments.index');
+                Route::get('/create', [ShipmentController::class, 'create'])->name('shipments.create');
+                Route::post('/', [ShipmentController::class, 'store'])->name('shipments.store');
+                Route::get('/{shipment}', [ShipmentController::class, 'show'])->name('shipments.show');
+                Route::post('/{shipment}/complete', [ShipmentController::class, 'complete'])->name('shipments.complete');
+            });
         });
     });
 });
