@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Vehicle;
 use App\Models\DriverProfile;
 use App\Models\RouteVersion;
+use App\Models\Warehouse;
 use App\Services\ShipmentService;
 use Illuminate\Http\Request;
 use Exception;
@@ -33,7 +34,7 @@ class ShipmentController extends Controller
             ->get();
             
         $warehouses = \App\Models\Warehouse::all();
-        $vehicles = Vehicle::where('status', 'available')->get();
+        $vehicles = Vehicle::with('vehicleType')->where('status', 'available')->get();
         $drivers = DriverProfile::where('status', 'available')->get();
         $routeVersions = RouteVersion::with('route')->latest()->get();
         $tariffs = \App\Models\Tariff::all();
@@ -104,8 +105,11 @@ class ShipmentController extends Controller
 
     public function show(Shipment $shipment)
     {
-        $shipment->load(['driver.user', 'vehicle', 'routeVersion.route', 'orders.customer', 'orders.originWarehouse']);
-        return view('shipments.show', compact('shipment'));
+        $shipment->load(['driver.user', 'vehicle', 'routeVersion.route', 'orders' => function($q) {
+            $q->withPivot('status', 'dropoff_warehouse_id');
+        }, 'orders.customer', 'orders.originWarehouse', 'orders.currentWarehouse']);
+        $warehouses = Warehouse::all();
+        return view('shipments.show', compact('shipment', 'warehouses'));
     }
 
     public function start(Shipment $shipment)
