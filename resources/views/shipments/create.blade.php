@@ -41,7 +41,9 @@
                 'id' => $v->id, 
                 'vehicle_type_id' => $v->vehicle_type_id,
                 'capacity_kg' => $v->capacity_kg, 
-                'capacity_volume' => $v->capacity_volume_cbm
+                'capacity_volume' => $v->capacity_volume_cbm,
+                'fuel_cost_per_km' => (float) $v->fuel_cost_per_km,
+                'driver_fee' => (float) ($v->vehicleType->driver_fee ?? 0)
             ];
         })->values()->toJson();
         
@@ -62,6 +64,8 @@
                 'calculated_date' => $rv->calculated_at ? $rv->calculated_at->format('Y-m-d') : 'Unknown',
                 'origin_name' => $rv->route->origin_name,
                 'destination_name' => $rv->route->destination_name,
+                'toll_cost' => (float) $rv->route->toll_cost,
+                'ferry_cost' => (float) $rv->route->ferry_cost,
                 'geojson' => $rv->polyline_geojson ? (is_string($rv->polyline_geojson) ? json_decode($rv->polyline_geojson) : $rv->polyline_geojson) : null
             ];
         })->values()->toJson();
@@ -263,40 +267,27 @@
                 
                 calculateCost() {
                     this.estimatedCost = 0;
-                    if (this.selectedOrders.length === 0) return;
+                    if (this.selectedOrders.length === 0 || !this.selectedVehicleId) return;
                     
-                    // Fallback tarif jika belum ada di database (5000/KM, 500/KG)
-                    let tariff = { price_per_km: 5000, price_per_kg: 500, fixed_price: 0 };
-                    
-                    let selectedVehicleTypeId = null;
-                    if (this.selectedVehicleId) {
-                        const v = vehiclesData.find(veh => veh.id === this.selectedVehicleId);
-                        if (v) selectedVehicleTypeId = v.vehicle_type_id;
-                    }
+                    const vehicle = vehiclesData.find(veh => veh.id === this.selectedVehicleId);
+                    if (!vehicle) return;
+
+                    let fuelCostPerKm = vehicle.fuel_cost_per_km || 0;
+                    let driverFee = vehicle.driver_fee || 0;
+                    let tollCost = 0;
+                    let ferryCost = 0;
                     
                     if (this.routeMode === 'direct') {
-                        // Cari general tariff (route_id = null)
-                        const globalTariffs = tariffsData.filter(t => t.route_id === null);
-                        let matchedTariff = globalTariffs.find(t => t.vehicle_type_id === selectedVehicleTypeId);
-                        if (!matchedTariff) matchedTariff = globalTariffs.find(t => t.vehicle_type_id === null);
-                        
-                        if (matchedTariff) tariff = matchedTariff;
-                        
-                        const distanceCost = this.estimatedDistanceKm * tariff.price_per_km;
-                        const weightCost = this.totalWeight * tariff.price_per_kg;
-                        this.estimatedCost = distanceCost + weightCost;
+                        let distanceCost = this.estimatedDistanceKm * fuelCostPerKm;
+                        this.estimatedCost = distanceCost + driverFee;
                     } 
                     else if (this.routeMode === 'transit' && this.selectedRouteVersionId) {
                         const routeVersion = routesData.find(r => r.id === this.selectedRouteVersionId);
                         if (routeVersion) {
-                            const routeTariffs = tariffsData.filter(t => t.route_id === routeVersion.route_id);
-                            let matchedTariff = routeTariffs.find(t => t.vehicle_type_id === selectedVehicleTypeId);
-                            if (!matchedTariff) matchedTariff = routeTariffs.find(t => t.vehicle_type_id === null);
-                            
-                            if (matchedTariff) tariff = matchedTariff;
-                            else tariff.fixed_price = 1500000; // default fixed price for transit
-                            
-                            this.estimatedCost = tariff.fixed_price + (this.totalWeight * tariff.price_per_kg);
+                            tollCost = routeVersion.toll_cost || 0;
+                            ferryCost = routeVersion.ferry_cost || 0;
+                            let distanceCost = (routeVersion.distance_km || this.estimatedDistanceKm) * fuelCostPerKm;
+                            this.estimatedCost = distanceCost + driverFee + tollCost + ferryCost;
                         }
                     }
                 },
