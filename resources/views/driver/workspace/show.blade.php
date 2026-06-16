@@ -45,19 +45,29 @@
     <div id="map"></div>
 
     <!-- The Bottom Sheet -->
-    <div class="bottom-sheet pt-2 pb-8 px-6">
-        <!-- Drag Handle Indicator -->
-        <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
+    <div class="bottom-sheet pb-8" :style="{ transform: sheetTransform, transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }">
+        <!-- Draggable Header Area -->
+        <div class="cursor-pointer pt-2 px-6 touch-none select-none"
+             @touchstart="startDrag" @touchmove="doDrag" @touchend="endDrag"
+             @mousedown="startDrag" @mousemove="doDrag" @mouseup="endDrag" @mouseleave="endDrag"
+             @click="toggleSheet"
+        >
+            <!-- Drag Handle Indicator -->
+            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
 
-        <div class="flex justify-between items-start mb-6">
-            <div>
-                <h2 class="text-2xl font-black text-gray-800 tracking-tight">{{ $shipment->shipment_number }}</h2>
-                <p class="text-sm font-bold text-gray-500 mt-1">Truck: {{ $shipment->vehicle->plate_number }}</p>
-            </div>
-            <div class="bg-blue-100 text-blue-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                {{ $shipment->status }}
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-gray-800 tracking-tight">{{ $shipment->shipment_number }}</h2>
+                    <p class="text-sm font-bold text-gray-500 mt-1">Truck: {{ $shipment->vehicle->plate_number }}</p>
+                </div>
+                <div class="bg-blue-100 text-blue-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                    {{ $shipment->status }}
+                </div>
             </div>
         </div>
+
+        <!-- Scrollable Content -->
+        <div class="px-6">
 
         @if($shipment->status === 'Pending')
             <!-- PRE-JOURNEY VIEW -->
@@ -100,24 +110,25 @@
 
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <!-- View Orders Button -->
-                <button class="neu-btn bg-gray-100 text-gray-800 font-bold py-4 rounded-2xl neu-flat transition-all flex flex-col items-center justify-center gap-2">
+                <a href="{{ route('driver.workspace.packages', $shipment->id) }}" class="neu-btn bg-gray-100 text-gray-800 font-bold py-4 rounded-2xl neu-flat transition-all flex flex-col items-center justify-center gap-2">
                     <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     <span class="text-xs uppercase tracking-widest">Packages</span>
-                </button>
+                </a>
 
-                <!-- Costs Button -->
-                <button class="neu-btn bg-gray-100 text-gray-800 font-bold py-4 rounded-2xl neu-flat transition-all flex flex-col items-center justify-center gap-2">
+                <!-- Add Cost Button -->
+                <a href="{{ route('driver.workspace.costs', $shipment->id) }}" class="neu-btn bg-gray-100 text-gray-800 font-bold py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-2">
                     <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span class="text-xs uppercase tracking-widest">Input Cost</span>
-                </button>
+                    <span class="text-xs uppercase tracking-widest">Cost</span>
+                </a>
             </div>
 
             <!-- Complete/Unload Journey Action -->
-            <button type="button" @click="confirmComplete('{{ $shipment->id }}')" class="w-full neu-btn bg-gray-800 text-white font-black py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-lg shadow-xl">
+            <a href="{{ route('driver.workspace.packages', $shipment->id) }}" class="w-full neu-btn bg-gray-800 text-white font-black py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-lg shadow-xl">
                 <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 Scan / Arrive
-            </button>
+            </a>
         @endif
+        </div>
     </div>
 </div>
 @endsection
@@ -132,6 +143,12 @@
             shipmentId: '{{ $shipment->id }}',
             status: '{{ $shipment->status }}',
             
+            // Bottom Sheet state
+            sheetState: 'collapsed', // 'expanded' or 'collapsed'
+            startY: 0,
+            offsetY: 0,
+            isDragging: false,
+            
             // Map data
             routeJson: {!! json_encode($shipment->routeVersion ? $shipment->routeVersion->polyline_geojson : null) !!},
             orders: {!! json_encode($shipment->orders->map(function($order) {
@@ -141,6 +158,55 @@
                     'number' => $order->order_number
                 ];
             })) !!},
+
+            get sheetTransform() {
+                if (this.isDragging) {
+                    let base = this.sheetState === 'collapsed' ? 'calc(100% - 100px)' : '0px';
+                    return `translateY(calc(${base} + ${this.offsetY}px))`;
+                }
+                return this.sheetState === 'collapsed' ? 'translateY(calc(100% - 100px))' : 'translateY(0)';
+            },
+
+            startDrag(e) {
+                this.isDragging = true;
+                this.startY = e.touches ? e.touches[0].clientY : e.clientY;
+            },
+
+            doDrag(e) {
+                if (!this.isDragging) return;
+                let currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                let diff = currentY - this.startY;
+                
+                // Add resistance if pulling past limits
+                if ((this.sheetState === 'collapsed' && diff > 0) || (this.sheetState === 'expanded' && diff < 0)) {
+                    diff = diff * 0.2;
+                }
+                
+                this.offsetY = diff;
+                
+                // Prevent scrolling map while dragging sheet
+                if (e.cancelable) e.preventDefault();
+            },
+
+            endDrag() {
+                if (!this.isDragging) return;
+                this.isDragging = false;
+                
+                if (this.sheetState === 'expanded' && this.offsetY > 50) {
+                    this.sheetState = 'collapsed';
+                } else if (this.sheetState === 'collapsed' && this.offsetY < -50) {
+                    this.sheetState = 'expanded';
+                }
+                
+                this.startY = 0;
+                this.offsetY = 0;
+            },
+            
+            toggleSheet() {
+                if (this.offsetY === 0) { // Only toggle if it wasn't a drag
+                    this.sheetState = this.sheetState === 'expanded' ? 'collapsed' : 'expanded';
+                }
+            },
 
             init() {
                 // Initialize Map
