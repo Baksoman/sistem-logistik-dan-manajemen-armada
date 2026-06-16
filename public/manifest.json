@@ -1,0 +1,17 @@
+{
+    "name": "Driver Workspace",
+    "short_name": "Driver PWA",
+    "description": "Aplikasi pendamping operasional untuk driver logistik.",
+    "start_url": "/driver/workspace",
+    "display": "standalone",
+    "background_color": "#f3f4f6",
+    "theme_color": "#f3f4f6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/2766/2766067.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
