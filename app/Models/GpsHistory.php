@@ -10,6 +10,8 @@ class GpsHistory extends Model
 {
     use HasFactory, HasUuids;
 
+    protected $table = 'gps_history';
+
     protected $fillable = [
         'shipment_id',
         'driver_id',
