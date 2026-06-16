@@ -12,6 +12,7 @@ class ProofOfDelivery extends Model
 
     protected $fillable = [
         'shipment_id',
+        'order_id',
         'receiver_name',
         'receiver_phone',
         'notes',
@@ -28,6 +29,8 @@ class ProofOfDelivery extends Model
     }
 
     public function shipment() { return $this->belongsTo(Shipment::class); }
+    
+    public function order() { return $this->belongsTo(Order::class); }
 
     public function podPhotos() { return $this->hasMany(PodPhoto::class); }
 

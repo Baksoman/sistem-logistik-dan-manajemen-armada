@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('proof_of_deliveries', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('shipment_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('order_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('receiver_name');
             $table->string('receiver_phone')->nullable();
             $table->text('notes')->nullable();

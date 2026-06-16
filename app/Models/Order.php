@@ -46,6 +46,8 @@ class Order extends Model
                                         ->withPivot('status', 'dropoff_warehouse_id'); }
 
     public function histories() { return $this->hasMany(OrderHistory::class)->orderBy('created_at', 'desc'); }
+    
+    public function proofOfDeliveries() { return $this->hasMany(ProofOfDelivery::class); }
 
     protected static function booted()
     {
