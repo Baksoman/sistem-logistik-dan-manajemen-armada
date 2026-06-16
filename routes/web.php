@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Driver\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DriverProfileController;
@@ -161,5 +162,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{shipment}/unload', [ShipmentController::class, 'unload'])->name('shipments.unload');
             });
         });
+    });
+
+    // Driver PWA Routes
+    Route::middleware('role:driver')->prefix('driver')->group(function () {
+        Route::get('/workspace', [WorkspaceController::class, 'index'])->name('driver.workspace.index');
+        Route::post('/shipments/{shipment}/start', [WorkspaceController::class, 'startJourney'])->name('driver.shipments.start');
     });
 });
