@@ -158,6 +158,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/{shipment}', [ShipmentController::class, 'show'])->name('shipments.show');
                 Route::post('/{shipment}/start', [ShipmentController::class, 'start'])->name('shipments.start');
                 Route::post('/{shipment}/complete', [ShipmentController::class, 'complete'])->name('shipments.complete');
+                Route::post('/{shipment}/unload', [ShipmentController::class, 'unload'])->name('shipments.unload');
             });
         });
     });

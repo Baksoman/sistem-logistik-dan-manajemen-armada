@@ -193,4 +193,24 @@ class ShipmentController extends Controller
 
         return redirect()->route('shipments.index')->with('success', 'Shipment marked as completed. Vehicle is now available and Orders updated.');
     }
+
+    public function unload(Request $request, Shipment $shipment)
+    {
+        $request->validate([
+            'dropoff_warehouse_id' => 'required|exists:warehouses,id',
+            'order_ids' => 'required|array|min:1',
+            'order_ids.*' => 'exists:orders,id'
+        ]);
+
+        if ($shipment->status !== 'On Process') {
+            return back()->with('error', 'Only active shipments (On Process) can be unloaded.');
+        }
+
+        try {
+            $this->shipmentService->unloadOrders($shipment, $request->order_ids, $request->dropoff_warehouse_id);
+            return back()->with('success', count($request->order_ids) . ' orders have been successfully unloaded to the transit hub.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
 }

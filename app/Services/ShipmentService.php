@@ -81,4 +81,43 @@ class ShipmentService
             return $shipment;
         });
     }
+
+    public function unloadOrders(Shipment $shipment, array $orderIds, string $dropoffWarehouseId): Shipment
+    {
+        return DB::transaction(function () use ($shipment, $orderIds, $dropoffWarehouseId) {
+            // Lock orders being unloaded
+            $orders = Order::whereIn('id', $orderIds)->lockForUpdate()->get();
+
+            foreach ($orders as $order) {
+                // Update pivot table (shipment_orders)
+                $shipment->orders()->updateExistingPivot($order->id, [
+                    'status' => 'Unloaded',
+                    'dropoff_warehouse_id' => $dropoffWarehouseId
+                ]);
+
+                // Update order master table
+                $order->current_warehouse_id = $dropoffWarehouseId;
+                $order->status = 'Arrived at Hub';
+                $order->save();
+            }
+
+            // Check if there are any orders still 'Loaded'
+            $remainingLoaded = $shipment->orders()->wherePivot('status', 'Loaded')->count();
+
+            if ($remainingLoaded === 0) {
+                // If no more loaded orders, mark shipment as Delivered (job done)
+                $shipment->status = 'Delivered';
+                $shipment->completed_at = now();
+                $shipment->save();
+                
+                // Free the vehicle
+                if ($shipment->vehicle) {
+                    $shipment->vehicle->status = 'available';
+                    $shipment->vehicle->save();
+                }
+            }
+
+            return $shipment;
+        });
+    }
 }
