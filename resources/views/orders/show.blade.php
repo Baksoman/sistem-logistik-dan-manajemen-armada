@@ -50,6 +50,15 @@
     </div>
 
     @php
+        $latestShipment = $order->shipments->sortByDesc('created_at')->first();
+        $routeGeojsonObj = null;
+        $routeWaypointsObj = null;
+        if ($latestShipment && $latestShipment->routeVersion) {
+            $routeGeojson = $latestShipment->routeVersion->polyline_geojson ?? 'null';
+            $routeGeojsonObj = is_string($routeGeojson) && $routeGeojson !== 'null' ? json_decode($routeGeojson) : $routeGeojson;
+            $routeWaypointsObj = $latestShipment->routeVersion->waypoints ?? [];
+        }
+
         $mapData = [
             'origin' => [
                 'name' => $order->originWarehouse->name ?? 'Origin',
@@ -65,7 +74,9 @@
                 'address' => $order->destination_address,
                 'lat' => (float)$order->destination_latitude,
                 'lng' => (float)$order->destination_longitude,
-            ]
+            ],
+            'routeGeojson' => $routeGeojsonObj,
+            'routeWaypoints' => $routeWaypointsObj
         ];
     @endphp
 
@@ -252,15 +263,41 @@
                 }).bindPopup(`<b>Destination</b><br>${data.destination.address}`).addTo(map);
                 bounds.push(L.latLng(data.destination.lat, data.destination.lng));
                 
-                // Draw line from Origin/Current to Destination
-                const startLat = data.current ? data.current.lat : data.origin.lat;
-                const startLng = data.current ? data.current.lng : data.origin.lng;
-                
-                if (startLat && startLng) {
-                    L.polyline([
-                        [startLat, startLng],
-                        [data.destination.lat, data.destination.lng]
-                    ], { color: '#9ca3af', dashArray: '5, 10', weight: 3 }).addTo(map);
+                if (data.routeGeojson) {
+                    // Draw actual Shipment Route
+                    const routeLayer = L.geoJSON(data.routeGeojson, {
+                        style: { color: '#3b82f6', weight: 4, opacity: 0.8 }
+                    }).addTo(map);
+                    bounds.push(routeLayer.getBounds());
+                    
+                    // Draw Shipment Waypoints
+                    if (data.routeWaypoints && data.routeWaypoints.length > 0) {
+                        data.routeWaypoints.forEach((wp, index) => {
+                            L.circleMarker([wp[1], wp[0]], {
+                                color: '#3b82f6', fillColor: '#ffffff', fillOpacity: 1, weight: 2, radius: 6
+                            }).bindPopup(`<b>Shipment Waypoint ${index + 1}</b>`).addTo(map);
+                            bounds.push(L.latLng(wp[1], wp[0]));
+                        });
+                        
+                        // Draw dashed line from last shipment waypoint to final destination
+                        const lastWp = data.routeWaypoints[data.routeWaypoints.length - 1];
+                        L.polyline([
+                            [lastWp[1], lastWp[0]],
+                            [data.destination.lat, data.destination.lng]
+                        ], { color: '#9ca3af', dashArray: '5, 10', weight: 3 }).addTo(map);
+                    }
+                    
+                } else {
+                    // Fallback: Draw straight dashed line from Origin/Current to Destination
+                    const startLat = data.current ? data.current.lat : data.origin.lat;
+                    const startLng = data.current ? data.current.lng : data.origin.lng;
+                    
+                    if (startLat && startLng) {
+                        L.polyline([
+                            [startLat, startLng],
+                            [data.destination.lat, data.destination.lng]
+                        ], { color: '#9ca3af', dashArray: '5, 10', weight: 3 }).addTo(map);
+                    }
                 }
             }
 

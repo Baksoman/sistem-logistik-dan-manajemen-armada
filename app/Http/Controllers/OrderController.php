@@ -98,7 +98,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['customer', 'originWarehouse', 'currentWarehouse', 'items.stockItem', 'shipments.vehicle']);
+        $order->load(['customer', 'originWarehouse', 'currentWarehouse', 'items.stockItem', 'shipments.vehicle', 'shipments.routeVersion']);
         return view('orders.show', compact('order'));
     }
 
