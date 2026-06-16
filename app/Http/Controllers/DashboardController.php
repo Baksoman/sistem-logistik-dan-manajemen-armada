@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboard;
 use App\Http\Controllers\Driver\DashboardController as DriverDashboard;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboard;
+use App\Http\Controllers\Driver\WorkspaceController;
 
 class DashboardController extends Controller
 {
@@ -29,7 +30,7 @@ class DashboardController extends Controller
         }
 
         if ($user->hasRole('Driver')) {
-            return app(DriverDashboard::class)->index();
+            return redirect()->route('driver.workspace.index');
         }
 
         return app(CustomerDashboard::class)->index();
