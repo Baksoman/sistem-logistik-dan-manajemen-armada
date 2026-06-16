@@ -70,22 +70,29 @@
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-6 left-6 right-6 bg-gray-100 rounded-3xl px-6 py-4 flex justify-between items-center neu-flat z-50">
-        <a href="#" class="flex flex-col items-center text-blue-600 gap-1 transition">
-            <div class="w-10 h-10 rounded-2xl neu-pressed flex items-center justify-center">
+        @php
+            $isHome = request()->routeIs('driver.workspace.index', 'driver.workspace.show', 'driver.workspace.packages');
+            $isShipment = request()->routeIs('driver.workspace.history', 'driver.workspace.history.show');
+            $isCosts = request()->routeIs('driver.workspace.costs', 'driver.workspace.costs.global');
+        @endphp
+
+        <a href="{{ route('driver.workspace.index') }}" class="flex flex-col items-center {{ $isHome ? 'text-blue-600' : 'text-gray-400 hover:text-blue-500' }} gap-1 transition">
+            <div class="w-10 h-10 rounded-2xl {{ $isHome ? 'neu-pressed' : '' }} flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             </div>
             <span class="text-[10px] font-bold">Home</span>
         </a>
 
-        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-blue-500 gap-1 transition">
-            <div class="w-10 h-10 rounded-2xl flex items-center justify-center">
+        <a href="{{ route('driver.workspace.history') }}" class="flex flex-col items-center {{ $isShipment ? 'text-blue-600' : 'text-gray-400 hover:text-blue-500' }} gap-1 transition">
+            <div class="w-10 h-10 rounded-2xl {{ $isShipment ? 'neu-pressed' : '' }} flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
             </div>
-            <span class="text-[10px] font-bold">Route</span>
+            <span class="text-[10px] font-bold">Shipment</span>
         </a>
 
-        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-blue-500 gap-1 transition">
-            <div class="w-10 h-10 rounded-2xl flex items-center justify-center">
+        <a href="{{ isset($shipment) ? route('driver.workspace.costs', $shipment->id) : route('driver.workspace.costs.global') }}" 
+           class="flex flex-col items-center {{ $isCosts ? 'text-blue-600' : 'text-gray-400 hover:text-blue-500' }} gap-1 transition">
+            <div class="w-10 h-10 rounded-2xl {{ $isCosts ? 'neu-pressed' : '' }} flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path></svg>
             </div>
             <span class="text-[10px] font-bold">Costs</span>
