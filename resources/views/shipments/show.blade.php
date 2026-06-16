@@ -319,20 +319,26 @@
                     iconAnchor: [20, 20]
                 });
 
-                // Listen to public channel
-                if (typeof window.Echo !== 'undefined') {
-                    window.Echo.channel(`shipment.${shipmentId}`)
-                        .listen('.driver.location.updated', (e) => {
-                            console.log('Live tracking update:', e);
-                            const newPos = [e.lat, e.lng];
-                            
-                            if (!truckMarker) {
-                                truckMarker = L.marker(newPos, { icon: truckIcon }).addTo(map);
-                            } else {
-                                truckMarker.setLatLng(newPos);
-                            }
-                        });
-                }
+                // Wait for Echo to initialize since Vite module loads asynchronously
+                const initEcho = () => {
+                    if (typeof window.Echo !== 'undefined') {
+                        console.log("Menghubungkan ke Tracker Reverb...");
+                        window.Echo.channel(`shipment.${shipmentId}`)
+                            .listen('.driver.location.updated', (e) => {
+                                console.log('📍 Live tracking update received:', e);
+                                const newPos = [e.lat, e.lng];
+                                
+                                if (!truckMarker) {
+                                    truckMarker = L.marker(newPos, { icon: truckIcon }).addTo(map);
+                                } else {
+                                    truckMarker.setLatLng(newPos);
+                                }
+                            });
+                    } else {
+                        setTimeout(initEcho, 200);
+                    }
+                };
+                initEcho();
             @endif
         });
     </script>
