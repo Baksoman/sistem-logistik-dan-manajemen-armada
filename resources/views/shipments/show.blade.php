@@ -116,6 +116,8 @@
                 'status' => $o->status
             ];
         })->values()->toJson();
+
+        $routeWaypointsJson = json_encode($shipment->routeVersion->waypoints ?? []);
     @endphp
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -252,7 +254,8 @@
         document.addEventListener('alpine:init', () => {
             const mapData = {
                 route: @json($routeGeojsonObj),
-                orders: {!! $ordersJson !!}
+                orders: {!! $ordersJson !!},
+                waypoints: {!! $routeWaypointsJson !!}
             };
 
             const map = L.map('tracker-map').setView([-2.5489, 118.0149], 5);
@@ -269,6 +272,22 @@
                 bounds.push(routeLayer.getBounds());
             }
 
+            // Draw Route Waypoints (Origin, Stops, Destination)
+            if (mapData.waypoints && mapData.waypoints.length > 0) {
+                mapData.waypoints.forEach((wp, index) => {
+                    let label = index === 0 ? 'Origin' : (index === mapData.waypoints.length - 1 ? 'Destination' : `Stop ${index}`);
+                    const wMarker = L.circleMarker([wp[1], wp[0]], {
+                        color: '#3b82f6',
+                        fillColor: '#ffffff',
+                        fillOpacity: 1,
+                        weight: 3,
+                        radius: 8
+                    }).bindPopup(`<b>${label}</b><br>${wp[1].toFixed(5)}, ${wp[0].toFixed(5)}`).addTo(map);
+                    bounds.push(L.latLng(wp[1], wp[0]));
+                });
+            }
+
+            // Draw Dropoff Orders
             mapData.orders.forEach(order => {
                 if (order.lat && order.lng) {
                     const marker = L.circleMarker([order.lat, order.lng], {
