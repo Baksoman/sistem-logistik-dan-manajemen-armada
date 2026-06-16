@@ -167,6 +167,7 @@ Route::middleware('auth')->group(function () {
     // Driver PWA Routes
     Route::middleware('role:driver')->prefix('driver')->group(function () {
         Route::get('/workspace', [WorkspaceController::class, 'index'])->name('driver.workspace.index');
+        Route::get('/workspace/{shipment}', [WorkspaceController::class, 'show'])->name('driver.workspace.show');
         Route::post('/shipments/{shipment}/start', [WorkspaceController::class, 'startJourney'])->name('driver.shipments.start');
     });
 });
