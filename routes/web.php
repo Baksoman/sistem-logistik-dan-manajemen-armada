@@ -165,9 +165,19 @@ Route::middleware('auth')->group(function () {
     });
 
     // Driver PWA Routes
-    Route::middleware('role:driver')->prefix('driver')->group(function () {
-        Route::get('/workspace', [WorkspaceController::class, 'index'])->name('driver.workspace.index');
-        Route::get('/workspace/{shipment}', [WorkspaceController::class, 'show'])->name('driver.workspace.show');
-        Route::post('/shipments/{shipment}/start', [WorkspaceController::class, 'startJourney'])->name('driver.shipments.start');
+    Route::middleware('role:driver')->prefix('driver/workspace')->name('driver.')->group(function () {
+        Route::get('/', [WorkspaceController::class, 'index'])->name('workspace.index');
+        Route::get('/history', [WorkspaceController::class, 'history'])->name('workspace.history');
+        Route::get('/history/shipments/{shipment}', [WorkspaceController::class, 'historyShow'])->name('workspace.history.show');
+        Route::get('/costs', [WorkspaceController::class, 'globalCosts'])->name('workspace.costs.global');
+
+        Route::prefix('shipments/{shipment}')->group(function () {
+            Route::get('/', [WorkspaceController::class, 'show'])->name('workspace.show');
+            Route::post('/start', [WorkspaceController::class, 'startJourney'])->name('shipments.start');
+            Route::get('/packages', [WorkspaceController::class, 'packages'])->name('workspace.packages');
+            Route::post('/packages/{order}/unload', [WorkspaceController::class, 'unloadPackage'])->name('workspace.unload');
+            Route::get('/costs', [WorkspaceController::class, 'costs'])->name('workspace.costs');
+            Route::post('/costs', [WorkspaceController::class, 'storeCost'])->name('workspace.costs.store');
+        });
     });
 });
