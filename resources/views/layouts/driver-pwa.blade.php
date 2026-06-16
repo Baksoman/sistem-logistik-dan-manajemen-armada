@@ -8,6 +8,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#f3f4f6">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -47,6 +48,7 @@
         .neu-pressed { box-shadow: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff; }
         .neu-btn:active { box-shadow: inset 2px 2px 4px #d1d5db, inset -2px -2px 4px #ffffff; transform: scale(0.98); }
     </style>
+    @stack('styles')
 </head>
 <body class="text-gray-800 pb-24 overflow-x-hidden selection:bg-blue-200">
 
