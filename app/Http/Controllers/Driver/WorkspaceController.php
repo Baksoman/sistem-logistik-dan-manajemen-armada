@@ -75,7 +75,33 @@ class WorkspaceController extends Controller
         }
 
         if ($shipment->status === 'Pending') {
-            $shipment->update(['status' => 'On Process']);
+            $shipment->load(['routeVersion', 'orders']);
+            
+            $durationMin = $shipment->routeVersion->duration_min ?? 0;
+            $bufferedDuration = $durationMin * 1.2;
+
+            $shipment->update([
+                'status' => 'On Process',
+                'started_at' => now(),
+                'sla_target_at' => now()->addMinutes($bufferedDuration)
+            ]);
+
+            if ($shipment->vehicle) {
+                $shipment->vehicle->update(['status' => 'on_trip']);
+            }
+
+            foreach ($shipment->orders as $order) {
+                if ($order->status === 'Assigned') {
+                    $order->update(['status' => 'On Process']);
+                    
+                    \App\Models\OrderHistory::create([
+                        'order_id' => $order->id,
+                        'user_id' => $user->id,
+                        'status' => 'On Process',
+                        'description' => 'Driver has started the journey.',
+                    ]);
+                }
+            }
             
             // Log history to existing shipment_checkpoints table
             DB::table('shipment_checkpoints')->insert([
