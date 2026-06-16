@@ -34,7 +34,7 @@ services:
       PMA_USER: root
       PMA_PASSWORD: root
     ports:
-      - "8080:80"
+      - "8081:80"
     networks:
       - logistik_network
 
