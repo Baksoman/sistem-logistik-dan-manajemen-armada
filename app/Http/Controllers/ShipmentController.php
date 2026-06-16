@@ -105,7 +105,7 @@ class ShipmentController extends Controller
 
     public function show(Shipment $shipment)
     {
-        $shipment->load(['driver.user', 'vehicle', 'routeVersion.route', 'orders' => function($q) {
+        $shipment->load(['driver.user', 'vehicle', 'checkpoints', 'routeVersion.route', 'orders' => function($q) {
             $q->withPivot('status', 'dropoff_warehouse_id');
         }, 'orders.customer', 'orders.originWarehouse', 'orders.currentWarehouse']);
         $warehouses = Warehouse::all();
