@@ -18,7 +18,7 @@
         <!-- Swiper/List of Shipments -->
         <div class="space-y-8">
             @foreach($activeShipments as $shipment)
-            <div class="neu-flat rounded-3xl p-5 relative overflow-hidden bg-gray-100">
+            <a href="{{ route('driver.workspace.show', $shipment->id) }}" class="block neu-flat rounded-3xl p-5 relative overflow-hidden bg-gray-100 active:scale-95 transition-transform duration-200">
                 <!-- Status Badge -->
                 <div class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-widest shadow-md">
                     {{ $shipment->status }}
@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Shipment Info -->
-                <div class="neu-pressed rounded-2xl p-4 mb-6">
+                <div class="neu-pressed rounded-2xl p-4 mb-2">
                     <div class="flex justify-between items-end mb-2">
                         <span class="text-xs font-bold text-gray-500">Shipment Code</span>
                         <span class="text-sm font-black text-gray-800">{{ $shipment->shipment_number }}</span>
@@ -47,48 +47,10 @@
                     </div>
                 </div>
 
-                <!-- Action Swipe / Buttons -->
-                @if($shipment->status === 'Pending')
-                    <form action="{{ route('driver.shipments.start', $shipment->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full neu-btn bg-blue-500 text-white font-black py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Start Journey
-                        </button>
-                    </form>
-                @elseif(in_array($shipment->status, ['On Process', 'Arrived at Hub']))
-                    
-                    <div class="flex flex-col gap-4">
-                        <!-- Location Ping Status (Simulated) -->
-                        <div class="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600 mb-2">
-                            <span class="relative flex h-3 w-3">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                            </span>
-                            Broadcasting Live GPS...
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <!-- Show Map Button -->
-                            <button class="neu-btn bg-gray-100 text-blue-600 font-bold py-4 rounded-2xl neu-flat transition-all flex flex-col items-center justify-center gap-1">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                                <span class="text-xs uppercase tracking-wider">Map</span>
-                            </button>
-                            <!-- View Orders Button -->
-                            <button class="neu-btn bg-gray-100 text-gray-700 font-bold py-4 rounded-2xl neu-flat transition-all flex flex-col items-center justify-center gap-1">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                <span class="text-xs uppercase tracking-wider">Packages</span>
-                            </button>
-                        </div>
-
-                        <!-- Complete/Unload Journey Action -->
-                        <button type="button" @click="confirmComplete('{{ $shipment->id }}')" class="w-full neu-btn bg-emerald-500 text-white font-black py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Arrive / Complete
-                        </button>
-                    </div>
-                @endif
-            </div>
+                <div class="mt-4 text-center">
+                    <span class="text-xs font-bold text-blue-500 tracking-widest uppercase">Tap to view map details &rarr;</span>
+                </div>
+            </a>
             @endforeach
         </div>
     @endif
