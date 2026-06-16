@@ -304,6 +304,36 @@
                 const group = new L.featureGroup(bounds.map(b => b instanceof L.LatLngBounds ? L.rectangle(b) : L.marker(b)));
                 map.fitBounds(group.getBounds(), { padding: [30, 30] });
             }
+
+            // Real-time GPS Tracking via Laravel Reverb
+            @if(in_array($shipment->status, ['On Process', 'Arrived at Hub']))
+                const shipmentId = "{{ $shipment->id }}";
+                let truckMarker = null;
+
+                const truckIcon = L.divIcon({
+                    html: `<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] text-blue-500 border-2 border-blue-500">
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                           </div>`,
+                    className: '',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+
+                // Listen to public channel
+                if (typeof window.Echo !== 'undefined') {
+                    window.Echo.channel(`shipment.${shipmentId}`)
+                        .listen('.driver.location.updated', (e) => {
+                            console.log('Live tracking update:', e);
+                            const newPos = [e.lat, e.lng];
+                            
+                            if (!truckMarker) {
+                                truckMarker = L.marker(newPos, { icon: truckIcon }).addTo(map);
+                            } else {
+                                truckMarker.setLatLng(newPos);
+                            }
+                        });
+                }
+            @endif
         });
     </script>
 @endsection
