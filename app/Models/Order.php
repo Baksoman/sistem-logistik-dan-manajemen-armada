@@ -45,4 +45,23 @@ class Order extends Model
     public function shipments() { return $this->belongsToMany(Shipment::class, 'shipment_orders')
                                         ->withPivot('status', 'dropoff_warehouse_id'); }
 
+    public function histories() { return $this->hasMany(OrderHistory::class)->orderBy('created_at', 'desc'); }
+
+    protected static function booted()
+    {
+        static::updated(function ($order) {
+            if ($order->isDirty('status')) {
+                \Illuminate\Support\Facades\DB::table('order_histories')->insert([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'order_id' => $order->id,
+                    'status' => $order->status,
+                    'description' => "Status changed to " . $order->status,
+                    'location' => $order->currentWarehouse->name ?? null,
+                    'user_id' => auth()->id() ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+    }
 }

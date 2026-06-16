@@ -209,201 +209,41 @@
                 </div>
             </x-card>
             @endif
-        </div>
 
-        <!-- Right Column: Map Tracker -->
-        <div class="lg:col-span-5 xl:col-span-4 relative">
-            <div class="sticky top-6">
-                <x-card class="p-2 shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border-4 border-white mb-6">
-                    <div id="order-map" class="w-full h-[500px] rounded-2xl z-0"></div>
-                </x-card>
-                
-                <div class="text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
-                    <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1 align-middle"></span> Origin
-                    @if($order->currentWarehouse && $order->currentWarehouse->id !== $order->origin_warehouse_id)
-                        <span class="inline-block w-3 h-3 rounded-full bg-purple-500 ml-3 mr-1 align-middle"></span> Current Hub
-                    @endif
-                    <span class="inline-block w-3 h-3 rounded-full bg-red-500 ml-3 mr-1 align-middle"></span> Destination
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('alpine:init', () => {
-            const data = @json($mapData);
-
-            const map = L.map('order-map').setView([data.origin.lat, data.origin.lng], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
-
-            const bounds = [];
-
-            // Origin
-            if (data.origin.lat && data.origin.lng) {
-                L.circleMarker([data.origin.lat, data.origin.lng], {
-                    color: '#10b981', fillColor: '#10b981', fillOpacity: 1, radius: 8
-                }).bindPopup(`<b>${data.origin.name}</b><br>Origin`).addTo(map);
-                bounds.push(L.latLng(data.origin.lat, data.origin.lng));
-            }
-            
-            // Current Hub
-            if (data.current && data.current.lat && data.current.lng) {
-                L.circleMarker([data.current.lat, data.current.lng], {
-                    color: '#8b5cf6', fillColor: '#8b5cf6', fillOpacity: 1, radius: 9
-                }).bindPopup(`<b>${data.current.name}</b><br>Current Location`).addTo(map);
-                bounds.push(L.latLng(data.current.lat, data.current.lng));
-            }
-
-            // Destination
-            if (data.destination.lat && data.destination.lng) {
-                L.circleMarker([data.destination.lat, data.destination.lng], {
-                    color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, radius: 8
-                }).bindPopup(`<b>Destination</b><br>${data.destination.address}`).addTo(map);
-                bounds.push(L.latLng(data.destination.lat, data.destination.lng));
-                
-                if (data.routeGeojson) {
-                    // Draw actual Shipment Route
-                    const routeLayer = L.geoJSON(data.routeGeojson, {
-                        style: { color: '#3b82f6', weight: 4, opacity: 0.8 }
-                    }).addTo(map);
-                    bounds.push(routeLayer.getBounds());
-                    
-                    // Draw Shipment Waypoints
-                    if (data.routeWaypoints && data.routeWaypoints.length > 0) {
-                        data.routeWaypoints.forEach((wp, index) => {
-                            L.circleMarker([wp[1], wp[0]], {
-                                color: '#3b82f6', fillColor: '#ffffff', fillOpacity: 1, weight: 2, radius: 6
-                            }).bindPopup(`<b>Shipment Waypoint ${index + 1}</b>`).addTo(map);
-                            bounds.push(L.latLng(wp[1], wp[0]));
-                        });
-                        
-                        // Draw dashed line from last shipment waypoint to final destination
-                        const lastWp = data.routeWaypoints[data.routeWaypoints.length - 1];
-                        L.polyline([
-                            [lastWp[1], lastWp[0]],
-                            [data.destination.lat, data.destination.lng]
-                        ], { color: '#9ca3af', dashArray: '5, 10', weight: 3 }).addTo(map);
-                    }
-                    
-                } else {
-                    // Fallback: Draw straight dashed line from Origin/Current to Destination
-                    const startLat = data.current ? data.current.lat : data.origin.lat;
-                    const startLng = data.current ? data.current.lng : data.origin.lng;
-                    
-                    if (startLat && startLng) {
-                        L.polyline([
-                            [startLat, startLng],
-                            [data.destination.lat, data.destination.lng]
-                        ], { color: '#9ca3af', dashArray: '5, 10', weight: 3 }).addTo(map);
-                    }
-                }
-            }
-
-            if (bounds.length > 0) {
-                map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
-            }
-
-            // Real-time GPS Tracking via Laravel Reverb
-            @if($latestShipment && in_array($latestShipment->status, ['On Process', 'Arrived at Hub']))
-                const shipmentId = "{{ $latestShipment->id }}";
-                let truckMarker = null;
-
-                const truckIcon = L.divIcon({
-                    html: `<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] text-blue-500 border-2 border-blue-500">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                           </div>`,
-                            <p class="font-bold text-gray-800">{{ $order->originWarehouse->name ?? '-' }}</p>
-                        </div>
-                        @if($order->currentWarehouse && $order->currentWarehouse->id !== $order->origin_warehouse_id)
-                        <div>
-                            <p class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-1">Current Hub</p>
-                            <p class="font-black text-purple-700 text-lg">{{ $order->currentWarehouse->name }}</p>
-                        </div>
-                        @endif
-                        
-                        <div class="pt-2 border-t border-gray-200">
-                            <p class="font-bold text-gray-800">Weight: {{ $order->total_weight }} kg</p>
-                            <p class="font-bold text-gray-800">Volume: {{ $order->total_volume }} cbm</p>
-                            <p class="font-bold text-gray-800 mt-2">Est. Distance: <span class="text-blue-600">{{ $order->estimated_distance_km ? $order->estimated_distance_km . ' KM' : '-' }}</span></p>
-                            <p class="font-bold text-gray-800">Quoted Price: <span class="text-emerald-600 text-lg font-black">{{ $order->quoted_price ? 'Rp ' . number_format($order->quoted_price, 0, ',', '.') : '-' }}</span></p>
-                        </div>
-                    </div>
-                </x-card>
-            </div>
-
-            <!-- Items -->
-            <x-card>
+            <!-- Order Histories -->
+            <x-card class="mt-6">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800">Package Contents</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Order History Log</h3>
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-gray-400 text-xs tracking-widest uppercase border-b-2 border-gray-100">
-                                <th class="py-3 px-2 font-bold">Item SKU</th>
-                                <th class="py-3 px-2 font-bold">Name</th>
-                                <th class="py-3 px-2 font-bold text-right">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm">
-                            @foreach($order->items as $item)
-                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                                    <td class="py-4 px-2 font-black text-gray-800">{{ $item->stockItem->sku ?? '-' }}</td>
-                                    <td class="py-4 px-2 font-medium text-gray-700">{{ $item->stockItem->name ?? '-' }}</td>
-                                    <td class="py-4 px-2 font-bold text-right text-lg text-blue-600">{{ $item->quantity }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-[1.45rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-pink-200 before:to-transparent">
+                    @forelse($order->histories as $history)
+                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full border-4 border-white bg-pink-500 text-white shadow shrink-0 z-10 font-bold text-xs">
+                            ✓
+                        </div>
+                        <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white p-4 rounded-xl shadow-[4px_4px_10px_#e5e7eb,-4px_-4px_10px_#ffffff] border border-gray-100">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
+                                <h4 class="font-bold text-gray-800">{{ $history->status }}</h4>
+                                <time class="text-xs font-bold tracking-widest text-gray-400 uppercase sm:ml-2">{{ \Carbon\Carbon::parse($history->created_at)->format('d M H:i') }}</time>
+                            </div>
+                            <p class="text-sm text-gray-600">{{ $history->description }}</p>
+                            @if($history->location)
+                            <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                {{ $history->location }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-gray-500 italic text-sm">No history recorded yet.</p>
+                    @endforelse
                 </div>
             </x-card>
-            
-            @if($order->shipments->count() > 0)
-            <!-- Shipment History -->
-            <x-card>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800">Shipment History</h3>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-gray-400 text-xs tracking-widest uppercase border-b-2 border-gray-100">
-                                <th class="py-3 px-2 font-bold">Shipment No.</th>
-                                <th class="py-3 px-2 font-bold">Vehicle</th>
-                                <th class="py-3 px-2 font-bold">Status</th>
-                                <th class="py-3 px-2 font-bold text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm">
-                            @foreach($order->shipments as $shipment)
-                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                                    <td class="py-4 px-2 font-black text-gray-800">{{ $shipment->shipment_number }}</td>
-                                    <td class="py-4 px-2 font-medium text-gray-700">{{ $shipment->vehicle->plate_number ?? '-' }}</td>
-                                    <td class="py-4 px-2">
-                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold {{ $shipment->status === 'Delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
-                                            {{ $shipment->status }}
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-2 text-right">
-                                        <a href="{{ route('shipments.show', $shipment->id) }}" class="text-blue-500 font-bold hover:underline">View</a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </x-card>
-            @endif
         </div>
 
         <!-- Right Column: Map Tracker -->
