@@ -53,6 +53,14 @@
                         </div>
                     </div>
 
+                    <div x-show="routeType === 'land'" x-transition class="mt-4 p-4 rounded-2xl bg-gray-50 border border-dashed border-gray-300">
+                        <label class="block text-xs font-bold text-gray-500 mb-2">Add Intermediate Stop (Land Only)</label>
+                        <div @@stop-selected.window="insertStop([parseFloat($event.detail.lng), parseFloat($event.detail.lat)])">
+                            <x-omni-search name="stop_search" placeholder="Search to add stop..." event-name="stop-selected" />
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-1">Stops will be inserted before the destination.</p>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4 border-t border-gray-300 pt-4 mt-4">
                         <div x-show="routeType === 'land' || routeType === 'combined'" x-transition>
                             <label class="block text-xs font-bold text-gray-700 mb-2">Tol Cost (Rp)</label>
@@ -179,6 +187,18 @@
                     this.drawMarkers();
                     this.calculationResult = null;
                     if(this.routeLayer) this.map.removeLayer(this.routeLayer);
+                },
+
+                insertStop(coords) {
+                    if (this.waypoints.length < 2) {
+                        this.addWaypoint(coords);
+                    } else {
+                        // Insert just before the last waypoint (destination)
+                        this.waypoints.splice(this.waypoints.length - 1, 0, coords);
+                        this.drawMarkers();
+                        this.calculationResult = null;
+                        if(this.routeLayer) this.map.removeLayer(this.routeLayer);
+                    }
                 },
 
                 removeWaypoint(index) {
