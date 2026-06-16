@@ -61,6 +61,8 @@ class Shipment extends Model
     public function routeVersion() { return $this->belongsTo(RouteVersion::class); }
 
     public function operationalCosts() { return $this->hasMany(OperationalCost::class); }
+    
+    public function checkpoints() { return $this->hasMany(ShipmentCheckpoint::class)->orderBy('recorded_at', 'desc'); }
 
     public function gpsHistory() { return $this->hasMany(GpsHistory::class); }
 

@@ -233,6 +233,35 @@
                     </table>
                 </div>
             </x-card>
+
+            <!-- Shipment Checkpoints -->
+            <x-card class="mt-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Checkpoints Log</h3>
+                </div>
+                
+                <div class="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-[1.45rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-purple-200 before:to-transparent">
+                    @forelse($shipment->checkpoints as $checkpoint)
+                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full border-4 border-white bg-purple-500 text-white shadow shrink-0 z-10 font-bold text-xs">
+                            ✓
+                        </div>
+                        <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white p-4 rounded-xl shadow-[4px_4px_10px_#e5e7eb,-4px_-4px_10px_#ffffff] border border-gray-100">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
+                                <h4 class="font-bold text-gray-800">{{ $checkpoint->checkpoint_type }}</h4>
+                                <time class="text-xs font-bold tracking-widest text-gray-400 uppercase sm:ml-2">{{ \Carbon\Carbon::parse($checkpoint->recorded_at)->format('d M H:i') }}</time>
+                            </div>
+                            <p class="text-sm text-gray-600">{{ $checkpoint->description }}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-gray-500 italic text-sm">No checkpoints recorded yet.</p>
+                    @endforelse
+                </div>
+            </x-card>
         </div>
 
         <!-- Right Column: Map Tracker -->
