@@ -63,10 +63,25 @@ class ShipmentService
             
             $shipment = Shipment::create($shipmentData);
 
+            $destWarehouseId = null;
+            $shipment->load('routeVersion.route');
+            if ($shipment->routeVersion && $shipment->routeVersion->route) {
+                $isTransit = !str_starts_with($shipment->routeVersion->route->route_code, 'RTE-ADHOC-');
+                if ($isTransit) {
+                    $destName = $shipment->routeVersion->route->destination_name;
+                    $cleanName = trim(str_replace('(Warehouse)', '', $destName));
+                    $destWarehouse = \App\Models\Warehouse::where('name', 'LIKE', '%' . $cleanName . '%')->first();
+                    if ($destWarehouse) {
+                        $destWarehouseId = $destWarehouse->id;
+                    }
+                }
+            }
+
             // Assign Orders to Shipment
             foreach ($orders as $order) {
                 $shipment->orders()->attach($order->id, [
-                    'status' => 'Loaded'
+                    'status' => 'Loaded',
+                    'dropoff_warehouse_id' => $destWarehouseId
                 ]);
 
                 // Update order status
