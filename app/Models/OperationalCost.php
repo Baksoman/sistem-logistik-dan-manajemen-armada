@@ -15,6 +15,7 @@ class OperationalCost extends Model
         'category_id',
         'amount',
         'description',
+        'receipt_path',
         'recorded_at'
     ];
 

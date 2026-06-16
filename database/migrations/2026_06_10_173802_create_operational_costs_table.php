@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('shipment_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('category_id')->constrained('cost_categories')->cascadeOnDelete();
             $table->decimal('amount', 15, 2);
+            $table->string('receipt_path')->nullable();
             $table->text('description')->nullable();
             $table->dateTime('recorded_at');
             $table->timestamps();
