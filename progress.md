@@ -72,35 +72,43 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 * ✅ Penentuan Route Version & Mode Rute (Transit vs Direct)
 * ✅ Perhitungan Estimasi Biaya Berdasarkan Tarif (Tariff Module)
 * ✅ Update Status Pengiriman (Pending -> On Process -> Delivered)
-* ❌ Event-driven architecture (Events & Listeners) untuk notifikasi perubahan status
+* ✅ Event-driven architecture (Model `booted` events) untuk pencatatan *Order History Log* otomatis
 
 ### **E. Realtime Tracking (GPS) & WebSocket**
-* ❌ Setup Laravel Reverb / WebSocket / Redis
-* ❌ Endpoint API untuk menerima *live location* dari device Driver
-* ❌ Live Map Tracking pada Admin Dashboard (menggunakan Leaflet.js)
-* ❌ Pencatatan `gps_history` dan `shipment_checkpoints`
+* ✅ Setup Laravel Reverb / WebSocket / Redis
+* ✅ Endpoint API untuk menerima *live location* dari device Driver
+* ✅ Live Map Tracking pada Admin Dashboard (menggunakan Leaflet.js)
+* ✅ Pencatatan `gps_history` di Redis dan DB, serta `shipment_checkpoints` saat transit/unload
 
-### **F. Proof of Delivery (POD)**
-* ❌ Upload bukti pengiriman (foto penerima, tanda tangan, catatan) dari sisi Driver
-* ❌ Konfirmasi dan validasi penerimaan barang
+### **F. Proof of Delivery (POD) & Driver PWA**
+* ✅ Tampilan aplikasi Driver berbasis Mobile (PWA Layout)
+* ✅ Upload bukti pengiriman (foto penerima, titik GPS aktual, catatan) dari sisi Driver
+* ✅ Fitur *Unload di Transit* (Hub) dan *Delivery* (Tujuan Akhir)
+* ✅ Sinkronisasi otomatis POD dengan Status Order, Order History, dan Shipment Checkpoint
 
 ### **G. Analytics & Operational Costs**
-* ✅ Modul CRUD Tarif (Tariffs) untuk penentuan harga dasar pengiriman (Spesifik per Rute/Kendaraan atau Berlaku Semua)
-* ❌ Pencatatan Biaya Operasional (BBM, Tol, Parkir, dll)
-* ✅ Kalkulasi *Cost* Pengiriman
-* ❌ Report Generation (Mungkin membutuhkan Background Jobs / Queue)
+* ✅ Modul CRUD Tarif (Tariffs) untuk penentuan harga dasar pengiriman
+* ✅ Pencatatan Biaya Operasional (BBM, Tol, Parkir, dll) beserta upload struk/receipt
+* ✅ Kalkulasi *Cost* Pengiriman, Kalkulasi Jarak, dan target Service Level Agreement (SLA)
+* ❌ Dashboard Analytics (Rekapitulasi Cost per KM, Pencapaian SLA, Profitabilitas Rute)
+* ❌ Report Generation (Download Laporan PDF/Excel)
 
-### **H. Infrastruktur & CI/CD**
-* ❌ Setup *Docker Compose* utama untuk menjalankan Laravel, MySQL, Redis, dan FastAPI secara bersamaan.
+### **H. Halaman Publik & Keamanan (Sesuai Proposal)**
+* ❌ **Public Landing Page:** Halaman depan untuk mengenalkan layanan logistik.
+* ❌ **Fitur "Cek Resi":** Tracking Cepat bagi pelanggan umum tanpa perlu login (berdasarkan nomor order/shipment).
+* ❌ **Reset Password:** Fitur Lupa Password menggunakan Email (Mail Queue Laravel).
+
+### **I. Infrastruktur & CI/CD**
+* ❌ Setup *Docker Compose* utama untuk menjalankan Laravel, MySQL, Redis, dan FastAPI secara bersamaan dalam mode *Production-Ready*.
 * ❌ Setup GitHub Actions Pipeline (Automated Testing & Code Quality).
 
 ---
 
 ## 🎯 3. Kesimpulan & Rekomendasi Langkah Selanjutnya (Next Steps)
 
-Proyek ini telah memiliki pondasi database yang sangat kuat (sudah mencakup 95% dari ERD) dan pondasi untuk sistem Authentication, RBAC, Master Data Fleet, Warehouse, Customer, Order, Tariff, Route Optimization, dan Shipment Management (Assigning). Seluruh fungsionalitas inti logistik sudah berjalan dengan baik.
+Proyek ini telah berjalan dengan sangat impresif dan berhasil menyelesaikan hampir seluruh sistem *core* logistik: **Warehouse Management, Order Management, Route Optimization (Darat-Laut), Tracking Real-Time via WebSocket Reverb, Aplikasi PWA Driver, hingga Pencatatan Operational Cost dan Proof of Delivery!**
 
-**Rekomendasi prioritas pengerjaan selanjutnya:**
-1. **Realtime System & Tracking**: Implementasikan pelacakan GPS secara *real-time* menggunakan WebSockets/Reverb untuk memantau armada di jalan.
-2. **Driver Interface & POD**: Buat tampilan khusus atau API untuk aplikasi supir (Driver) agar dapat melakukan *update checkpoint* dan *Upload Proof of Delivery* (POD).
-3. **Analytics & Reporting**: Buat grafik dashboard dan laporan biaya operasional (BBM, Tol) yang lebih terperinci.
+**Rekomendasi prioritas pengerjaan selanjutnya (Finishing Touches):**
+1. **Public Landing Page & Cek Resi**: Buat UI *Landing Page* publik untuk pelanggan memonitor resi mereka secara interaktif.
+2. **Dashboard Analytics Logistik**: Buat visualisasi data pada panel Logistik untuk memonitor margin/profitabilitas dan performa ketepatan waktu (SLA).
+3. **Reset Password via Email**: Implementasikan modul bawaan Laravel untuk sistem *Forgot Password* di halaman *Login*.
