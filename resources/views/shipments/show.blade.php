@@ -118,6 +118,10 @@
         })->values()->toJson();
 
         $routeWaypointsJson = json_encode($shipment->routeVersion->waypoints ?? []);
+
+        $redisKey = "driver_last_location:{$shipment->id}";
+        $cached = \Illuminate\Support\Facades\Redis::get($redisKey);
+        $lastKnownLocationJson = $cached ? $cached : 'null';
     @endphp
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -284,7 +288,8 @@
             const mapData = {
                 route: @json($routeGeojsonObj),
                 orders: {!! $ordersJson !!},
-                waypoints: {!! $routeWaypointsJson !!}
+                waypoints: {!! $routeWaypointsJson !!},
+                lastKnownLocation: {!! $lastKnownLocationJson !!}
             };
 
             const map = L.map('tracker-map').setView([-2.5489, 118.0149], 5);
@@ -347,6 +352,10 @@
                     iconSize: [40, 40],
                     iconAnchor: [20, 20]
                 });
+                
+                if (mapData.lastKnownLocation && mapData.lastKnownLocation.lat) {
+                    truckMarker = L.marker([mapData.lastKnownLocation.lat, mapData.lastKnownLocation.lng], { icon: truckIcon }).addTo(map);
+                }
 
                 // Wait for Echo to initialize since Vite module loads asynchronously
                 const initEcho = () => {

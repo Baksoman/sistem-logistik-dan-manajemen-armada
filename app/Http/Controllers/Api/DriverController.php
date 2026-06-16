@@ -38,6 +38,11 @@ class DriverController extends Controller
         ];
         
         Redis::rpush('gps_buffer', json_encode($gpsData));
+        Redis::set("driver_last_location:{$request->shipment_id}", json_encode([
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'updated_at' => now()->toDateTimeString()
+        ]));
 
         broadcast(new \App\Events\DriverLocationUpdated($request->shipment_id, $request->lat, $request->lng));
 

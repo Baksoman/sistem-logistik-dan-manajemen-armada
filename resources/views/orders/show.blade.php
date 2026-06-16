@@ -53,10 +53,20 @@
         $latestShipment = $order->shipments->sortByDesc('created_at')->first();
         $routeGeojsonObj = null;
         $routeWaypointsObj = null;
-        if ($latestShipment && $latestShipment->routeVersion) {
-            $routeGeojson = $latestShipment->routeVersion->polyline_geojson ?? 'null';
-            $routeGeojsonObj = is_string($routeGeojson) && $routeGeojson !== 'null' ? json_decode($routeGeojson) : $routeGeojson;
-            $routeWaypointsObj = $latestShipment->routeVersion->waypoints ?? [];
+        $lastKnownLocationObj = null;
+
+        if ($latestShipment) {
+            if ($latestShipment->routeVersion) {
+                $routeGeojson = $latestShipment->routeVersion->polyline_geojson ?? 'null';
+                $routeGeojsonObj = is_string($routeGeojson) && $routeGeojson !== 'null' ? json_decode($routeGeojson) : $routeGeojson;
+                $routeWaypointsObj = $latestShipment->routeVersion->waypoints ?? [];
+            }
+            
+            $redisKey = "driver_last_location:{$latestShipment->id}";
+            $cached = \Illuminate\Support\Facades\Redis::get($redisKey);
+            if ($cached) {
+                $lastKnownLocationObj = json_decode($cached, true);
+            }
         }
 
         $mapData = [
@@ -76,7 +86,8 @@
                 'lng' => (float)$order->destination_longitude,
             ],
             'routeGeojson' => $routeGeojsonObj,
-            'routeWaypoints' => $routeWaypointsObj
+            'routeWaypoints' => $routeWaypointsObj,
+            'lastKnownLocation' => $lastKnownLocationObj
         ];
     @endphp
 
@@ -353,6 +364,10 @@
                     iconSize: [40, 40],
                     iconAnchor: [20, 20]
                 });
+
+                if (data.lastKnownLocation && data.lastKnownLocation.lat) {
+                    truckMarker = L.marker([data.lastKnownLocation.lat, data.lastKnownLocation.lng], { icon: truckIcon }).addTo(map);
+                }
 
                 // Wait for Echo to initialize since Vite module loads asynchronously
                 const initEcho = () => {
