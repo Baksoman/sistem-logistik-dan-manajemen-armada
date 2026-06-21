@@ -1,7 +1,5 @@
 services:
-  # -------------------------------------------
   # MySQL Database
-  # -------------------------------------------
   mysql:
     image: mysql:8.0
     container_name: logistik_mysql
@@ -22,9 +20,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # -------------------------------------------
   # PHPMyAdmin
-  # -------------------------------------------
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: logistik_phpmyadmin
@@ -38,9 +34,7 @@ services:
     networks:
       - logistik_network
 
-  # -------------------------------------------
   # Redis (Cache & Queue & Realtime support)
-  # -------------------------------------------
   redis:
     image: redis:7-alpine
     container_name: logistik_redis
@@ -57,9 +51,7 @@ services:
       timeout: 5s
       retries: 3
 
-  # -------------------------------------------
   # FastAPI Searoute Microservice
-  # -------------------------------------------
   searoute:
     build:
       context: ./microservices/searoute
