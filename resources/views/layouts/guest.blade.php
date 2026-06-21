@@ -22,6 +22,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
         }
 
         [x-cloak] {
@@ -56,9 +57,6 @@
             <div class="hidden md:flex items-center gap-4 transition-all duration-500">
                 <a href="{{ url('/') }}"
                     class="text-base font-semibold text-gray-600 hover:text-gray-900 transition-all duration-300 px-4 py-2 rounded-xl hover:shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff]">Home</a>
-                <a href="#"
-                    class="text-base font-semibold text-gray-600 hover:text-gray-900 transition-all duration-300 px-4 py-2 rounded-xl hover:shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff]">About</a>
-
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}"
