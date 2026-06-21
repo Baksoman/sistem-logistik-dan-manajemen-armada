@@ -12,7 +12,13 @@
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <x-card class="transform hover:-translate-y-1 transition-transform duration-300">
+        <x-card class="relative transform hover:-translate-y-1 transition-transform duration-300">
+            <div class="absolute top-2 right-2 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Jumlah gudang yang Anda miliki akses untuk dikelola.
+                </div>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] flex items-center justify-center">
                     <svg class="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -24,7 +30,13 @@
             </div>
         </x-card>
 
-        <x-card class="transform hover:-translate-y-1 transition-transform duration-300">
+        <x-card class="relative transform hover:-translate-y-1 transition-transform duration-300">
+            <div class="absolute top-2 right-2 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Total kuantitas barang di seluruh gudang yang Anda kelola.
+                </div>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] flex items-center justify-center">
                     <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -36,7 +48,13 @@
             </div>
         </x-card>
 
-        <x-card class="transform hover:-translate-y-1 transition-transform duration-300">
+        <x-card class="relative transform hover:-translate-y-1 transition-transform duration-300">
+            <div class="absolute top-2 right-2 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Total kuantitas barang yang masuk (inbound) hari ini.
+                </div>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] flex items-center justify-center">
                     <svg class="w-7 h-7 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
@@ -48,7 +66,13 @@
             </div>
         </x-card>
 
-        <x-card class="transform hover:-translate-y-1 transition-transform duration-300">
+        <x-card class="relative transform hover:-translate-y-1 transition-transform duration-300">
+            <div class="absolute top-2 right-2 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Total kuantitas barang yang keluar (outbound) hari ini.
+                </div>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="w-14 h-14 rounded-2xl shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] flex items-center justify-center">
                     <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l4 4m0 0l-4 4m4-4H3m5-4V6a3 3 0 013-3h7a3 3 0 013 3v12a3 3 0 01-3 3h-7a3 3 0 01-3-3v-1"></path></svg>
@@ -109,6 +133,80 @@
             </div>
             @endif
         </x-card>
+    </div>
+    
+    <!-- Advanced Analytics Section -->
+    <h3 class="font-bold text-gray-700 text-lg mb-6 mt-10 border-b border-gray-200 pb-2">Advanced Analytics</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <!-- Inventory Turnover -->
+        <div class="relative bg-gray-100 rounded-3xl p-6 shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff]">
+            <div class="absolute top-4 right-4 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-400 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-6 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Rasio perputaran stok. Menunjukkan berapa kali stok berganti dalam 30 hari terakhir.
+                </div>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] flex items-center justify-center text-blue-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </div>
+                <h3 class="font-bold text-gray-700 text-lg">Inventory Turnover</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-800">{{ number_format($warehouseAnalytics['inventory_turnover'], 3) }} <span class="text-lg text-gray-500 font-bold">x</span></p>
+            <p class="text-sm text-gray-500 mt-2">
+                Ratio over last 30 days
+            </p>
+        </div>
+
+        <!-- Space Utilization -->
+        <div class="relative bg-gray-100 rounded-3xl p-6 shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff]">
+            <div class="absolute top-4 right-4 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-400 hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-6 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Persentase rak yang terisi oleh barang dibandingkan dengan total rak yang tersedia.
+                </div>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] flex items-center justify-center text-purple-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <h3 class="font-bold text-gray-700 text-lg">Capacity Utilization</h3>
+            </div>
+            <p class="text-3xl font-black {{ $warehouseAnalytics['space_utilization'] >= 80 ? 'text-red-600' : 'text-green-600' }}">
+                {{ number_format($warehouseAnalytics['space_utilization'], 1) }}%
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Occupied Racks
+            </p>
+            <!-- Mini progress bar -->
+            <div class="w-full bg-gray-300 rounded-full h-2.5 mt-3 shadow-[inset_1px_1px_2px_#d1d5db,inset_-1px_-1px_2px_#ffffff]">
+                <div class="h-2.5 rounded-full {{ $warehouseAnalytics['space_utilization'] >= 80 ? 'bg-red-500' : 'bg-green-500' }}" style="width: {{ $warehouseAnalytics['space_utilization'] }}%"></div>
+            </div>
+        </div>
+
+        <!-- Order Cycle Time -->
+        <div class="relative bg-gray-100 rounded-3xl p-6 shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff]">
+            <div class="absolute top-4 right-4 group cursor-pointer">
+                <svg class="w-4 h-4 text-gray-400 hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="absolute right-0 top-6 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                    Rata-rata waktu yang dibutuhkan dari sejak pesanan dibuat hingga pengiriman dimulai.
+                </div>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] flex items-center justify-center text-orange-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="font-bold text-gray-700 text-lg">Order Cycle Time</h3>
+            </div>
+            <p class="text-3xl font-black text-gray-800">
+                {{ number_format($warehouseAnalytics['order_cycle_time'], 1) }} <span class="text-lg text-gray-500 font-bold">hrs</span>
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Avg time from order to shipment start
+            </p>
+        </div>
+        
     </div>
 
     <!-- Recent Activities -->
