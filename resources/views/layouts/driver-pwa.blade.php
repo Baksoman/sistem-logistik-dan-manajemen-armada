@@ -58,8 +58,26 @@
             <p class="text-xs font-bold text-gray-400 tracking-widest uppercase">Driver Workspace</p>
             <h1 class="text-2xl font-black text-gray-800">@yield('title', 'Dashboard')</h1>
         </div>
-        <div class="w-12 h-12 rounded-full neu-flat flex items-center justify-center bg-gray-100">
-            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" class="w-12 h-12 rounded-full neu-flat flex items-center justify-center bg-gray-100 active:scale-95 transition-transform">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </button>
+
+            <!-- Dropdown -->
+            <div x-show="open" @click.away="open = false" x-transition.opacity x-cloak
+                 class="absolute right-0 mt-4 w-48 bg-gray-100 rounded-3xl neu-flat py-2 z-50">
+                <div class="px-5 py-3 border-b border-gray-200/50">
+                    <p class="text-xs font-bold text-gray-400 tracking-widest uppercase">Logged in as</p>
+                    <p class="text-sm font-black text-gray-800">{{ auth()->user()->name ?? 'Driver' }}</p>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="m-0 p-2">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-3 text-red-500 font-bold hover:bg-gray-200/50 rounded-2xl transition flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Log Out
+                    </button>
+                </form>
+            </div>
         </div>
     </header>
 
