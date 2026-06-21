@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Driver\WorkspaceController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DriverProfileController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Warehouse\InboundController;
 use App\Http\Controllers\Warehouse\OutboundController;
 use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboardController;
+use App\Http\Controllers\TrackingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,10 +31,15 @@ Route::get('/', function () {
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+
+Route::get('/track', [TrackingController::class, 'search'])->name('track.search');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     Route::middleware('permission:manage_users')->group(function () {
         Route::prefix('users')->group(function () {
             Route::get('/export/excel', [UserController::class, 'exportExcel'])->name('users.export.excel');
@@ -42,7 +49,7 @@ Route::middleware('auth')->group(function () {
             Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         });
-        
+
         Route::prefix('rbac')->group(function () {
             Route::get('/', [RolePermissionController::class, 'index'])->name('rbac.index');
             Route::post('/roles', [RolePermissionController::class, 'storeRole'])->name('rbac.roles.store');
@@ -61,7 +68,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{driver}', [DriverProfileController::class, 'destroy'])->name('drivers.destroy');
         });
     });
-    
+
     Route::middleware('permission:manage_vehicles')->group(function () {
         Route::prefix('fleet')->group(function () {
             Route::get('/export/excel', [VehicleController::class, 'exportExcel'])->name('fleet.export.excel');
@@ -80,7 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:manage_inventory')->group(function () {
         Route::prefix('warehouse-panel')->group(function () {
             Route::get('/', [WarehouseDashboardController::class, 'index'])->name('warehouse.dashboard');
-            
+
             Route::prefix('warehouses')->group(function () {
                 Route::get('/export/excel', [WarehouseController::class, 'exportExcel'])->name('warehouse.warehouses.export.excel');
                 Route::get('/export/pdf', [WarehouseController::class, 'exportPdf'])->name('warehouse.warehouses.export.pdf');
@@ -138,7 +145,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('/logistik-panel')->group(function () {
         Route::get('/', [LogistikDashboardController::class, 'index'])->name('dashboard.logistik.index');
-        
+
         Route::middleware('permission:manage_routes')->group(function () {
             Route::prefix('/routes')->group(function () {
                 Route::get('/', [RouteController::class, 'index'])->name('routes.index');
@@ -148,7 +155,7 @@ Route::middleware('auth')->group(function () {
                 Route::delete('/{route}', [RouteController::class, 'destroy'])->name('routes.destroy');
                 Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
             });
-    
+
             Route::get('tariffs/export/excel', [TariffController::class, 'exportExcel'])->name('tariffs.export.excel');
             Route::get('tariffs/export/pdf', [TariffController::class, 'exportPdf'])->name('tariffs.export.pdf');
             Route::resource('tariffs', TariffController::class);
@@ -168,7 +175,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/warehouse-items/{warehouse}', [OrderController::class, 'getWarehouseItems'])->name('orders.warehouse-items');
             });
         });
-    
+
         Route::middleware('permission:manage_shipments')->group(function () {
             Route::prefix('shipments')->group(function () {
                 Route::get('/export/excel', [ShipmentController::class, 'exportExcel'])->name('shipments.export.excel');
