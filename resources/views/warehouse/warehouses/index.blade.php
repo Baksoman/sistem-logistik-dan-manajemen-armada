@@ -27,41 +27,57 @@
         }
         .map-coords-badge.has-location { color: #2563eb; }
         .leaflet-container { font-family: inherit; }
-        .geocode-status {
+        .suggestions-dropdown {
+            position: absolute;
+            z-index: 9999;
+            width: 100%;
+            background: #f3f4f6;
+            border-radius: 1rem;
+            box-shadow: 8px 8px 16px #d1d5db, -8px -8px 16px #ffffff;
+            margin-top: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid #e5e7eb;
+        }
+        .suggestions-dropdown.active {
+            display: block;
+        }
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-top: 6px;
-            padding: 6px 12px;
-            border-radius: 10px;
+            gap: 12px;
+            transition: background 0.15s;
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .suggestion-item:hover {
+            background: rgba(229, 231, 235, 0.5);
+        }
+        .suggestion-icon {
+            padding: 8px;
+            border-radius: 9999px;
+            background: #ffffff;
+            box-shadow: inset 1px 1px 2px #d1d5db, inset -1px -1px 2px #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .suggestion-text {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 700;
+        }
+        .suggestion-type {
             font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.2s;
+            color: #9ca3af;
+            font-weight: 500;
+            text-transform: uppercase;
         }
-        .geocode-status.idle { display: none; }
-        .geocode-status.searching {
-            color: #6366f1;
-            background: #eef2ff;
-            box-shadow: inset 1px 1px 3px #c7d2fe, inset -1px -1px 3px #ffffff;
-        }
-        .geocode-status.found {
-            color: #059669;
-            background: #ecfdf5;
-            box-shadow: inset 1px 1px 3px #a7f3d0, inset -1px -1px 3px #ffffff;
-        }
-        .geocode-status.not-found {
-            color: #d97706;
-            background: #fffbeb;
-            box-shadow: inset 1px 1px 3px #fde68a, inset -1px -1px 3px #ffffff;
-        }
-        .geocode-spinner {
-            width: 12px; height: 12px;
-            border: 2px solid #c7d2fe;
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 @endpush
 
@@ -186,10 +202,10 @@
                     <label class="block text-sm font-bold text-gray-700 mb-2">Name</label>
                     <x-input type="text" name="name" placeholder="Warehouse Jakarta" required />
                 </div>
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
-                    <textarea id="create_address" name="address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap, peta akan otomatis mencari..."></textarea>
-                    <div id="create-geocode-status" class="geocode-status idle"></div>
+                    <textarea id="create_address" name="address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap untuk mencari..."></textarea>
+                    <div id="create_address_suggestions" class="suggestions-dropdown"></div>
                 </div>
 
                 {{-- Inline Map --}}
@@ -256,10 +272,10 @@
                     <label class="block text-sm font-bold text-gray-700 mb-2">Name</label>
                     <input type="text" name="name" x-model="editData.name" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
                 </div>
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
-                    <textarea id="edit_address" name="address" x-model="editData.address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap, peta akan otomatis mencari..."></textarea>
-                    <div id="edit-geocode-status" class="geocode-status idle"></div>
+                    <textarea id="edit_address" name="address" x-model="editData.address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap untuk mencari..."></textarea>
+                    <div id="edit_address_suggestions" class="suggestions-dropdown"></div>
                 </div>
 
                 {{-- Inline Map --}}
@@ -371,52 +387,97 @@
             return { map, placeMarker };
         }
 
-        // ─── Nominatim Geocoding ──────────────────────────────────────────────────
-        function geocodeAddress(address, mapInstance, placeMarkerFn, statusElId) {
-            const statusEl = document.getElementById(statusElId);
-            if (!address || address.trim().length < 5) {
-                if (statusEl) { statusEl.className = 'geocode-status idle'; statusEl.innerHTML = ''; }
+        // ─── Location Search (API) ──────────────────────────────────────────────────
+        function searchLocationSuggestions(address, dropdownId, onSelectCallback) {
+            const dropdownEl = document.getElementById(dropdownId);
+            
+            if (!address || address.trim().length < 3) {
+                if (dropdownEl) { dropdownEl.classList.remove('active'); dropdownEl.innerHTML = ''; }
                 return;
             }
 
-            // Show searching state
-            if (statusEl) {
-                statusEl.className = 'geocode-status searching';
-                statusEl.innerHTML = '<div class="geocode-spinner"></div> Mencari lokasi...';
+            // Show searching state (Omni-search style loader)
+            if (dropdownEl) {
+                dropdownEl.innerHTML = `
+                    <div class="px-5 py-4 text-sm text-gray-500 flex items-center justify-center">
+                        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>`;
+                dropdownEl.classList.add('active');
             }
 
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=id&limit=1`, {
-                headers: { 'Accept-Language': 'id' }
-            })
+            fetch(`/api/locations/search?q=${encodeURIComponent(address)}`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lng = parseFloat(data[0].lon);
-                    const displayName = data[0].display_name;
+                    dropdownEl.innerHTML = '';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        
+                        let iconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>';
+                        let iconClass = 'text-gray-500';
 
-                    placeMarkerFn(L.latLng(lat, lng));
-                    mapInstance.setView([lat, lng], 15, { animate: true });
-
-                    if (statusEl) {
-                        statusEl.className = 'geocode-status found';
-                        const shortName = displayName.length > 60 ? displayName.substring(0, 60) + '…' : displayName;
-                        statusEl.innerHTML = `<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Ditemukan: ${shortName}`;
-                    }
+                        if (item.type === 'warehouse') {
+                            iconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>';
+                            iconClass = 'text-blue-500';
+                        } else if (item.type === 'customer') {
+                            iconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>';
+                            iconClass = 'text-emerald-500';
+                        }
+                        
+                        div.innerHTML = `
+                            <div class="suggestion-icon">
+                                <svg class="w-4 h-4 ${iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconSvg}</svg>
+                            </div>
+                            <div>
+                                <div class="suggestion-text">${item.name}</div>
+                                <div class="suggestion-type">${item.type}</div>
+                            </div>
+                        `;
+                        div.onclick = () => {
+                            dropdownEl.classList.remove('active');
+                            onSelectCallback(item);
+                        };
+                        dropdownEl.appendChild(div);
+                    });
                 } else {
-                    if (statusEl) {
-                        statusEl.className = 'geocode-status not-found';
-                        statusEl.innerHTML = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Lokasi tidak ditemukan, klik peta secara manual';
+                    if (dropdownEl) {
+                        dropdownEl.innerHTML = `
+                            <div class="px-5 py-4 text-sm font-medium text-gray-500 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 
+                                Lokasi tidak ditemukan
+                            </div>`;
                     }
                 }
             })
             .catch(() => {
-                if (statusEl) {
-                    statusEl.className = 'geocode-status not-found';
-                    statusEl.innerHTML = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Gagal mencari, klik peta secara manual';
+                if (dropdownEl) {
+                    dropdownEl.innerHTML = `
+                        <div class="px-5 py-4 text-sm font-medium text-red-500 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 
+                            Gagal mencari lokasi
+                        </div>`;
                 }
             });
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const createDropdown = document.getElementById('create_address_suggestions');
+            const editDropdown = document.getElementById('edit_address_suggestions');
+            const createInput = document.getElementById('create_address');
+            const editInput = document.getElementById('edit_address');
+            
+            if (createDropdown && createInput && !createInput.contains(e.target) && !createDropdown.contains(e.target)) {
+                createDropdown.classList.remove('active');
+            }
+            if (editDropdown && editInput && !editInput.contains(e.target) && !editDropdown.contains(e.target)) {
+                editDropdown.classList.remove('active');
+            }
+        });
 
         // ─── Debounce utility ─────────────────────────────────────────────────────
         function debounce(fn, delay) {
@@ -441,10 +502,17 @@
                 // Attach geocoding to address textarea
                 const addressEl = document.getElementById('create_address');
                 if (addressEl) {
-                    const debouncedGeocode = debounce(function () {
-                        geocodeAddress(addressEl.value, _createMapObj.map, _createMapObj.placeMarker, 'create-geocode-status');
-                    }, 800);
-                    addressEl.addEventListener('input', debouncedGeocode);
+                    const debouncedSearch = debounce(function () {
+                        searchLocationSuggestions(addressEl.value, 'create_address_suggestions', (item) => {
+                            addressEl.value = item.name;
+                            const lat = parseFloat(item.lat);
+                            const lng = parseFloat(item.lng);
+                            _createMapObj.placeMarker(L.latLng(lat, lng));
+                            _createMapObj.map.setView([lat, lng], 15, { animate: true });
+                        });
+                    }, 500);
+                    addressEl.addEventListener('input', debouncedSearch);
+                    addressEl.addEventListener('focus', debouncedSearch);
                 }
             }, 80);
         }
@@ -461,10 +529,18 @@
                 // Attach geocoding to address textarea
                 const addressEl = document.getElementById('edit_address');
                 if (addressEl) {
-                    const debouncedGeocode = debounce(function () {
-                        geocodeAddress(addressEl.value, _editMapObj.map, _editMapObj.placeMarker, 'edit-geocode-status');
-                    }, 800);
-                    addressEl.addEventListener('input', debouncedGeocode);
+                    const debouncedSearch = debounce(function () {
+                        searchLocationSuggestions(addressEl.value, 'edit_address_suggestions', (item) => {
+                            addressEl.value = item.name;
+                            addressEl.dispatchEvent(new Event('input')); // for Alpine.js x-model update
+                            const l = parseFloat(item.lat);
+                            const lg = parseFloat(item.lng);
+                            _editMapObj.placeMarker(L.latLng(l, lg));
+                            _editMapObj.map.setView([l, lg], 15, { animate: true });
+                        });
+                    }, 500);
+                    addressEl.addEventListener('input', debouncedSearch);
+                    addressEl.addEventListener('focus', debouncedSearch);
                 }
             }, 80);
         }

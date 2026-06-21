@@ -15,12 +15,26 @@
         </div>
     </div>
 
-    <!-- Scan Barcode Button (Dummy) -->
+    <!-- Scan Barcode Button -->
     <div class="mb-8">
-        <button type="button" onclick="alert('Camera scanner will open here!')" class="w-full neu-btn bg-blue-500 text-white font-bold py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-3">
+        <button type="button" @click="openScanner" class="w-full neu-btn bg-blue-500 text-white font-bold py-4 rounded-2xl neu-flat transition-all flex items-center justify-center gap-3 focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
             SCAN PACKAGE QR
         </button>
+    </div>
+
+    <!-- QR Scanner Modal -->
+    <div x-show="isScanning" x-cloak style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+        <div @click.away="closeScanner" class="bg-gray-100 rounded-3xl p-6 w-full max-w-lg shadow-[12px_12px_24px_#c2c6cc,-12px_-12px_24px_#ffffff]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Scan QR Code Paket</h3>
+                <button @click="closeScanner" type="button" class="text-gray-500 hover:text-red-500 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="reader" class="w-full bg-black rounded-xl overflow-hidden min-h-[300px]"></div>
+            <p class="text-center text-sm text-gray-500 mt-4">Arahkan kamera ke QR Code/Barcode di paket</p>
+        </div>
     </div>
 
     <div class="space-y-6 pb-20">
@@ -134,6 +148,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 function podManager() {
     return {
@@ -144,6 +159,16 @@ function podManager() {
         lat: null,
         lng: null,
         isLoading: false,
+        isScanning: false,
+        html5QrcodeScanner: null,
+        
+        ordersMap: {!! json_encode($shipment->orders->mapWithKeys(function($order) use ($shipment) {
+            return [$order->order_number => [
+                'id' => $order->id,
+                'url' => route('driver.workspace.unload', ['shipment' => $shipment->id, 'order' => $order->id])
+            ]];
+        })) !!},
+
         openModal(id, url) {
             this.orderId = id;
             this.actionUrl = url;
@@ -157,6 +182,46 @@ function podManager() {
                     this.lat = position.coords.latitude;
                     this.lng = position.coords.longitude;
                 });
+            }
+        },
+
+        openScanner() {
+            this.isScanning = true;
+            this.$nextTick(() => {
+                if (!this.html5QrcodeScanner) {
+                    this.html5QrcodeScanner = new Html5Qrcode("reader");
+                }
+                
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                
+                this.html5QrcodeScanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    (decodedText, decodedResult) => {
+                        this.closeScanner();
+                        // Lookup the order in this shipment
+                        if (this.ordersMap[decodedText]) {
+                            // Order found! Open PoD modal automatically
+                            this.openModal(this.ordersMap[decodedText].id, this.ordersMap[decodedText].url);
+                        } else {
+                            alert("QR Code Valid, tapi nomor order ini (" + decodedText + ") tidak ditemukan di shipment Anda saat ini.");
+                        }
+                    },
+                    (errorMessage) => {
+                        // ignore parse errors
+                    }
+                ).catch((err) => {
+                    console.error("Camera error:", err);
+                    alert("Gagal mengakses kamera. Pastikan Anda telah memberikan izin kamera (HTTPS required).");
+                    this.isScanning = false;
+                });
+            });
+        },
+        
+        closeScanner() {
+            this.isScanning = false;
+            if (this.html5QrcodeScanner && this.html5QrcodeScanner.isScanning) {
+                this.html5QrcodeScanner.stop().catch(err => console.error(err));
             }
         }
     }
