@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'Login')
+
+
 @section('content')
     <div class="w-full sm:max-w-lg my-auto px-6 py-12 relative z-10">
         

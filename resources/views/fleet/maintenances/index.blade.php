@@ -1,5 +1,7 @@
 @extends('layouts.logistik')
 
+@section('title', 'Maintenance Management')
+
 @section('content')
         <div x-data="{ 
             slideOverOpen: {{ $errors->any() && !old('maintenance_id') ? 'true' : 'false' }}, 

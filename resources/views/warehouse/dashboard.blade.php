@@ -1,6 +1,6 @@
 @extends('layouts.warehouse')
 
-@section('title', 'Warehouse Dashboard')
+@section('title', 'Dashboard')
 
 @section('content')
     <x-topbar />

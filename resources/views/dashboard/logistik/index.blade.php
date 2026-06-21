@@ -1,6 +1,6 @@
 @extends('layouts.logistik')
 
-@section('title', 'Logistics & Fleet Command Center')
+@section('title', 'Dashboard')
 
 @section('content')
     <x-topbar />
