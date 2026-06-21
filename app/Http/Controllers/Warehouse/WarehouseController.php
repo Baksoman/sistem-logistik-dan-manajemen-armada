@@ -9,6 +9,9 @@ use App\Models\Role;
 use App\Services\WarehouseService;
 use App\Http\Requests\Warehouse\StoreWarehouseRequest;
 use App\Http\Requests\Warehouse\UpdateWarehouseRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\Warehouse\WarehouseExport;
 
 class WarehouseController extends Controller
 {
@@ -57,5 +60,34 @@ class WarehouseController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new WarehouseExport, 'laporan-warehouses-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $warehouses = Warehouse::with('users')->withCount(['zones', 'racks', 'stockItems'])->latest()->get();
+        $headings = ['Name', 'Code', 'Address', 'Assigned Staff', 'Status', 'Zones', 'Racks', 'Stock Items'];
+        $data = $warehouses->map(fn($w) => [
+            $w->name,
+            $w->code,
+            $w->address,
+            $w->users->pluck('name')->join(', ') ?: '-',
+            $w->is_active ? 'Active' : 'Inactive',
+            $w->zones_count,
+            $w->racks_count,
+            $w->stock_items_count,
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Warehouse',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-warehouses-' . now()->format('Ymd-His') . '.pdf');
     }
 }

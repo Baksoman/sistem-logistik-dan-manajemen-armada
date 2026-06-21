@@ -23,4 +23,8 @@ class Warehouse extends Model
 
     public function stockItems() { return $this->hasMany(StockItem::class); }
 
+    public function zones() { return $this->hasMany(Zone::class); }
+
+    public function racks() { return $this->hasManyThrough(Rack::class, Zone::class); }
+
 }

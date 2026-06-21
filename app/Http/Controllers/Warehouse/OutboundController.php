@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\StockItem;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
+use App\Exports\Warehouse\OutboundExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OutboundController extends Controller
 {
@@ -72,5 +75,33 @@ class OutboundController extends Controller
         $stockItem->decrement('quantity', $validated['quantity']);
 
         return back()->with('success', "Outbound berhasil: -{$validated['quantity']} {$stockItem->name} telah dikeluarkan dari stok.");
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new OutboundExport, 'laporan-outbound-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $movements = StockMovement::with(['stockItem.warehouse', 'stockItem.unitType', 'creator'])
+            ->where('type', 'outbound')->latest()->get();
+        $headings = ['ID', 'Reference No.', 'SKU', 'Item Name', 'Warehouse', 'Quantity', 'Unit', 'Processed By', 'Notes', 'Date'];
+        $data = $movements->map(fn($m) => [
+            $m->id, $m->reference_number ?? '-',
+            $m->stockItem->sku ?? '-', $m->stockItem->name ?? '-',
+            $m->stockItem->warehouse->name ?? '-',
+            $m->quantity, $m->stockItem->unitType->name ?? 'pcs',
+            $m->creator->name ?? '-', $m->notes ?? '-',
+            $m->created_at?->format('Y-m-d H:i') ?? '-',
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Outbound (Barang Keluar)',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-outbound-' . now()->format('Ymd-His') . '.pdf');
     }
 }

@@ -7,6 +7,9 @@ use App\Models\StockItem;
 use App\Services\InventoryService;
 use App\Http\Requests\Warehouse\StoreStockItemRequest;
 use App\Http\Requests\Warehouse\UpdateStockItemRequest;
+use App\Exports\Warehouse\InventoryExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryController extends Controller
 {
@@ -44,5 +47,31 @@ class InventoryController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new InventoryExport, 'laporan-inventory-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $items = StockItem::with(['warehouse', 'category', 'unitType', 'zone', 'rack'])->get();
+        $headings = ['ID', 'SKU', 'Name', 'Brand', 'Category', 'Warehouse', 'Zone', 'Rack', 'Qty Total', 'Qty Available', 'Unit', 'Weight (kg)', 'Volume (m³)'];
+        $data = $items->map(fn($i) => [
+            $i->id, $i->sku, $i->name, $i->brand ?? '-',
+            $i->category->name ?? '-', $i->warehouse->name ?? '-',
+            $i->zone->name ?? '-', $i->rack->name ?? '-',
+            $i->quantity, $i->quantity - ($i->allocated_quantity ?? 0),
+            $i->unitType->name ?? '-', $i->weight_kg, $i->volume_cbm,
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Inventory',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-inventory-' . now()->format('Ymd-His') . '.pdf');
     }
 }
