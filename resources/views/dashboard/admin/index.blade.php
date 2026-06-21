@@ -6,71 +6,115 @@
     <x-topbar />
     
     <div class="mb-8">
-        <p class="text-gray-500 text-lg font-medium">Welcome back to the logistics control center.</p>
+        <p class="text-gray-500 text-lg font-medium">Welcome back to the control center.</p>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-        <!-- Stat Card 1 -->
-        <x-card class="flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Total Shipments</p>
-                <p class="text-4xl font-bold text-gray-800">1,284</p>
-            </div>
-            <div class="w-16 h-16 rounded-2xl shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-700 bg-gray-100">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-            </div>
-        </x-card>
+    <!-- Script for Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!-- Stat Card 2 -->
-        <x-card class="flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Active Fleet</p>
-                <p class="text-4xl font-bold text-gray-800">42</p>
-            </div>
-            <div class="w-16 h-16 rounded-2xl shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-700 bg-gray-100">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-            </div>
-        </x-card>
+    <!-- Executive Stats Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <!-- Financial Pillar -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Financials</h3>
+            <x-card class="relative flex flex-col gap-2 transition-transform duration-300 hover:-translate-y-1 bg-gradient-to-br from-green-50 to-emerald-100/50">
+                <div class="absolute top-3 right-3 group cursor-pointer">
+                    <svg class="w-4 h-4 text-emerald-500/50 hover:text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="absolute right-0 top-6 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                        Total pendapatan vs pengeluaran operasional perusahaan secara keseluruhan.
+                    </div>
+                </div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Revenue vs Expense</p>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-sm text-gray-500">Revenue</p>
+                        <p class="text-xl font-black text-green-700">Rp {{ number_format($stats['revenue'] / 1000000, 1) }}M</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Expense</p>
+                        <p class="text-xl font-black text-red-600">Rp {{ number_format($stats['expense'] / 1000000, 1) }}M</p>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-emerald-200/50 flex justify-between items-center">
+                    <span class="text-sm font-bold text-gray-600">Net Profit</span>
+                    <span class="text-lg font-black {{ $stats['net_profit'] >= 0 ? 'text-green-700' : 'text-red-700' }}">
+                        Rp {{ number_format($stats['net_profit'] / 1000000, 1) }}M
+                    </span>
+                </div>
+            </x-card>
+        </div>
 
-        <!-- Stat Card 3 -->
-        <x-card class="flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Pending Orders</p>
-                <p class="text-4xl font-bold text-gray-800">15</p>
+        <!-- Logistics Pillar -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Logistics & Fleet</h3>
+            <div class="grid grid-cols-2 gap-4 h-[148px]">
+                <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
+                    <div class="absolute top-2 right-2 group cursor-pointer">
+                        <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                            Persentase pengiriman yang tiba tepat waktu sesuai target SLA.
+                        </div>
+                    </div>
+                    <p class="text-3xl font-black {{ $stats['sla_achievement'] >= 90 ? 'text-green-600' : 'text-yellow-600' }}">{{ number_format($stats['sla_achievement'], 1) }}%</p>
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mt-1">SLA On-Time</p>
+                </x-card>
+                <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
+                    <div class="absolute top-2 right-2 group cursor-pointer">
+                        <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                            Persentase armada kendaraan yang sedang aktif beroperasi dari total kendaraan.
+                        </div>
+                    </div>
+                    <p class="text-3xl font-black text-indigo-600">{{ number_format($stats['fleet_utilization'], 0) }}%</p>
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mt-1">Fleet Utilized</p>
+                    <p class="text-[10px] text-gray-400 mt-1">{{ $stats['active_fleet'] }} / {{ $stats['total_vehicles'] }}</p>
+                </x-card>
             </div>
-            <div class="w-16 h-16 rounded-2xl shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-700 bg-gray-100">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-            </div>
-        </x-card>
+        </div>
 
-        <!-- Stat Card 4 -->
-        <x-card class="flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Revenue</p>
-                <p class="text-3xl font-bold text-gray-800">Rp 128M</p>
+        <!-- Warehouse Pillar -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Warehouse & Orders</h3>
+            <div class="grid grid-cols-2 gap-4 h-[148px]">
+                <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
+                    <div class="absolute top-2 right-2 group cursor-pointer">
+                        <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                            Total kuantitas barang fisik di seluruh jaringan gudang.
+                        </div>
+                    </div>
+                    <p class="text-3xl font-black text-orange-500">{{ number_format($stats['total_inventory']) }}</p>
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mt-1">Total Items</p>
+                    <p class="text-[10px] text-gray-400 mt-1">{{ $stats['active_warehouses'] }} Warehouses</p>
+                </x-card>
+                <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
+                    <div class="absolute top-2 right-2 group cursor-pointer">
+                        <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="absolute right-0 top-5 w-40 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
+                            Jumlah pesanan aktif yang masih dalam proses pemenuhan atau belum selesai.
+                        </div>
+                    </div>
+                    <p class="text-3xl font-black text-rose-500">{{ number_format($stats['pending_fulfillment']) }}</p>
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mt-1">Pending Orders</p>
+                </x-card>
             </div>
-            <div class="w-16 h-16 rounded-2xl shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-700 bg-gray-100">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-        </x-card>
+        </div>
     </div>
 
     <!-- Layout Split -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
         <div class="xl:col-span-2">
             <x-card class="h-full min-h-[450px] flex flex-col">
                 <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-xl font-bold text-gray-800">Shipment Analytics</h3>
+                    <h3 class="text-xl font-bold text-gray-800">Financial Trends (Last 7 Days)</h3>
                     <div class="flex gap-2">
-                        <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] text-gray-800">Weekly</button>
-                        <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 shadow-[2px_2px_4px_#d1d5db,-2px_-2px_4px_#ffffff] text-gray-500 hover:text-gray-800">Monthly</button>
+                        <span class="flex items-center text-xs text-gray-500 font-medium before:w-3 before:h-3 before:bg-emerald-500 before:rounded-sm before:mr-2">Revenue</span>
+                        <span class="flex items-center text-xs text-gray-500 font-medium before:w-3 before:h-3 before:bg-red-500 before:rounded-sm before:mr-2 ml-2">Expense</span>
                     </div>
                 </div>
-                <div class="flex-1 w-full rounded-3xl shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff] flex items-center justify-center text-gray-400 bg-gray-100">
-                    <div class="flex flex-col items-center">
-                        <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                        <span class="font-medium tracking-wide">[ Interactive Chart Area ]</span>
+                <div class="flex-1 w-full rounded-3xl p-4 shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff] flex items-center justify-center text-gray-400 bg-gray-100">
+                    <div class="w-full h-72">
+                        <canvas id="adminChart"></canvas>
                     </div>
                 </div>
             </x-card>
@@ -79,41 +123,117 @@
             <x-card class="h-full">
                 <h3 class="text-xl font-bold text-gray-800 mb-8">Recent Activities</h3>
                 <div class="space-y-8">
-                    <!-- Activity Item -->
-                    <div class="flex gap-5">
-                        <div class="w-12 h-12 rounded-full shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] flex-shrink-0 flex items-center justify-center text-gray-600 bg-gray-100">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    @forelse($recentActivities as $activity)
+                        <div class="flex gap-5">
+                            <div class="w-12 h-12 rounded-full shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] flex-shrink-0 flex items-center justify-center text-gray-600 bg-gray-100">
+                                @if(str_contains(strtolower($activity->checkpoint_type), 'depart'))
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                                @elseif(str_contains(strtolower($activity->checkpoint_type), 'arriv'))
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                @else
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800 leading-tight">
+                                    {{ $activity->shipment->shipment_number ?? 'Shipment' }}: {{ $activity->checkpoint_type }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ $activity->description }}</p>
+                                <p class="text-xs font-medium text-gray-400 mt-1">{{ \Carbon\Carbon::parse($activity->recorded_at)->diffForHumans() }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-base font-bold text-gray-800">Shipment #SHP-1029 Delivered</p>
-                            <p class="text-sm font-medium text-gray-500 mt-1">2 minutes ago</p>
+                    @empty
+                        <div class="text-center text-gray-400 py-8">
+                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                            <p class="text-sm font-medium">No recent activities</p>
                         </div>
-                    </div>
-                    <!-- Activity Item -->
-                    <div class="flex gap-5">
-                        <div class="w-12 h-12 rounded-full shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] flex-shrink-0 flex items-center justify-center text-gray-600 bg-gray-100">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-base font-bold text-gray-800">Maintenance Alert: L 8001 AA</p>
-                            <p class="text-sm font-medium text-gray-500 mt-1">1 hour ago</p>
-                        </div>
-                    </div>
-                    <!-- Activity Item -->
-                    <div class="flex gap-5">
-                        <div class="w-12 h-12 rounded-full shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] flex-shrink-0 flex items-center justify-center text-gray-600 bg-gray-100">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-base font-bold text-gray-800">New Driver Onboarded</p>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Yesterday</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-300">
-                    <x-button class="w-full text-sm">View All Activities</x-button>
+                    @endforelse
                 </div>
             </x-card>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('adminChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($chartLabels) !!},
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: {!! json_encode($revenueData) !!},
+                            backgroundColor: '#10b981', // Emerald-500
+                            borderRadius: 4,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            label: 'Expense',
+                            data: {!! json_encode($expenseData) !!},
+                            backgroundColor: '#ef4444', // Red-500
+                            borderRadius: 4,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#4b5563',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 4,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#6b7280',
+                                font: { family: "'Poppins', sans-serif", size: 11 },
+                                callback: function(value) {
+                                    return 'Rp ' + (value / 1000000) + 'M';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.1)',
+                                drawBorder: false,
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#6b7280',
+                                font: { family: "'Poppins', sans-serif", size: 11 }
+                            },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endsection
