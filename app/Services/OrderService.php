@@ -56,6 +56,7 @@ class OrderService
             $orderData['total_volume'] = $totalVolume;
             $orderData['tracking_status'] = OrderTrackingStatus::ORDER_CREATED;
             $orderData['current_warehouse_id'] = $orderData['origin_warehouse_id'];
+            $orderData['status'] = 'Pending Approval'; // Default to Pending Approval per user request
 
             // Generate a unique order number
             if (empty($orderData['order_number'])) {
