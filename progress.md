@@ -90,13 +90,12 @@ Berdasarkan *requirements*, modul-modul berikut masih belum memiliki rute (route
 * ✅ Modul CRUD Tarif (Tariffs) untuk penentuan harga dasar pengiriman
 * ✅ Pencatatan Biaya Operasional (BBM, Tol, Parkir, dll) beserta upload struk/receipt
 * ✅ Kalkulasi *Cost* Pengiriman, Kalkulasi Jarak, dan target Service Level Agreement (SLA)
-* ❌ Dashboard Analytics (Rekapitulasi Cost per KM, Pencapaian SLA, Profitabilitas Rute)
+* ✅ Dashboard Analytics (Rekapitulasi Cost per KM, Pencapaian SLA, Profitabilitas Rute)
 * ❌ Report Generation (Download Laporan PDF/Excel)
 
 ### **H. Halaman Publik & Keamanan (Sesuai Proposal)**
-* ❌ **Public Landing Page:** Halaman depan untuk mengenalkan layanan logistik.
-* ❌ **Fitur "Cek Resi":** Tracking Cepat bagi pelanggan umum tanpa perlu login (berdasarkan nomor order/shipment).
-* ❌ **Reset Password:** Fitur Lupa Password menggunakan Email (Mail Queue Laravel).
+* ✅ **Public Landing Page:** Halaman depan untuk mengenalkan layanan logistik.
+* ✅ **Fitur "Cek Resi":** Tracking Cepat bagi pelanggan umum tanpa perlu login (berdasarkan nomor order/shipment).
 
 ### **I. Infrastruktur & CI/CD**
 * ❌ Setup *Docker Compose* utama untuk menjalankan Laravel, MySQL, Redis, dan FastAPI secara bersamaan dalam mode *Production-Ready*.
