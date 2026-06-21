@@ -33,9 +33,14 @@ class DatabaseSeeder extends Seeder
             
             // General / Master Domain
             CustomerSeeder::class,
-            // RouteSeeder::class,
+            RouteSeeder::class,
+            RouteVersionSeeder::class,
             CostCategorySeeder::class,
             TariffSeeder::class,
+
+            // Order & Shipment Domain
+            OrderSeeder::class,
+            ShipmentSeeder::class,
         ]);
     }
 }

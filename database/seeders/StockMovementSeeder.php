@@ -59,6 +59,28 @@ class StockMovementSeeder extends Seeder
             ];
         }
 
+        // Add lots of outbound movements to make inventory turnover significant
+        $users = [$warehouseUser, $budi];
+        $items = [$stockTV, $stockBiskuit];
+
+        for ($i = 0; $i < 15; $i++) {
+            $u = $users[array_rand($users)];
+            $item = $items[array_rand($items)];
+            if ($u && $item) {
+                $movements[] = [
+                    'id' => Str::uuid(),
+                    'stock_item_id' => $item->id,
+                    'type' => 'outbound',
+                    'quantity' => rand(10, 30),
+                    'reference_number' => 'SO-2026-00' . rand(2, 99),
+                    'notes' => 'Pesanan pelanggan',
+                    'created_by' => $u->id,
+                    'created_at' => Carbon::now()->subDays(rand(1, 28))->subHours(rand(1, 24)),
+                    'updated_at' => Carbon::now()->subDays(rand(1, 28))->subHours(rand(1, 24)),
+                ];
+            }
+        }
+
         if (!empty($movements)) {
             DB::table('stock_movements')->insert($movements);
         }
