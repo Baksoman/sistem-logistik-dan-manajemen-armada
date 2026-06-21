@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     
     Route::middleware('permission:manage_users')->group(function () {
         Route::prefix('users')->group(function () {
+            Route::get('/export/excel', [UserController::class, 'exportExcel'])->name('users.export.excel');
+            Route::get('/export/pdf', [UserController::class, 'exportPdf'])->name('users.export.pdf');
             Route::get('/', [UserController::class, 'index'])->name('users.index');
             Route::post('/', [UserController::class, 'store'])->name('users.store');
             Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
@@ -51,6 +53,8 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:manage_drivers')->group(function () {
         Route::prefix('drivers')->group(function () {
+            Route::get('/export/excel', [DriverProfileController::class, 'exportExcel'])->name('drivers.export.excel');
+            Route::get('/export/pdf', [DriverProfileController::class, 'exportPdf'])->name('drivers.export.pdf');
             Route::get('/', [DriverProfileController::class, 'index'])->name('drivers.index');
             Route::post('/', [DriverProfileController::class, 'store'])->name('drivers.store');
             Route::put('/{driver}', [DriverProfileController::class, 'update'])->name('drivers.update');
@@ -60,6 +64,8 @@ Route::middleware('auth')->group(function () {
     
     Route::middleware('permission:manage_vehicles')->group(function () {
         Route::prefix('fleet')->group(function () {
+            Route::get('/export/excel', [VehicleController::class, 'exportExcel'])->name('fleet.export.excel');
+            Route::get('/export/pdf', [VehicleController::class, 'exportPdf'])->name('fleet.export.pdf');
             Route::get('/', [VehicleController::class, 'index'])->name('fleet.index');
             Route::post('/', [VehicleController::class, 'store'])->name('fleet.store');
             Route::put('/{vehicle}', [VehicleController::class, 'update'])->name('fleet.update');
@@ -76,6 +82,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [WarehouseDashboardController::class, 'index'])->name('warehouse.dashboard');
             
             Route::prefix('warehouses')->group(function () {
+                Route::get('/export/excel', [WarehouseController::class, 'exportExcel'])->name('warehouse.warehouses.export.excel');
+                Route::get('/export/pdf', [WarehouseController::class, 'exportPdf'])->name('warehouse.warehouses.export.pdf');
                 Route::get('/', [WarehouseController::class, 'index'])->name('warehouse.warehouses.index');
                 Route::post('/', [WarehouseController::class, 'store'])->name('warehouse.warehouses.store');
                 Route::put('/{warehouse}', [WarehouseController::class, 'update'])->name('warehouse.warehouses.update');
@@ -104,6 +112,8 @@ Route::middleware('auth')->group(function () {
             });
 
             Route::prefix('inventory')->group(function () {
+                Route::get('/export/excel', [InventoryController::class, 'exportExcel'])->name('warehouse.inventory.export.excel');
+                Route::get('/export/pdf', [InventoryController::class, 'exportPdf'])->name('warehouse.inventory.export.pdf');
                 Route::get('/', [InventoryController::class, 'index'])->name('warehouse.inventory.index');
                 Route::post('/', [InventoryController::class, 'store'])->name('warehouse.inventory.store');
                 Route::put('/{inventory}', [InventoryController::class, 'update'])->name('warehouse.inventory.update');
@@ -111,11 +121,15 @@ Route::middleware('auth')->group(function () {
             });
 
             Route::prefix('inbound')->group(function () {
+                Route::get('/export/excel', [InboundController::class, 'exportExcel'])->name('warehouse.inbound.export.excel');
+                Route::get('/export/pdf', [InboundController::class, 'exportPdf'])->name('warehouse.inbound.export.pdf');
                 Route::get('/', [InboundController::class, 'index'])->name('warehouse.inbound.index');
                 Route::post('/', [InboundController::class, 'store'])->name('warehouse.inbound.store');
             });
 
             Route::prefix('outbound')->group(function () {
+                Route::get('/export/excel', [OutboundController::class, 'exportExcel'])->name('warehouse.outbound.export.excel');
+                Route::get('/export/pdf', [OutboundController::class, 'exportPdf'])->name('warehouse.outbound.export.pdf');
                 Route::get('/', [OutboundController::class, 'index'])->name('warehouse.outbound.index');
                 Route::post('/', [OutboundController::class, 'store'])->name('warehouse.outbound.store');
             });
@@ -135,11 +149,15 @@ Route::middleware('auth')->group(function () {
                 Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
             });
     
+            Route::get('tariffs/export/excel', [TariffController::class, 'exportExcel'])->name('tariffs.export.excel');
+            Route::get('tariffs/export/pdf', [TariffController::class, 'exportPdf'])->name('tariffs.export.pdf');
             Route::resource('tariffs', TariffController::class);
         });
 
         Route::middleware('permission:manage_orders')->group(function () {
             Route::prefix('orders')->group(function () {
+                Route::get('/export/excel', [OrderController::class, 'exportExcel'])->name('orders.export.excel');
+                Route::get('/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
                 Route::get('/', [OrderController::class, 'index'])->name('orders.index');
                 Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
                 Route::post('/', [OrderController::class, 'store'])->name('orders.store');
@@ -153,6 +171,8 @@ Route::middleware('auth')->group(function () {
     
         Route::middleware('permission:manage_shipments')->group(function () {
             Route::prefix('shipments')->group(function () {
+                Route::get('/export/excel', [ShipmentController::class, 'exportExcel'])->name('shipments.export.excel');
+                Route::get('/export/pdf', [ShipmentController::class, 'exportPdf'])->name('shipments.export.pdf');
                 Route::get('/', [ShipmentController::class, 'index'])->name('shipments.index');
                 Route::get('/create', [ShipmentController::class, 'create'])->name('shipments.create');
                 Route::post('/', [ShipmentController::class, 'store'])->name('shipments.store');
