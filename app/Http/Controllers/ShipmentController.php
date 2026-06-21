@@ -11,6 +11,9 @@ use App\Models\Warehouse;
 use App\Services\ShipmentService;
 use Illuminate\Http\Request;
 use Exception;
+use App\Exports\Logistik\ShipmentExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ShipmentController extends Controller
 {
@@ -212,5 +215,36 @@ class ShipmentController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new ShipmentExport, 'laporan-shipments-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $shipments = Shipment::with(['driver.user', 'vehicle.vehicleType', 'routeVersion.route'])->latest()->get();
+        $headings = ['Shipment Number', 'Driver', 'Vehicle', 'Route', 'Distance (km)', 'Total Cost (IDR)', 'Status', 'SLA Status', 'Started At', 'Completed At'];
+        $data = $shipments->map(fn($s) => [
+            $s->shipment_number,
+            $s->driver->user->name ?? '-',
+            $s->vehicle->plate_number ?? '-',
+            $s->routeVersion->route->route_code ?? '-',
+            $s->total_distance_km ?? '-',
+            $s->total_cost ? number_format($s->total_cost, 0, ',', '.') : '-',
+            $s->status,
+            $s->sla_status,
+            $s->started_at?->format('Y-m-d H:i') ?? '-',
+            $s->completed_at?->format('Y-m-d H:i') ?? '-',
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Pengiriman (Shipments)',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-shipments-' . now()->format('Ymd-His') . '.pdf');
     }
 }

@@ -55,12 +55,101 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // 5. Dashboard Analytics (Cost, SLA, Profitabilitas)
+        $totalDistance = Shipment::sum('total_distance_km') ?? 0;
+        $totalRevenue = Shipment::sum('total_cost') ?? 0;
+        $totalExpense = \App\Models\OperationalCost::sum('amount') ?? 0;
+        
+        $netProfit = $totalRevenue - $totalExpense;
+        $profitMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
+        
+        $costPerKm = $totalDistance > 0 ? $totalExpense / $totalDistance : 0;
+
+        // SLA Performance
+        $totalWithSla = Shipment::whereNotNull('sla_target_at')->whereNotNull('completed_at')->count();
+        $onTimeDeliveries = Shipment::whereNotNull('sla_target_at')
+            ->whereNotNull('completed_at')
+            ->whereColumn('completed_at', '<=', 'sla_target_at')
+            ->count();
+            
+        $slaAchievement = $totalWithSla > 0 ? ($onTimeDeliveries / $totalWithSla) * 100 : 0;
+
+        $analytics = [
+            'total_distance' => $totalDistance,
+            'total_revenue' => $totalRevenue,
+            'total_expense' => $totalExpense,
+            'net_profit' => $netProfit,
+            'profit_margin' => $profitMargin,
+            'cost_per_km' => $costPerKm,
+            'sla_achievement' => $slaAchievement,
+            'total_with_sla' => $totalWithSla,
+            'on_time_deliveries' => $onTimeDeliveries,
+        ];
+
+        // Advanced Analytics
+        // 1. OTIF (On-Time In-Full)
+        // For simplicity, we calculate OTIF % based on delivered shipments that met SLA.
+        $totalDeliveredShipments = Shipment::where('status', 'Delivered')->count();
+        $otifDeliveries = Shipment::where('status', 'Delivered')
+            ->whereNotNull('sla_target_at')
+            ->whereNotNull('completed_at')
+            ->whereColumn('completed_at', '<=', 'sla_target_at')
+            ->count();
+        $otifAchievement = $totalDeliveredShipments > 0 ? ($otifDeliveries / $totalDeliveredShipments) * 100 : 0;
+
+        // 2. Avg Transit Time
+        $completedShipmentsQuery = Shipment::whereNotNull('started_at')->whereNotNull('completed_at');
+        $totalTransitHours = 0;
+        $transitCount = 0;
+        $completedShipmentsList = $completedShipmentsQuery->take(100)->get();
+        foreach ($completedShipmentsList as $ship) {
+            $start = Carbon::parse($ship->started_at);
+            $end = Carbon::parse($ship->completed_at);
+            if ($end->greaterThan($start)) {
+                $totalTransitHours += $start->diffInHours($end);
+                $transitCount++;
+            }
+        }
+        $avgTransitTime = $transitCount > 0 ? ($totalTransitHours / $transitCount) : 0;
+
+        // 3. Freight Cost per Shipment
+        $freightCostPerShipment = $totalDeliveredShipments > 0 ? ($totalExpense / $totalDeliveredShipments) : 0;
+
+        // 4. Fleet Utilization
+        $totalVehicles = \App\Models\Vehicle::count();
+        $activeFleet = \App\Models\Vehicle::whereIn('status', ['Available', 'On Trip', 'available', 'on_trip'])->count();
+        $fleetUtilization = $totalVehicles > 0 ? ($activeFleet / $totalVehicles) * 100 : 0;
+
+        // 5. Fuel Efficiency (Cost per KM for Fuel)
+        $fuelCost = \App\Models\OperationalCost::whereHas('category', function($q) {
+            $q->where('name', 'Fuel');
+        })->sum('amount') ?? 0;
+        $fuelEfficiency = $totalDistance > 0 ? ($fuelCost / $totalDistance) : 0;
+
+        // 6. Delivery Status
+        $deliveryStatusData = [
+            'pending' => $shipmentStats['pending'],
+            'on_process' => $shipmentStats['on_process'],
+            'delivered' => $shipmentStats['delivered'],
+        ];
+
+        $advancedAnalytics = [
+            'otif_achievement' => $otifAchievement,
+            'avg_transit_time' => $avgTransitTime,
+            'freight_cost_per_shipment' => $freightCostPerShipment,
+            'fleet_utilization' => $fleetUtilization,
+            'fuel_efficiency' => $fuelEfficiency,
+            'delivery_status' => $deliveryStatusData,
+        ];
+
         return view('dashboard.logistik.index', compact(
             'shipmentStats',
             'orderStats',
             'chartLabels',
             'chartData',
-            'recentShipments'
+            'recentShipments',
+            'analytics',
+            'advancedAnalytics'
         ));
     }
 }

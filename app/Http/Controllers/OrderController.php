@@ -11,6 +11,9 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Exports\Logistik\OrderExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderController extends Controller
 {
@@ -111,5 +114,34 @@ class OrderController extends Controller
         $order->update(['status' => $validated['status']]);
 
         return back()->with('success', 'Order status updated successfully!');
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new OrderExport, 'laporan-orders-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $orders = Order::with(['customer', 'originWarehouse', 'currentWarehouse', 'creator'])->latest()->get();
+        $headings = ['Order Number', 'Customer', 'Origin', 'Destination', 'Weight (kg)', 'Price (IDR)', 'Status', 'Created At'];
+        $data = $orders->map(fn($o) => [
+            $o->order_number,
+            $o->customer->company_name ?? '-',
+            $o->originWarehouse->name ?? '-',
+            $o->destination_address,
+            $o->total_weight,
+            $o->quoted_price ? number_format($o->quoted_price, 0, ',', '.') : '-',
+            $o->status,
+            $o->created_at?->format('Y-m-d H:i') ?? '-',
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Pesanan (Orders)',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-orders-' . now()->format('Ymd-His') . '.pdf');
     }
 }

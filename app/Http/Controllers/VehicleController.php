@@ -6,6 +6,9 @@ use App\Models\Vehicle;
 use App\Services\VehicleService;
 use App\Http\Requests\Vehicle\StoreVehicleRequest;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
+use App\Exports\VehiclesExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VehicleController extends Controller
 {
@@ -40,5 +43,32 @@ class VehicleController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new VehiclesExport, 'laporan-armada-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $vehicles = Vehicle::with(['vehicleType'])->latest()->get();
+        $headings = ['ID', 'Plate Number', 'Brand', 'Model', 'Year', 'Type', 'Capacity (kg)', 'Capacity (m³)', 'Fuel Type', 'Status', 'KIR Expired', 'STNK Expired'];
+        $data = $vehicles->map(fn($v) => [
+            $v->id, $v->plate_number, $v->brand, $v->model, $v->year,
+            $v->vehicleType->name ?? '-',
+            $v->capacity_kg, $v->capacity_volume_cbm,
+            $v->fuel_type, $v->status,
+            $v->kir_expired_at ? \Carbon\Carbon::parse($v->kir_expired_at)->format('Y-m-d') : '-',
+            $v->stnk_expired_at ? \Carbon\Carbon::parse($v->stnk_expired_at)->format('Y-m-d') : '-',
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Armada Kendaraan',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-armada-' . now()->format('Ymd-His') . '.pdf');
     }
 }

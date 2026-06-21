@@ -8,6 +8,9 @@ use App\Models\VehicleType;
 use App\Services\TariffService;
 use Illuminate\Http\Request;
 use Exception;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\Logistik\TariffExport;
 
 class TariffController extends Controller
 {
@@ -90,5 +93,34 @@ class TariffController extends Controller
         } catch (Exception $e) {
             return back()->with('error', 'Failed to delete tariff: ' . $e->getMessage());
         }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new TariffExport, 'laporan-tariffs-' . now()->format('Ymd-His') . '.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $tariffs = Tariff::with(['route', 'vehicleType'])->latest()->get();
+        $headings = ['Route', 'Vehicle Type', 'Price/km', 'Price/kg', 'Price/cbm', 'Fixed Price', 'Status', 'Created At'];
+        $data = $tariffs->map(fn($t) => [
+            $t->route ? ($t->route->origin_name . ' - ' . $t->route->destination_name) : 'All Routes',
+            $t->vehicleType->name ?? 'All Vehicles',
+            $t->price_per_km ? number_format($t->price_per_km, 0, ',', '.') : '-',
+            $t->price_per_kg ? number_format($t->price_per_kg, 0, ',', '.') : '-',
+            $t->price_per_cbm ? number_format($t->price_per_cbm, 0, ',', '.') : '-',
+            $t->fixed_price ? number_format($t->fixed_price, 0, ',', '.') : '-',
+            $t->is_active ? 'Active' : 'Inactive',
+            $t->created_at?->format('Y-m-d H:i') ?? '-',
+        ]);
+
+        $pdf = Pdf::loadView('reports.pdf', [
+            'title' => 'Laporan Data Tarif',
+            'headings' => $headings,
+            'data' => $data,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-tariffs-' . now()->format('Ymd-His') . '.pdf');
     }
 }
