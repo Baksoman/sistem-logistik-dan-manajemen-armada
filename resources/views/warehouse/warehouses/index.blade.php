@@ -1,27 +1,92 @@
 @extends('layouts.warehouse')
 
+@push('head')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .inline-map {
+            height: 280px;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff;
+        }
+        .map-coords-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            box-shadow: inset 2px 2px 5px #d1d5db, inset -2px -2px 5px #ffffff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6b7280;
+            font-family: monospace;
+            margin-top: 8px;
+        }
+        .map-coords-badge.has-location { color: #2563eb; }
+        .leaflet-container { font-family: inherit; }
+        .geocode-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .geocode-status.idle { display: none; }
+        .geocode-status.searching {
+            color: #6366f1;
+            background: #eef2ff;
+            box-shadow: inset 1px 1px 3px #c7d2fe, inset -1px -1px 3px #ffffff;
+        }
+        .geocode-status.found {
+            color: #059669;
+            background: #ecfdf5;
+            box-shadow: inset 1px 1px 3px #a7f3d0, inset -1px -1px 3px #ffffff;
+        }
+        .geocode-status.not-found {
+            color: #d97706;
+            background: #fffbeb;
+            box-shadow: inset 1px 1px 3px #fde68a, inset -1px -1px 3px #ffffff;
+        }
+        .geocode-spinner {
+            width: 12px; height: 12px;
+            border: 2px solid #c7d2fe;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+@endpush
+
 @section('title', 'Warehouse Management')
 
 @section('content')
     <x-topbar />
 
-    <div x-data="{ 
-            slideOverOpen: {{ $errors->any() && !old('warehouse_id') ? 'true' : 'false' }}, 
-            editSlideOverOpen: {{ $errors->any() && old('warehouse_id') ? 'true' : 'false' }}, 
-            editData: { 
-                id: '{{ old('warehouse_id') }}', 
-                code: '{{ old('code') }}', 
-                name: '{{ old('name') }}', 
-                address: '{{ old('address') }}', 
-                latitude: '{{ old('latitude') }}', 
-                longitude: '{{ old('longitude') }}', 
+    <div x-data="{
+            slideOverOpen: {{ $errors->any() && !old('warehouse_id') ? 'true' : 'false' }},
+            editSlideOverOpen: {{ $errors->any() && old('warehouse_id') ? 'true' : 'false' }},
+            editData: {
+                id: '{{ old('warehouse_id') }}',
+                code: '{{ old('code') }}',
+                name: '{{ old('name') }}',
+                address: '{{ old('address') }}',
+                latitude: '{{ old('latitude') }}',
+                longitude: '{{ old('longitude') }}',
                 is_active: '{{ old('is_active', 1) }}',
-                user_ids: [] 
-            } 
-         }" 
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
+                user_ids: []
+            }
+         }"
+         @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $nextTick(() => initEditMap(editData.latitude, editData.longitude))"
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
-        
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <p class="text-gray-500 text-lg font-medium">Manage warehouse locations and staff assignments.</p>
             <div class="flex items-center gap-3 shrink-0">
@@ -33,7 +98,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     PDF
                 </a>
-                <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
+                <button @click="slideOverOpen = true; $nextTick(() => initCreateMap())" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Warehouse
                 </button>
@@ -104,10 +169,15 @@
             </div>
         </x-card>
 
-        <!-- Create Form Slide-Over -->
+        {{-- ==================== CREATE FORM SLIDE-OVER ==================== --}}
         <x-slide-over title="Create New Warehouse">
             <form action="{{ route('warehouse.warehouses.store') }}" method="POST" class="space-y-6">
                 @csrf
+
+                {{-- Hidden inputs that hold the actual lat/lng values for submission --}}
+                <input type="hidden" id="create_latitude" name="latitude" value="{{ old('latitude') }}">
+                <input type="hidden" id="create_longitude" name="longitude" value="{{ old('longitude') }}">
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Code</label>
                     <x-input type="text" name="code" placeholder="WH-01" required />
@@ -118,18 +188,23 @@
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
-                    <textarea name="address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3"></textarea>
+                    <textarea id="create_address" name="address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap, peta akan otomatis mencari..."></textarea>
+                    <div id="create-geocode-status" class="geocode-status idle"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Latitude</label>
-                        <x-input type="text" name="latitude" placeholder="-6.200000" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Longitude</label>
-                        <x-input type="text" name="longitude" placeholder="106.816666" />
+
+                {{-- Inline Map --}}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        <svg class="inline w-4 h-4 mb-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Location - <span class="text-gray-400 font-normal">Click on the map to set warehouse position</span>
+                    </label>
+                    <div id="create-map" class="inline-map"></div>
+                    <div id="create-coords-badge" class="map-coords-badge">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                        <span id="create-coords-text">No location selected — click the map to pin</span>
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
                     <x-select name="is_active" required>
@@ -138,7 +213,7 @@
                     </x-select>
                 </div>
 
-                <!-- User Mapping -->
+                {{-- User Mapping --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Assign Staff</label>
                     <div class="bg-gray-100 rounded-2xl p-4 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] max-h-48 overflow-y-auto space-y-2">
@@ -153,7 +228,7 @@
                         @endforelse
                     </div>
                 </div>
-                
+
                 <div class="pt-6 mt-6 border-t border-gray-300">
                     <button type="submit" class="w-full py-4 rounded-2xl font-bold text-gray-100 bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#4b5563,inset_-2px_-2px_4px_#1f2937] transition-all uppercase tracking-widest">
                         Save Warehouse
@@ -162,12 +237,17 @@
             </form>
         </x-slide-over>
 
-        <!-- Edit Form Slide-Over -->
+        {{-- ==================== EDIT FORM SLIDE-OVER ==================== --}}
         <x-slide-over title="Edit Warehouse" model="editSlideOverOpen">
             <form :action="'{{ route('warehouse.warehouses.index') }}/' + editData.id" method="POST" class="space-y-6">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="warehouse_id" x-model="editData.id">
+
+                {{-- Hidden inputs for lat/lng --}}
+                <input type="hidden" id="edit_latitude" name="latitude" x-model="editData.latitude">
+                <input type="hidden" id="edit_longitude" name="longitude" x-model="editData.longitude">
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Code</label>
                     <input type="text" name="code" x-model="editData.code" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
@@ -178,18 +258,23 @@
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
-                    <textarea name="address" x-model="editData.address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3"></textarea>
+                    <textarea id="edit_address" name="address" x-model="editData.address" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" rows="3" placeholder="Ketik alamat lengkap, peta akan otomatis mencari..."></textarea>
+                    <div id="edit-geocode-status" class="geocode-status idle"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Latitude</label>
-                        <input type="text" name="latitude" x-model="editData.latitude" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Longitude</label>
-                        <input type="text" name="longitude" x-model="editData.longitude" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" />
+
+                {{-- Inline Map --}}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        <svg class="inline w-4 h-4 mb-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Location - <span class="text-gray-400 font-normal">Drag the pin or click to reposition</span>
+                    </label>
+                    <div id="edit-map" class="inline-map"></div>
+                    <div id="edit-coords-badge" class="map-coords-badge">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                        <span id="edit-coords-text">Loading location...</span>
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
                     <select name="is_active" x-model="editData.is_active" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none">
@@ -198,7 +283,7 @@
                     </select>
                 </div>
 
-                <!-- User Mapping -->
+                {{-- User Mapping --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Assign Staff</label>
                     <div class="bg-gray-100 rounded-2xl p-4 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] max-h-48 overflow-y-auto space-y-2">
@@ -213,7 +298,7 @@
                         @endforelse
                     </div>
                 </div>
-                
+
                 <div class="pt-6 mt-6 border-t border-gray-300">
                     <button type="submit" class="w-full py-4 rounded-2xl font-bold text-gray-100 bg-gray-800 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#4b5563,inset_-2px_-2px_4px_#1f2937] transition-all uppercase tracking-widest">
                         Update Warehouse
@@ -223,4 +308,177 @@
         </x-slide-over>
 
     </div>
+
+    @push('scripts')
+    <script>
+        // ─── Shared helper ───────────────────────────────────────────────────────
+        function buildMap(containerId, latHiddenId, lngHiddenId, coordsBadgeId, coordsTextId, initLat, initLng) {
+            const hasLocation = initLat && initLng && !isNaN(parseFloat(initLat)) && !isNaN(parseFloat(initLng));
+            const center = hasLocation ? [parseFloat(initLat), parseFloat(initLng)] : [-2.5, 118.0];
+            const zoom   = hasLocation ? 14 : 5;
+
+            const map = L.map(containerId, { center, zoom, zoomControl: true });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
+
+            let marker = null;
+
+            function setCoords(lat, lng) {
+                const latEl = document.getElementById(latHiddenId);
+                const lngEl = document.getElementById(lngHiddenId);
+                const badge = document.getElementById(coordsBadgeId);
+                const text  = document.getElementById(coordsTextId);
+
+                const latVal = parseFloat(lat).toFixed(7);
+                const lngVal = parseFloat(lng).toFixed(7);
+
+                if (latEl) { latEl.value = latVal; latEl.dispatchEvent(new Event('input')); }
+                if (lngEl) { lngEl.value = lngVal; lngEl.dispatchEvent(new Event('input')); }
+                if (text)  { text.textContent = `${parseFloat(latVal).toFixed(6)}, ${parseFloat(lngVal).toFixed(6)}`; }
+                if (badge) { badge.classList.add('has-location'); }
+            }
+
+            function placeMarker(latlng) {
+                if (marker) {
+                    marker.setLatLng(latlng);
+                } else {
+                    marker = L.marker(latlng, { draggable: true }).addTo(map);
+                    marker.on('dragend', function (e) {
+                        const pos = e.target.getLatLng();
+                        setCoords(pos.lat, pos.lng);
+                    });
+                }
+                setCoords(latlng.lat, latlng.lng);
+            }
+
+            // Place existing pin
+            if (hasLocation) {
+                placeMarker(L.latLng(parseFloat(initLat), parseFloat(initLng)));
+            }
+
+            // Click to place / move pin
+            map.on('click', function (e) {
+                placeMarker(e.latlng);
+            });
+
+            // Invalidate so tiles render correctly inside slide-over
+            setTimeout(() => map.invalidateSize(), 100);
+
+            // Return both the map and placeMarker so geocoding can use it
+            return { map, placeMarker };
+        }
+
+        // ─── Nominatim Geocoding ──────────────────────────────────────────────────
+        function geocodeAddress(address, mapInstance, placeMarkerFn, statusElId) {
+            const statusEl = document.getElementById(statusElId);
+            if (!address || address.trim().length < 5) {
+                if (statusEl) { statusEl.className = 'geocode-status idle'; statusEl.innerHTML = ''; }
+                return;
+            }
+
+            // Show searching state
+            if (statusEl) {
+                statusEl.className = 'geocode-status searching';
+                statusEl.innerHTML = '<div class="geocode-spinner"></div> Mencari lokasi...';
+            }
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=id&limit=1`, {
+                headers: { 'Accept-Language': 'id' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lng = parseFloat(data[0].lon);
+                    const displayName = data[0].display_name;
+
+                    placeMarkerFn(L.latLng(lat, lng));
+                    mapInstance.setView([lat, lng], 15, { animate: true });
+
+                    if (statusEl) {
+                        statusEl.className = 'geocode-status found';
+                        const shortName = displayName.length > 60 ? displayName.substring(0, 60) + '…' : displayName;
+                        statusEl.innerHTML = `<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Ditemukan: ${shortName}`;
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.className = 'geocode-status not-found';
+                        statusEl.innerHTML = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Lokasi tidak ditemukan, klik peta secara manual';
+                    }
+                }
+            })
+            .catch(() => {
+                if (statusEl) {
+                    statusEl.className = 'geocode-status not-found';
+                    statusEl.innerHTML = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Gagal mencari, klik peta secara manual';
+                }
+            });
+        }
+
+        // ─── Debounce utility ─────────────────────────────────────────────────────
+        function debounce(fn, delay) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // ─── Create form map ─────────────────────────────────────────────────────
+        let _createMapObj = null;
+        function initCreateMap() {
+            if (_createMapObj) { _createMapObj.map.remove(); _createMapObj = null; }
+            const initLat = document.getElementById('create_latitude')?.value || '';
+            const initLng = document.getElementById('create_longitude')?.value || '';
+            setTimeout(() => {
+                _createMapObj = buildMap('create-map', 'create_latitude', 'create_longitude',
+                                         'create-coords-badge', 'create-coords-text',
+                                         initLat, initLng);
+
+                // Attach geocoding to address textarea
+                const addressEl = document.getElementById('create_address');
+                if (addressEl) {
+                    const debouncedGeocode = debounce(function () {
+                        geocodeAddress(addressEl.value, _createMapObj.map, _createMapObj.placeMarker, 'create-geocode-status');
+                    }, 800);
+                    addressEl.addEventListener('input', debouncedGeocode);
+                }
+            }, 80);
+        }
+
+        // ─── Edit form map ───────────────────────────────────────────────────────
+        let _editMapObj = null;
+        function initEditMap(lat, lng) {
+            if (_editMapObj) { _editMapObj.map.remove(); _editMapObj = null; }
+            setTimeout(() => {
+                _editMapObj = buildMap('edit-map', 'edit_latitude', 'edit_longitude',
+                                       'edit-coords-badge', 'edit-coords-text',
+                                       lat, lng);
+
+                // Attach geocoding to address textarea
+                const addressEl = document.getElementById('edit_address');
+                if (addressEl) {
+                    const debouncedGeocode = debounce(function () {
+                        geocodeAddress(addressEl.value, _editMapObj.map, _editMapObj.placeMarker, 'edit-geocode-status');
+                    }, 800);
+                    addressEl.addEventListener('input', debouncedGeocode);
+                }
+            }, 80);
+        }
+
+        // ─── Auto-init if slide-over already open on page load (validation errors) ─
+        document.addEventListener('DOMContentLoaded', function () {
+            @if($errors->any() && !old('warehouse_id'))
+                initCreateMap();
+            @endif
+            @if($errors->any() && old('warehouse_id'))
+                initEditMap('{{ old('latitude') }}', '{{ old('longitude') }}');
+            @endif
+        });
+    </script>
+    @endpush
+
 @endsection
