@@ -39,7 +39,9 @@ class ShipmentController extends Controller
         $warehouses = \App\Models\Warehouse::all();
         $vehicles = Vehicle::with('vehicleType')->where('status', 'available')->get();
         $drivers = DriverProfile::where('status', 'available')->get();
-        $routeVersions = RouteVersion::with('route')->latest()->get();
+        $routeVersions = RouteVersion::whereHas('route', function($q) {
+            $q->where('is_master', true);
+        })->with('route')->latest()->get();
         $tariffs = \App\Models\Tariff::all();
 
         return view('shipments.create', compact('orders', 'warehouses', 'vehicles', 'drivers', 'routeVersions', 'tariffs'));
@@ -162,7 +164,7 @@ class ShipmentController extends Controller
 
         $isMaster = false;
         if ($shipment->routeVersion && $shipment->routeVersion->route) {
-            $isMaster = !str_starts_with($shipment->routeVersion->route->route_code, 'RTE-ADHOC-');
+            $isMaster = $shipment->routeVersion->route->is_master;
         }
         
         // Find destination warehouse if it's a master route
