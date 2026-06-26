@@ -11,7 +11,7 @@ class RouteService
 
     public function getPaginatedRoutes($perPage = 10)
     {
-        return Route::with('routeVersions')->latest()->paginate($perPage);
+        return Route::where('is_master', true)->with('routeVersions')->latest()->paginate($perPage);
     }
 
     public function getRouteById($id)
@@ -30,6 +30,7 @@ class RouteService
             'destination_name' => $data['destination_name'],
             'toll_cost' => $data['toll_cost'] ?? 0,
             'ferry_cost' => $data['ferry_cost'] ?? 0,
+            'is_master' => $data['is_master'] ?? true,
         ]);
 
         $this->createRouteVersion($route, $waypoints);

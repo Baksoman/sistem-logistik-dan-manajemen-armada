@@ -66,7 +66,8 @@ class ShipmentService
             $destWarehouseId = null;
             $shipment->load('routeVersion.route');
             if ($shipment->routeVersion && $shipment->routeVersion->route) {
-                $isTransit = !str_starts_with($shipment->routeVersion->route->route_code, 'RTE-ADHOC-');
+                $isTransit = $shipment->routeVersion->route->is_master;
+
                 if ($isTransit) {
                     $destName = $shipment->routeVersion->route->destination_name;
                     $cleanName = trim(str_replace('(Warehouse)', '', $destName));
