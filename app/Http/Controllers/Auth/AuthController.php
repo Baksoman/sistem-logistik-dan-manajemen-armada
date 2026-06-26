@@ -2,10 +2,13 @@
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Laravel\Socialite\Socialite;
+
 class AuthController extends Controller
 {
     /**
@@ -49,5 +52,34 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Obtain the user information from Google.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+
+            // Check if they exist by email
+            $user = User::where('email', $googleUser->email)->first();
+            
+            if (!$user) {
+                return redirect('/login')->withErrors(['email' => 'No account associated with this Google email. Please contact the administrator.']);
+            } 
+            Auth::login($user);
+            return redirect()->intended('dashboard');
+
+        } catch (\Exception $e) {
+            return redirect('/login')->withErrors(['email' => 'Failed to login with Google. Please try again.']);
+        }
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Logistik;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Shipment;
 use App\Models\Order;

@@ -80,7 +80,7 @@ class PermissionSeeder extends Seeder
 
         // Admin Logistik
         $adminLogistikPermissions = Permission::whereIn('name', [
-            'view_vehicles', 'view_drivers',
+            'view_vehicles', 'manage_vehicles', 'view_drivers', 'manage_drivers',
             'view_customers', 'manage_customers',
             'view_orders', 'create_order', 'manage_orders',
             'view_shipments', 'create_shipment', 'update_shipment', 'manage_shipments',
