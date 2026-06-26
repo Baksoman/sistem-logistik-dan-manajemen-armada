@@ -5,7 +5,7 @@
     // Akses Alpine.js v3 data menggunakan Alpine.$data() dengan query selector spesifik
     const domElement = document.querySelector('[x-data="journeyTracker()"]');
     if (!domElement) {
-        console.error("❌ Tidak ada komponen Alpine.js 'journeyTracker()' ditemukan di halaman ini.");
+        console.error("Tidak ada komponen Alpine.js 'journeyTracker()' ditemukan di halaman ini.");
         return;
     }
 
@@ -18,13 +18,13 @@
     }
     
     if (!tracker) {
-        console.error("❌ Gagal membaca data Alpine.js. Pastikan halaman sudah sepenuhnya dimuat.");
+        console.error("Gagal membaca data Alpine.js. Pastikan halaman sudah sepenuhnya dimuat.");
         return;
     }
 
     if (!tracker.routeJson) {
-        console.error("❌ Gagal membaca Rute GeoJSON! Pastikan shipment ini memiliki rute yang terpasang dan garis biru muncul di peta.");
-        console.info("ℹ️  Cek: tracker.routeJson =", tracker.routeJson);
+        console.error("Gagal membaca Rute GeoJSON! Pastikan shipment ini memiliki rute yang terpasang dan garis biru muncul di peta.");
+        console.info("Cek: tracker.routeJson =", tracker.routeJson);
         return;
     }
 
@@ -32,7 +32,7 @@
     let geoData = tracker.routeJson;
     if (typeof geoData === 'string') {
         try { geoData = JSON.parse(geoData); } catch(e) {
-            console.error("❌ GeoJSON tidak valid:", e);
+            console.error("GeoJSON tidak valid:", e);
             return;
         }
     }
@@ -44,12 +44,12 @@
     else if (geoData.features && geoData.features.length > 0) coordinates = geoData.features[0].geometry.coordinates;
 
     if (!coordinates || coordinates.length === 0) {
-        console.error("❌ Rute kosong / tidak valid. Cek struktur GeoJSON:", geoData);
+        console.error("Rute kosong / tidak valid. Cek struktur GeoJSON:", geoData);
         return;
     }
 
-    console.log(`🚀 Simulasi Autopilot Dinyalakan! Menyusuri ${coordinates.length} titik koordinat.`);
-    console.log(`📍 Shipment ID: ${tracker.shipmentId || shipmentId}`);
+    console.log(`Simulasi Autopilot Dinyalakan! Menyusuri ${coordinates.length} titik koordinat.`);
+    console.log(`Shipment ID: ${tracker.shipmentId || shipmentId}`);
 
     let currentIndex = 0;
     const actualShipmentId = tracker.shipmentId || shipmentId;
@@ -57,7 +57,7 @@
     const driverEngine = setInterval(() => {
         // Cek apakah sudah sampai tujuan
         if (currentIndex >= coordinates.length) {
-            console.log("🏁 TRUK TELAH SAMPAI DI TUJUAN AKHIR! Simulator berhenti.");
+            console.log("TRUK TELAH SAMPAI DI TUJUAN AKHIR! Simulator berhenti.");
             clearInterval(driverEngine);
             return;
         }
@@ -69,6 +69,11 @@
         // Update ikon truk secara visual di peta
         if (tracker.marker) {
             tracker.marker.setLatLng([lat, lng]);
+            
+            // Auto-pan peta kalau mode tracking aktif
+            if (tracker.isTracking) {
+                tracker.map.panTo([lat, lng]);
+            }
         }
 
         // Broadcast ke server (simpan ke gps_history)
@@ -82,9 +87,9 @@
             },
             body: JSON.stringify({ shipment_id: actualShipmentId, lat: lat, lng: lng })
         }).then(r => r.json()).then(() => {
-            console.log(`📡 Step ${currentIndex}/${coordinates.length} → [${lat.toFixed(5)}, ${lng.toFixed(5)}]`);
+            console.log(`Step ${currentIndex}/${coordinates.length} → [${lat.toFixed(5)}, ${lng.toFixed(5)}]`);
         }).catch(err => {
-            console.warn("⚠️ Ping gagal:", err);
+            console.warn("Ping gagal:", err);
         });
 
         // Skip 2 titik per interval agar simulasi terasa lebih cepat
@@ -92,6 +97,6 @@
 
     }, 1500); // Bergerak setiap 1.5 detik
 
-    console.log("✅ Simulator berjalan. Untuk berhenti ketik: clearInterval(driverEngine)");
-    window.driverEngine = driverEngine; // Expose ke window agar bisa di-stop manual
+    console.log("Simulator berjalan. Untuk berhenti ketik: clearInterval(driverEngine)");
+    window.driverEngine = driverEngine;
 })();
