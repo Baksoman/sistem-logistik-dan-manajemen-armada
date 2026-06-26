@@ -21,6 +21,8 @@
         border-top-right-radius: 2rem;
         z-index: 20;
         box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
+    }
+    .bottom-sheet-content {
         max-height: 80vh;
         overflow-y: auto;
         padding-bottom: env(safe-area-inset-bottom, 2rem);
@@ -46,28 +48,37 @@
 
     <!-- The Bottom Sheet -->
     <div class="bottom-sheet pb-8" :style="{ transform: sheetTransform, transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }">
-        <!-- Draggable Header Area -->
-        <div class="cursor-pointer pt-2 px-6 touch-none select-none"
-             @touchstart="startDrag" @touchmove="doDrag" @touchend="endDrag"
-             @mousedown="startDrag" @mousemove="doDrag" @mouseup="endDrag" @mouseleave="endDrag"
-             @click="toggleSheet"
-        >
-            <!-- Drag Handle Indicator -->
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
+        
+        <!-- Floating Recenter Map Button (Attached to top of sheet) -->
+        @if(in_array($shipment->status, ['On Process', 'Arrived at Hub']))
+        <button @click="recenterMap" :class="{'text-blue-600': isTracking, 'text-gray-400': !isTracking}" class="absolute -top-16 right-4 z-[1000] w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] active:scale-95 transition-all duration-300" aria-label="Recenter Map">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-current-location"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /><path d="M12 2l0 2" /><path d="M12 20l0 2" /><path d="M20 12l2 0" /><path d="M2 12l2 0" /></svg>
+        </button>
+        @endif
 
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h2 class="text-2xl font-black text-gray-800 tracking-tight">{{ $shipment->shipment_number }}</h2>
-                    <p class="text-sm font-bold text-gray-500 mt-1">Truck: {{ $shipment->vehicle->plate_number }}</p>
-                </div>
-                <div class="bg-blue-100 text-blue-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                    {{ $shipment->status }}
+        <div class="bottom-sheet-content">
+            <!-- Draggable Header Area -->
+            <div class="cursor-pointer pt-2 px-6 touch-none select-none sticky top-0 bg-[#f3f4f6] z-10"
+                 @touchstart="startDrag" @touchmove="doDrag" @touchend="endDrag"
+                 @mousedown="startDrag" @mousemove="doDrag" @mouseup="endDrag" @mouseleave="endDrag"
+                 @click="toggleSheet"
+            >
+                <!-- Drag Handle Indicator -->
+                <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
+
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-gray-800 tracking-tight">{{ $shipment->shipment_number }}</h2>
+                        <p class="text-sm font-bold text-gray-500 mt-1">Truck: {{ $shipment->vehicle->plate_number }}</p>
+                    </div>
+                    <div class="bg-blue-100 text-blue-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                        {{ $shipment->status }}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Scrollable Content -->
-        <div class="px-6">
+            <!-- Scrollable Content -->
+            <div class="px-6">
 
         @if($shipment->status === 'Pending')
             <!-- PRE-JOURNEY VIEW -->
@@ -102,10 +113,6 @@
                         <p class="text-sm font-black text-emerald-600">Broadcasting Live</p>
                     </div>
                 </div>
-                <!-- Mini map recenter button -->
-                <button @click="recenterMap" class="w-10 h-10 neu-btn bg-gray-100 rounded-full flex items-center justify-center text-blue-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -128,6 +135,7 @@
                 Scan / Arrive
             </a>
         @endif
+            </div>
         </div>
     </div>
 </div>
@@ -142,6 +150,7 @@
             marker: null,
             shipmentId: '{{ $shipment->id }}',
             status: '{{ $shipment->status }}',
+            isTracking: true,
             
             // Bottom Sheet state
             sheetState: 'collapsed', // 'expanded' or 'collapsed'
@@ -151,6 +160,7 @@
             
             // Map data
             routeJson: {!! json_encode($shipment->routeVersion ? $shipment->routeVersion->polyline_geojson : null) !!},
+            waypointsJson: {!! json_encode($shipment->routeVersion ? $shipment->routeVersion->waypoints : null) !!},
             orders: {!! json_encode($shipment->orders->map(function($order) {
                 return [
                     'lat' => $order->destination_latitude,
@@ -215,6 +225,11 @@
                     attribution: '&copy; OpenStreetMap &copy; CARTO'
                 }).addTo(this.map);
 
+                // Stop tracking on manual map drag
+                this.map.on('dragstart', () => {
+                    this.isTracking = false;
+                });
+
                 let parsedRoute = this.routeJson;
                 if (typeof parsedRoute === 'string') {
                     try { parsedRoute = JSON.parse(parsedRoute); } catch(e) { parsedRoute = null; }
@@ -228,6 +243,25 @@
                         }).addTo(this.map);
                         this.map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
                     } catch(e) { console.error("GeoJSON error:", e); }
+                }
+
+                // Draw Route Waypoints (Origin, Stops, Destination)
+                let parsedWaypoints = this.waypointsJson;
+                if (typeof parsedWaypoints === 'string') {
+                    try { parsedWaypoints = JSON.parse(parsedWaypoints); } catch(e) { parsedWaypoints = null; }
+                }
+
+                if (parsedWaypoints && Array.isArray(parsedWaypoints)) {
+                    parsedWaypoints.forEach((wp, index) => {
+                        let color = index === 0 ? '#10b981' : '#3b82f6'; // Green for origin, blue for stops
+                        L.circleMarker([wp[1], wp[0]], {
+                            color: color,
+                            fillColor: '#ffffff',
+                            fillOpacity: 1,
+                            weight: 4,
+                            radius: 8
+                        }).addTo(this.map);
+                    });
                 }
 
                 // Draw Package Destinations
@@ -265,19 +299,22 @@
                             this.map.setView([lat, lng], 15);
                             
                             const truckIcon = L.divIcon({
-                                html: `<div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl text-blue-500 border-4 border-blue-500">
-                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                html: `<div class="relative flex items-center justify-center w-full h-full">
+                                         <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(37,99,235,0.5)] border-2 border-white relative z-10 text-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5" /><path d="M3 9l4 0" /></svg>
+                                         </div>
+                                         <div class="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-50 z-0 m-auto" style="width: 40px; height: 40px;"></div>
                                        </div>`,
-                                className: '',
-                                iconSize: [48, 48],
-                                iconAnchor: [24, 24]
+                                className: 'bg-transparent border-none',
+                                iconSize: [80, 80],
+                                iconAnchor: [40, 40]
                             });
 
                             this.marker = L.marker([lat, lng], { icon: truckIcon }).addTo(this.map);
 
                             // If on process, start pinging
                             if (this.status === 'On Process' || this.status === 'Arrived at Hub') {
-                                // this.startPinging(); // Dikomentari sementara untuk tes simulator
+                               // this.startPinging(); // Dikomentari sementara untuk tes simulator
                             }
                         },
                         (error) => {
@@ -290,39 +327,57 @@
             },
 
             recenterMap() {
+                this.isTracking = true;
                 if (this.marker) {
-                    this.map.setView(this.marker.getLatLng(), 16);
+                    this.map.flyTo(this.marker.getLatLng(), 16, { animate: true, duration: 1 });
                 }
             },
 
             startPinging() {
-                setInterval(() => {
-                    navigator.geolocation.getCurrentPosition((position) => {
+                let lastPingTime = 0;
+                
+                navigator.geolocation.watchPosition(
+                    (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
                         
                         // Update local marker
                         if(this.marker) {
                             this.marker.setLatLng([lat, lng]);
+                            if (this.isTracking) {
+                                this.map.panTo([lat, lng]);
+                            }
                         }
 
-                        // Send ping to server
-                        fetch('/api/driver/location/ping', {
-                            method: 'POST',
-                            credentials: 'include',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                            },
-                            body: JSON.stringify({
-                                shipment_id: this.shipmentId,
-                                lat: lat,
-                                lng: lng
-                            })
-                        }).catch(err => console.warn("Background ping failed:", err));
-                    }, null, { enableHighAccuracy: true });
-                }, 10000); // 10 seconds actual pinging
+                        const now = Date.now();
+                        if (now - lastPingTime > 10000) {
+                            lastPingTime = now;
+                            
+                            // Send ping to server
+                            fetch('/api/driver/location/ping', {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                                },
+                                body: JSON.stringify({
+                                    shipment_id: this.shipmentId,
+                                    lat: lat,
+                                    lng: lng
+                                })
+                            }).catch(err => console.warn("Background ping failed:", err));
+                            
+                        }
+                    },
+                    (error) => {
+                        if (error.code !== 3) {
+                            console.warn("GPS tracking error:", error);
+                        }
+                    },
+                    { enableHighAccuracy: true, maximumAge: 0 }
+                );
             }
         }));
     });

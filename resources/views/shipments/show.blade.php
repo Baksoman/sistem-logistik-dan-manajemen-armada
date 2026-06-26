@@ -271,7 +271,12 @@
         <!-- Right Column: Map Tracker -->
         <div class="lg:col-span-5 xl:col-span-4 relative">
             <div class="sticky top-6">
-                <x-card class="p-2 shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border-4 border-white mb-6">
+                <x-card class="p-2 shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border-4 border-white mb-6 relative">
+                    @if(in_array($shipment->status, ['On Process', 'Arrived at Hub']))
+                    <button id="recenterBtn" class="absolute bottom-6 right-6 z-[1000] w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-blue-600 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 transition-all" aria-label="Recenter Map">
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-current-location"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /><path d="M12 2l0 2" /><path d="M12 20l0 2" /><path d="M20 12l2 0" /><path d="M2 12l2 0" /></svg>
+                    </button>
+                    @endif
                     <div id="tracker-map" class="w-full h-[500px] rounded-2xl z-0"></div>
                 </x-card>
                 
@@ -343,14 +348,41 @@
             @if(in_array($shipment->status, ['On Process', 'Arrived at Hub']))
                 const shipmentId = "{{ $shipment->id }}";
                 let truckMarker = null;
+                let isTracking = true;
+
+                // Stop tracking if user drags the map
+                map.on('dragstart', () => {
+                    isTracking = false;
+                    const btn = document.getElementById('recenterBtn');
+                    if (btn) {
+                        btn.classList.remove('text-blue-600');
+                        btn.classList.add('text-gray-400');
+                    }
+                });
+
+                // Handle recenter button click
+                const recenterBtn = document.getElementById('recenterBtn');
+                if (recenterBtn) {
+                    recenterBtn.addEventListener('click', () => {
+                        isTracking = true;
+                        recenterBtn.classList.remove('text-gray-400');
+                        recenterBtn.classList.add('text-blue-600');
+                        if (truckMarker) {
+                            map.flyTo(truckMarker.getLatLng(), 16, { animate: true, duration: 1 });
+                        }
+                    });
+                }
 
                 const truckIcon = L.divIcon({
-                    html: `<div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] text-blue-500 border-2 border-blue-500">
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    html: `<div class="relative flex items-center justify-center w-full h-full">
+                             <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-[0_4px_10px_rgba(37,99,235,0.5)] border-2 border-white relative z-10 text-white">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M15 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5" /><path d="M3 9l4 0" /></svg>
+                             </div>
+                             <div class="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-50 z-0 m-auto" style="width: 40px; height: 40px;"></div>
                            </div>`,
-                    className: '',
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 20]
+                    className: 'bg-transparent border-none',
+                    iconSize: [80, 80],
+                    iconAnchor: [40, 40]
                 });
                 
                 if (mapData.lastKnownLocation && mapData.lastKnownLocation.lat) {
@@ -370,6 +402,10 @@
                                     truckMarker = L.marker(newPos, { icon: truckIcon }).addTo(map);
                                 } else {
                                     truckMarker.setLatLng(newPos);
+                                }
+
+                                if (isTracking) {
+                                    map.panTo(newPos);
                                 }
                             });
                     } else {
