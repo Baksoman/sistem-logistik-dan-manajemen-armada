@@ -61,16 +61,19 @@ class RoutingService
             ]);
 
             if ($response->failed()) {
+                $errorMsg = $response->json('detail') ?? "Failed to calculate sea route from Microservice.";
                 Log::error('Searoute Calculation Failed', ['response' => $response->body()]);
-                throw new \Exception("Failed to calculate sea route from Microservice. Pastikan Microservice Searoute berjalan.");
+                throw new \Exception($errorMsg);
             }
 
             $data = $response->json();
+            $distanceKm = $data['distance'];
+            $durationMin = ($distanceKm / 37.04) * 60; // 20 knots = ~37.04 km/h
 
             return [
                 'source_api' => 'Searoute',
-                'distance_km' => $data['distance'],
-                'duration_min' => 0, // Searoute doesn't return duration
+                'distance_km' => $distanceKm,
+                'duration_min' => $durationMin,
                 'geojson' => $data['geojson']['geometry'],
                 'waypoints' => [$origin, $destination]
             ];
