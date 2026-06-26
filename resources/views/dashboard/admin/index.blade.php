@@ -15,27 +15,29 @@
     <!-- Executive Stats Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Financial Pillar -->
-        <div class="space-y-4">
+        <div class="space-y-4 flex flex-col">
             <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Financials</h3>
-            <x-card class="relative flex flex-col gap-2 transition-transform duration-300 hover:-translate-y-1 bg-gradient-to-br from-green-50 to-emerald-100/50">
+            <x-card class="flex-1 relative flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 bg-gradient-to-br from-green-50 to-emerald-100/50">
                 <div class="absolute top-3 right-3 group cursor-pointer">
                     <svg class="w-4 h-4 text-emerald-500/50 hover:text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div class="absolute right-0 top-6 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal text-left">
                         Total pendapatan vs pengeluaran operasional perusahaan secara keseluruhan.
                     </div>
                 </div>
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Revenue vs Expense</p>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <p class="text-sm text-gray-500">Revenue</p>
-                        <p class="text-xl font-black text-green-700">Rp {{ number_format($stats['revenue'] / 1000000, 1) }}M</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-gray-500">Expense</p>
-                        <p class="text-xl font-black text-red-600">Rp {{ number_format($stats['expense'] / 1000000, 1) }}M</p>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Revenue vs Expense</p>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="text-sm text-gray-500">Revenue</p>
+                            <p class="text-xl font-black text-green-700">Rp {{ number_format($stats['revenue'] / 1000000, 1) }}M</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">Expense</p>
+                            <p class="text-xl font-black text-red-600">Rp {{ number_format($stats['expense'] / 1000000, 1) }}M</p>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-2 pt-2 border-t border-emerald-200/50 flex justify-between items-center">
+                <div class="mt-4 pt-3 border-t border-emerald-200/50 flex justify-between items-center">
                     <span class="text-sm font-bold text-gray-600">Net Profit</span>
                     <span class="text-lg font-black {{ $stats['net_profit'] >= 0 ? 'text-green-700' : 'text-red-700' }}">
                         Rp {{ number_format($stats['net_profit'] / 1000000, 1) }}M
@@ -45,9 +47,9 @@
         </div>
 
         <!-- Logistics Pillar -->
-        <div class="space-y-4">
+        <div class="space-y-4 flex flex-col">
             <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Logistics & Fleet</h3>
-            <div class="grid grid-cols-2 gap-4 h-[148px]">
+            <div class="grid grid-cols-2 gap-4 flex-1">
                 <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
                     <div class="absolute top-2 right-2 group cursor-pointer">
                         <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -73,9 +75,9 @@
         </div>
 
         <!-- Warehouse Pillar -->
-        <div class="space-y-4">
+        <div class="space-y-4 flex flex-col">
             <h3 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Warehouse & Orders</h3>
-            <div class="grid grid-cols-2 gap-4 h-[148px]">
+            <div class="grid grid-cols-2 gap-4 flex-1">
                 <x-card class="relative flex flex-col justify-center items-center text-center transition-transform duration-300 hover:-translate-y-1 !p-4">
                     <div class="absolute top-2 right-2 group cursor-pointer">
                         <svg class="w-4 h-4 text-gray-300 hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
