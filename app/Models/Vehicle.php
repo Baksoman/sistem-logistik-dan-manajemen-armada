@@ -25,6 +25,11 @@ class Vehicle extends Model
         'stnk_expired_at'
     ];
 
+    protected $casts = [
+        'kir_expired_at' => 'date',
+        'stnk_expired_at' => 'date',
+    ];
+
     public function vehicleType() { return $this->belongsTo(VehicleType::class); }
 
     public function shipments() { return $this->hasMany(Shipment::class); }
