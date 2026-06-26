@@ -78,7 +78,7 @@ class AuthController extends Controller
             Auth::login($user);
             return redirect()->intended('dashboard');
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return redirect('/login')->withErrors(['email' => 'Failed to login with Google. Please try again.']);
         }
     }
