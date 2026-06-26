@@ -58,6 +58,32 @@ class RouteController extends Controller
         return view('logistik.routes.show', compact('route'));
     }
 
+    public function createVersion(Route $route)
+    {
+        $route->load('routeVersions');
+        return view('logistik.routes.create-version', compact('route'));
+    }
+
+    public function storeVersion(Request $request, Route $route)
+    {
+        $validated = $request->validate([
+            'waypoints' => 'required|json'
+        ]);
+
+        $waypoints = json_decode($validated['waypoints'], true);
+
+        if (!is_array($waypoints) || count($waypoints) < 2) {
+            return back()->with('error', 'Minimal diperlukan origin dan destination koordinat.');
+        }
+
+        try {
+            $this->routeService->createRouteVersion($route, $waypoints);
+            return redirect()->route('routes.show', $route->id)->with('success', 'Versi rute baru berhasil dibuat dan dihitung.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
     public function destroy(Route $route)
     {
         try {
@@ -80,7 +106,8 @@ class RouteController extends Controller
             if ($request->route_type === 'land') {
                 $result = $this->routingService->calculateLandRoute($request->waypoints);
             } elseif ($request->route_type === 'sea') {
-                $result = $this->routingService->calculateSeaRoute($request->waypoints[0], end($request->waypoints));
+                $waypoints = $request->input('waypoints');
+                $result = $this->routingService->calculateSeaRoute($waypoints[0], end($waypoints));
             } else {
                 $result = $this->routingService->calculateCombinedRoute($request->waypoints);
             }

@@ -20,9 +20,15 @@
                 if ($route->route_type === 'sea') $badgeClass = 'text-blue-700 bg-blue-100';
                 if ($route->route_type === 'auto' || $route->route_type === 'combined') $badgeClass = 'text-purple-700 bg-purple-100';
             @endphp
+        </div>
+        <div class="flex items-center gap-4">
             <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $badgeClass }} uppercase">
                 {{ $route->route_type === 'auto' ? 'Combined' : $route->route_type }}
             </span>
+            <a href="{{ route('routes.version.create', $route->id) }}" class="px-5 py-2 rounded-xl font-bold text-white bg-blue-600 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#1e3a8a] transition-all text-sm flex items-center gap-2 hover:bg-blue-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Create New Version
+            </a>
         </div>
     </div>
 
@@ -93,9 +99,37 @@
         </div>
 
         <!-- Map Section -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-2 space-y-6">
             <x-card class="h-[600px] p-0 overflow-hidden">
                 <div id="map" class="w-full h-full z-0"></div>
+            </x-card>
+
+            <x-card>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Version History</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="border-b border-gray-300 text-gray-500 text-xs tracking-widest uppercase">
+                                <th class="py-3 px-4 font-bold">Version #</th>
+                                <th class="py-3 px-4 font-bold">Distance</th>
+                                <th class="py-3 px-4 font-bold">Duration</th>
+                                <th class="py-3 px-4 font-bold">Source</th>
+                                <th class="py-3 px-4 font-bold">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm font-medium text-gray-700">
+                            @foreach($route->routeVersions as $idx => $version)
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                                    <td class="py-3 px-4 font-bold text-blue-600">v{{ $route->routeVersions->count() - $idx }}</td>
+                                    <td class="py-3 px-4">{{ number_format($version->distance_km, 2) }} km</td>
+                                    <td class="py-3 px-4">{{ round($version->duration_min) }} min</td>
+                                    <td class="py-3 px-4">{{ $version->source_api }}</td>
+                                    <td class="py-3 px-4">{{ $version->calculated_at->format('d M Y H:i') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </x-card>
         </div>
     </div>
@@ -114,7 +148,7 @@
             
             var routeType = "{{ $route->route_type }}";
             var color = '#8b5cf6'; // auto
-            if (routeType === 'land') color = '#f59e0b';
+            if (routeType === 'land') color = '#dc2626';
             if (routeType === 'sea') color = '#3b82f6';
 
             var routeLayer = L.geoJSON(geojsonFeature, {

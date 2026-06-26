@@ -158,6 +158,8 @@ Route::middleware('auth')->group(function () {
                 Route::get('/create', [RouteController::class, 'create'])->name('routes.create');
                 Route::post('/', [RouteController::class, 'store'])->name('routes.store');
                 Route::get('/{route}', [RouteController::class, 'show'])->name('routes.show');
+                Route::get('/{route}/version/create', [RouteController::class, 'createVersion'])->name('routes.version.create');
+                Route::post('/{route}/version', [RouteController::class, 'storeVersion'])->name('routes.version.store');
                 Route::delete('/{route}', [RouteController::class, 'destroy'])->name('routes.destroy');
                 Route::post('/calculate-preview', [RouteController::class, 'calculatePreview'])->name('routes.calculate-preview');
             });
