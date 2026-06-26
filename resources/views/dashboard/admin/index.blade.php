@@ -115,7 +115,7 @@
                     </svg>
                 </div>
 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
                     <div class="flex items-center gap-4">
                         <h3 class="text-xl font-bold text-gray-800" x-text="trendTitle"></h3>
                         <div class="relative">

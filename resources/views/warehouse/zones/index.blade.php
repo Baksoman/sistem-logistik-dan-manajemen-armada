@@ -13,7 +13,7 @@
          @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false"
          @open-edit.window="editData = $event.detail; editSlideOverOpen = true">
         
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
             <div>
                 <p class="text-gray-500 text-lg font-medium">Manage warehouse zones.</p>
             </div>
