@@ -47,14 +47,8 @@
         <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-20 bg-gray-900/50 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
 
         <!-- Sidebar -->
-        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-30 w-72 bg-gray-100 shadow-[8px_0_16px_#d1d5db] transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 lg:flex lg:flex-col">
-            <div class="flex items-center justify-center h-24 shadow-[0_4px_6px_-1px_#d1d5db]">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center font-bold text-2xl text-gray-800">L</div>
-                    <span class="text-2xl font-bold tracking-widest text-gray-800 uppercase">Logistik</span>
-                </div>
-            </div>
-
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-30 w-72 bg-gray-100 shadow-[8px_0_24px_rgba(0,0,0,0.15)] lg:m-6 lg:h-[calc(100vh-3rem)] lg:rounded-[2rem] lg:shadow-[12px_12px_24px_#c2c6cc,-12px_-12px_24px_#ffffff] transition-all duration-300 lg:translate-x-0 lg:static lg:flex lg:flex-col">
+            <x-sidebar-logo panel="Logistik" />
             <nav class="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
                 @php
                     $navItems = [

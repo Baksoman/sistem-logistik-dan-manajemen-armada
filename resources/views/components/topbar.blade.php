@@ -1,13 +1,14 @@
-<header class="flex items-center justify-between mb-8 shrink-0 pt-2">
-    <div class="flex items-center gap-4">
-        <button @click="sidebarOpen = true" class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-gray-600 bg-gray-100 shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] focus:outline-none">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-        <!-- Page Title -->
-        <h2 class="text-2xl font-bold text-gray-800 tracking-tight hidden sm:block">
-            @yield('title', 'Overview')
-        </h2>
-    </div>
+<header class="mb-8 pt-2">
+    <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-4">
+            <button @click="sidebarOpen = true" class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-gray-600 bg-gray-100 shadow-[3px_3px_6px_#d1d5db,-3px_-3px_6px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <!-- Page Title (Desktop) -->
+            <h2 class="text-3xl font-black text-gray-800 tracking-tight hidden sm:block">
+                @yield('title', 'Overview')
+            </h2>
+        </div>
 
     <!-- Profile Dropdown -->
     <div class="flex items-center gap-4">
@@ -71,5 +72,12 @@
                 </form>
             </div>
         </div>
+    </div> <!-- Close Profile Section -->
+    </div> <!-- Close flex justify-between -->
+    <!-- Page Title (Mobile) -->
+    <div class="mt-6 sm:hidden">
+        <h2 class="text-3xl font-black text-gray-800 tracking-tight">
+            @yield('title', 'Overview')
+        </h2>
     </div>
 </header>
