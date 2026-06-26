@@ -92,12 +92,12 @@ class WorkspaceController extends Controller
 
             foreach ($shipment->orders as $order) {
                 if ($order->status === 'Assigned') {
-                    $order->update(['status' => 'On Process']);
+                    $order->update(['status' => 'In Transit']);
                     
                     \App\Models\OrderHistory::create([
                         'order_id' => $order->id,
                         'user_id' => $user->id,
-                        'status' => 'On Process',
+                        'status' => 'In Transit',
                         'description' => 'Driver has started the journey.',
                     ]);
                 }
@@ -245,13 +245,23 @@ class WorkspaceController extends Controller
             $isTransit = false;
             $destWarehouseId = null;
             if ($shipment->routeVersion && $shipment->routeVersion->route) {
-                $isTransit = !str_starts_with($shipment->routeVersion->route->route_code, 'RTE-ADHOC-');
+                $isTransit = $shipment->routeVersion->route->is_master;
+                
                 if ($isTransit) {
                     $destName = $shipment->routeVersion->route->destination_name;
                     $cleanName = trim(str_replace('(Warehouse)', '', $destName));
                     $destWarehouse = \App\Models\Warehouse::where('name', 'LIKE', '%' . $cleanName . '%')->first();
                     if ($destWarehouse) {
                         $destWarehouseId = $destWarehouse->id;
+                        
+                        // Check if the order's final destination is actually this warehouse (e.g. stock transfer)
+                        // Using a simple distance check or coordinate exact match
+                        if ($order->destination_latitude == $destWarehouse->latitude && 
+                            $order->destination_longitude == $destWarehouse->longitude) {
+                            $isTransit = false;
+                        } else if (str_contains(strtolower($order->destination_address), strtolower($destWarehouse->name))) {
+                            $isTransit = false;
+                        }
                     }
                 }
             }
@@ -313,7 +323,7 @@ class WorkspaceController extends Controller
 
             $pendingOrders = DB::table('shipment_orders')
                 ->where('shipment_id', $shipment->id)
-                ->whereIn('status', ['Pending', 'On Process', 'Loaded'])
+                ->where('status', 'Loaded')
                 ->count();
 
             if ($pendingOrders === 0) {
