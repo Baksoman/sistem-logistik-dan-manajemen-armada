@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Logistik | @yield('title', ' ')</title>
+    <title>LogiX | @yield('title', ' ')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -46,11 +46,12 @@
             <!-- Logo -->
             <div class="flex items-center gap-3 transition-transform duration-500"
                 :class="scrolled ? 'scale-90' : 'scale-100'">
-                <div
-                    class="w-10 h-10 rounded-full shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] flex items-center justify-center font-bold text-xl text-gray-800">
-                    L
+                <div class="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center shadow-[inset_3px_3px_6px_#d1d5db,inset_-3px_-3px_6px_#ffffff] relative overflow-hidden group p-1">
+                    <img src="{{ asset('images/logix-logo-only.jpg') }}" alt="LogiX Logo" class="w-full h-full object-contain mix-blend-multiply">
                 </div>
-                <span class="font-bold text-xl text-gray-800 tracking-widest uppercase">Logistik</span>
+                <span class="text-2xl font-black tracking-tight text-gray-800" style="font-family: 'Inter', sans-serif;">
+                    Logi<span class="text-blue-600">X</span>
+                </span>
             </div>
 
             <!-- Desktop Links -->
