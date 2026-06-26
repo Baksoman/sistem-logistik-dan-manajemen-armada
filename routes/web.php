@@ -7,13 +7,13 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DriverProfileController;
-use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\Logistik\VehicleController;
 use App\Http\Controllers\RolePermissionController;
-use App\Http\Controllers\VehicleMaintenanceController;
+use App\Http\Controllers\Logistik\VehicleMaintenanceController;
 use App\Http\Controllers\Logistik\RouteController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ShipmentController;
-use App\Http\Controllers\TariffController;
+use App\Http\Controllers\Logistik\OrderController;
+use App\Http\Controllers\Logistik\ShipmentController;
+use App\Http\Controllers\Logistik\TariffController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\InventoryController;
 use App\Http\Controllers\Warehouse\ZoneController;
@@ -25,6 +25,7 @@ use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboardController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\QuoteRequestController;
+use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/', function () {
     return view('home');
@@ -34,6 +35,9 @@ Route::post('/quote-request', [QuoteRequestController::class, 'store'])->name('q
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+
+Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 Route::get('/track', [TrackingController::class, 'search'])->name('track.search');
 
