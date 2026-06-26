@@ -69,6 +69,11 @@
             opacity: 1;
             transform: translateY(0);
         }
+        
+        /* Wave animation */
+        .fill-gray-100 {
+            fill: #f3f4f6;
+        }
     </style>
 @endpush
 
@@ -86,7 +91,7 @@
             terpusat.
         </p>
 
-        <div id="hero-card" class="mt-12 mb-10 w-full max-w-3xl bg-gray-100 rounded-3xl p-8" x-data="qrScanner()">
+        <div id="hero-card" class="mt-12 mb-32 w-full max-w-3xl bg-gray-100 rounded-3xl p-8" x-data="qrScanner()">
             <h2 class="text-xl font-bold text-gray-700 mb-6 tracking-tight">Cek Resi Pengiriman</h2>
             <form action="{{ route('track.search') }}" method="GET" class="flex flex-col sm:flex-row gap-4"
                 id="track-form">
@@ -141,6 +146,13 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Wave Divider -->
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none" style="transform: rotate(180deg);">
+        <svg class="relative block w-full h-[80px] md:h-[120px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-gray-100"></path>
+        </svg>
     </div>
 </section>
 

@@ -124,44 +124,39 @@
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach([
-                        ['name' => 'PICKUP', 'cap' => '500 KG', 'img' => 'pickup.png', 'delay' => '0s'],
-                        ['name' => 'ENGKEL', 'cap' => '2 TON', 'img' => 'engkel.png', 'delay' => '0.1s'],
-                        ['name' => 'FUSO', 'cap' => '5 TON', 'img' => 'fuso.png', 'delay' => '0.2s'],
-                        ['name' => 'TRONTON', 'cap' => '10+ TON', 'img' => 'tronton.png', 'delay' => '0.3s']
+                    ['name' => 'PICKUP', 'cap' => '500 KG', 'img' => 'pickup.png', 'delay' => '0s'],
+                    ['name' => 'ENGKEL', 'cap' => '2 TON', 'img' => 'engkel.png', 'delay' => '0.1s'],
+                    ['name' => 'FUSO', 'cap' => '5 TON', 'img' => 'fuso.png', 'delay' => '0.2s'],
+                    ['name' => 'TRONTON', 'cap' => '10+ TON', 'img' => 'tronton.png', 'delay' => '0.3s']
                     ] as $vehicle)
 
 
-                                                            <div class="vehicle-card" style="animation-delay: {{ $vehicle['delay'] }};" x-intersect.once="$el.classList.add('fade-in')">
-                        <div class="mb-4 px-2">
-                                <img src="{{ asset('assets/home/truk/' . $vehicle['img']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-auto mx-auto">
-                            </div>
-                         <h4 class="font-black text-gray-800 text-sm uppercase tracking-wider mb-2">{{ $vehicle['name'] }}</h4>
-                            <div class="inline-block neo-badge text-[0.65rem] px-3 py-1">{{ $vehicle['cap'] }}</div>
-                        </div>
+        <div class="vehicle-card" style="animation-delay: {{ $vehicle['delay'] }};" x-intersect.once="$el.classList.add('fade-in')">
+            <div class="mb-4 px-2">
+                    <img src="{{ asset('assets/home/truk/' . $vehicle['img']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-auto mx-auto">
+                </div>
+                <h4 class="font-black text-gray-800 text-sm uppercase tracking-wider mb-2">{{ $vehicle['name'] }}</h4>
+                <div class="inline-block neo-badge text-[0.65rem] px-3 py-1">{{ $vehicle['cap'] }}</div>
+            </div>
 
-                   @endforeach
+        @endforeach
      </div>
 
-               
-               
-               
+    <!-- Armada Laut -->
 
-                           <!-- Armada Laut -->
-                
-
-                                          <div x-show="activeMode === 'laut'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="flex flex-wrap justify-center gap-6">
+    <div x-show="activeMode === 'laut'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="flex flex-wrap justify-center gap-6">
             @foreach([
-                    ['name' => 'KAPAL KARGO', 'cap' => '100+ TON', 'img' => 'kargo.png', 'delay' => '0s'],
-                    ['name' => 'KAPAL KONTAINER', 'cap' => '500+ TON', 'img' => 'kontainer.png', 'delay' => '0.1s'],
-                    ['name' => 'KAPAL RO-RO', 'cap' => '50+ UNIT', 'img' => 'roro.png', 'delay' => '0.2s']
-                ] as $vehicle)
-                        <div class="vehicle-card w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)]" style="animation-delay: {{ $vehicle['delay'] }};" x-intersect.once="$el.classList.add('fade-in')">
-                            <div class="mb-4 px-2">
-                                <img src="{{ asset('assets/home/kapal/' . $vehicle['img']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-auto mx-auto">
-                            </div>
-                            <h4 class="font-black text-gray-800 text-sm uppercase tracking-wider mb-2 leading-tight">{{ $vehicle['name'] }}</h4>
-                            <div class="inline-block neo-badge text-[0.65rem] px-3 py-1">{{ $vehicle['cap'] }}</div>
+                ['name' => 'KAPAL KARGO', 'cap' => '100+ TON', 'img' => 'kargo.png', 'delay' => '0s'],
+                ['name' => 'KAPAL KONTAINER', 'cap' => '500+ TON', 'img' => 'kontainer.png', 'delay' => '0.1s'],
+                ['name' => 'KAPAL RO-RO', 'cap' => '50+ UNIT', 'img' => 'roro.png', 'delay' => '0.2s']
+            ] as $vehicle)
+                    <div class="vehicle-card w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)]" style="animation-delay: {{ $vehicle['delay'] }};" x-intersect.once="$el.classList.add('fade-in')">
+                        <div class="mb-4 px-2">
+                            <img src="{{ asset('assets/home/kapal/' . $vehicle['img']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-auto mx-auto">
                         </div>
+                        <h4 class="font-black text-gray-800 text-sm uppercase tracking-wider mb-2 leading-tight">{{ $vehicle['name'] }}</h4>
+                        <div class="inline-block neo-badge text-[0.65rem] px-3 py-1">{{ $vehicle['cap'] }}</div>
+                    </div>
             @endforeach
             </div>
         </div>
