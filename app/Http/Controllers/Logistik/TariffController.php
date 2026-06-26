@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Logistik;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Tariff;
 use App\Models\Route;
