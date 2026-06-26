@@ -58,6 +58,17 @@
             transform-origin: center center;
             will-change: transform, opacity;
         }
+
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 @endpush
 
@@ -218,6 +229,24 @@
                     window.location.href = '/';
                 }
             }
+        });
+
+        // Section fade in on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-fade-in').forEach(section => {
+            observer.observe(section);
         });
     </script>
 @endpush

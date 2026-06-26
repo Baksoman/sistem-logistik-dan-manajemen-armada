@@ -10,7 +10,7 @@
 </style>
 @endpush
 
-<section id="cta-section" class="relative w-full py-24 px-6 bg-gray-100 overflow-hidden">
+<section id="cta-section" class="section-fade-in relative w-full py-24 px-6 bg-gray-100 overflow-hidden">
     <div class="dot-grid opacity-20"></div>
     <div class="max-w-6xl mx-auto relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

@@ -6,7 +6,7 @@
 </style>
 @endpush
 
-<section id="why-section" class="relative w-full py-24 px-6 bg-gray-100 overflow-hidden">
+<section id="why-section" class="section-fade-in relative w-full py-24 px-6 bg-gray-100 overflow-hidden">
     <div class="dot-grid opacity-25"></div>
     <div class="max-w-6xl mx-auto relative z-10">
         <div class="text-center mb-16">

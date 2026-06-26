@@ -19,7 +19,7 @@
 </style>
 @endpush
 
-<section id="faq-section" class="relative w-full py-24 px-6 bg-gray-100" x-data="faqManager()">
+<section id="faq-section" class="section-fade-in relative w-full py-24 px-6 bg-gray-100" x-data="faqManager()">
     <div class="max-w-3xl mx-auto">
         <div class="text-center mb-12">
             <h2 class="mt-3 text-4xl md:text-5xl font-black text-gray-800 tracking-tight" style="font-family:'Inter',sans-serif;">Pertanyaan yang Sering Diajukan</h2>
