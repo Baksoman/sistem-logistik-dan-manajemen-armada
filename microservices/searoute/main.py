@@ -56,7 +56,7 @@ def calculate_sea_route(request: RouteRequest):
         route = sr.searoute(origin, destination, units=request.units)
 
         if not route or 'properties' not in route:
-            raise ValueError("Invalid route calculation result from searoute library.")
+            raise ValueError("Titik koordinat terlalu jauh dari laut atau rute laut tidak ditemukan.")
 
         return RouteResponse(
             distance=route["properties"]["length"],
@@ -64,5 +64,11 @@ def calculate_sea_route(request: RouteRequest):
             geojson=route
         )
     except Exception as e:
-        logger.error(f"Error calculating sea route: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to calculate sea route: {str(e)}")
+        error_msg = str(e)
+        logger.error(f"Error calculating sea route: {error_msg}")
+        
+        if "cannot add waypoints" in error_msg.lower() or "too far from sea" in error_msg.lower():
+            friendly_msg = "Gagal menghitung rute laut. Pastikan titik Origin dan Destination berada di area perairan/pelabuhan, bukan di daratan jauh."
+            raise HTTPException(status_code=400, detail=friendly_msg)
+            
+        raise HTTPException(status_code=500, detail=f"Failed to calculate sea route: {error_msg}")
