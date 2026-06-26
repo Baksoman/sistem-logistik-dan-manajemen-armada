@@ -13,7 +13,7 @@ class TrackingController extends Controller
         $trackingId = trim($request->input('tracking_id'));
 
         if (!$trackingId) {
-            return view('welcome', [
+            return view('home', [
                 'error' => 'Silakan masukkan nomor resi (Order ID / Shipment ID).',
                 'trackingId' => null
             ]);
@@ -29,10 +29,18 @@ class TrackingController extends Controller
         }])->where('order_number', $trackingId)->first();
 
         if ($order) {
-            return view('welcome', [
+            // Get latest GPS
+            $latestGps = null;
+            $activeShipment = $order->shipments->first();
+            if ($activeShipment) {
+                $latestGps = $activeShipment->gpsHistory->first();
+            }
+            
+            return view('home', [
                 'type' => 'order',
                 'data' => $order,
-                'trackingId' => $trackingId
+                'trackingId' => $trackingId,
+                'latestGps' => $latestGps
             ]);
         }
 
@@ -44,15 +52,18 @@ class TrackingController extends Controller
         }])->where('shipment_number', $trackingId)->first();
 
         if ($shipment) {
-            return view('welcome', [
+            $latestGps = $shipment->gpsHistory->first();
+            
+            return view('home', [
                 'type' => 'shipment',
                 'data' => $shipment,
-                'trackingId' => $trackingId
+                'trackingId' => $trackingId,
+                'latestGps' => $latestGps
             ]);
         }
 
         // Not found
-        return view('welcome', [
+        return view('home', [
             'error' => 'Resi tidak ditemukan. Pastikan nomor yang dimasukkan benar.',
             'trackingId' => $trackingId
         ]);

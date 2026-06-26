@@ -24,11 +24,13 @@ use App\Http\Controllers\Warehouse\OutboundController;
 use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboardController;
 use App\Http\Controllers\TrackingController;
-use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\QuoteRequestController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
+
+Route::post('/quote-request', [QuoteRequestController::class, 'store'])->name('quote.request');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
