@@ -44,7 +44,6 @@ class RouteService
             $calculation = $this->routingService->calculateLandRoute($waypoints);
         } elseif ($route->route_type === 'sea') {
             $calculation = $this->routingService->calculateSeaRoute($waypoints[0], end($waypoints));
-            $calculation['duration_min'] = ($calculation['distance_km'] / 37) * 60;
         } else {
             // "auto" or "combined"
             $calculation = $this->routingService->calculateCombinedRoute($waypoints);
