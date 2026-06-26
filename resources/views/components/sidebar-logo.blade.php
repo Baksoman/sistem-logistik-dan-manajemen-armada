@@ -5,7 +5,7 @@
         <!-- Main Logo Area -->
         <div class="flex items-center gap-3">
             <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center shadow-[4px_4px_10px_#d1d5db,-4px_-4px_10px_#ffffff] relative overflow-hidden group p-1">
-                <img src="{{ asset('images/logix-logo-only.jpg') }}" alt="LogiX Logo" class="w-full h-full object-contain mix-blend-multiply">
+                <img src="{{ asset('assets/logo/logix-logo-only.jpg') }}" alt="LogiX Logo" class="w-full h-full object-contain mix-blend-multiply">
             </div>
             
             <div class="flex flex-col justify-center">
