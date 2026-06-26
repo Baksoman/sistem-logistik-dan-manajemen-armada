@@ -270,7 +270,7 @@
 
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="nm-pill">
-                <p class="text-xs font-bold text-gray-400">© {{ date('Y') }} LogiX — Sistem Logistik dan Manajemen Armada. All rights reserved.</p>
+                <p class="text-xs font-bold text-gray-400">© {{ date('Y') }} LogiX - Sistem Logistik dan Manajemen Armada. All rights reserved.</p>
             </div>
             <div class="flex gap-3">
                 <a href="#" class="nm-text-link">Syarat &amp; Ketentuan</a>

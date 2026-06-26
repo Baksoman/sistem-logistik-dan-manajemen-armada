@@ -75,9 +75,7 @@
             terpusat.
         </p>
 
-        <div id="hero-card"
-            class="mt-12 mb-10 w-full max-w-3xl bg-gray-100 rounded-3xl p-8"
-            x-data="qrScanner()">
+        <div id="hero-card" class="mt-12 mb-10 w-full max-w-3xl bg-gray-100 rounded-3xl p-8" x-data="qrScanner()">
             <h2 class="text-xl font-bold text-gray-700 mb-6 tracking-tight">Cek Resi Pengiriman</h2>
             <form action="{{ route('track.search') }}" method="GET" class="flex flex-col sm:flex-row gap-4"
                 id="track-form">
@@ -142,12 +140,16 @@
 
             const map = new mapboxgl.Map({
                 container: 'hero-map',
-                center: [103.851959, 1.290270],  // Jakarta — ganti sesuai kotamu
-                zoom: 16.1, // starting zoom
-                pitch: 62, // starting pitch
-                bearing: -20, // starting bearing
+                center: [103.851959, 1.290270],
+                zoom: 16.1,
+                pitch: 62,
+                bearing: -20,
                 style: 'mapbox://styles/mapbox/standard',
-                // interactive: false             // tidak bisa digeser, zoom, maupun klik
+                interactive: true,
+                attributionControl: false,
+                renderWorldCopies: false,
+                maxZoom: 16.1,
+                minZoom: 16.1
             });
 
             map.on('style.load', () => {
@@ -160,7 +162,6 @@
                 map.setConfigProperty('basemap', 'showTransitLabels', false);
             });
 
-            // Resize map ketika window berubah ukuran agar tetap full layar
             window.addEventListener('resize', () => map.resize());
         })();
 
