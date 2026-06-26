@@ -1,4 +1,4 @@
-@props(['name' => '', 'placeholder' => 'Search location...', 'eventName' => 'location-selected', 'value' => ''])
+@props(['name' => '', 'placeholder' => 'Search location...', 'eventName' => 'location-selected', 'value' => '', 'required' => true])
 <div x-data="{
     query: '{{ addslashes($value) }}',
     results: [],
@@ -18,7 +18,7 @@
         this.$dispatch('{{ $eventName }}', result);
     }
 }" class="relative w-full">
-    <input type="text" name="{{ $name }}" x-model="query" @input.debounce.500ms="search()" @focus="isOpen = true" @click.away="isOpen = false" placeholder="{{ $placeholder }}" autocomplete="off" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" required />
+    <input type="text" name="{{ $name }}" x-model="query" @input.debounce.500ms="search()" @focus="isOpen = true" @click.away="isOpen = false" placeholder="{{ $placeholder }}" autocomplete="off" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none" {{ $required ? 'required' : '' }} />
     
     <div x-show="isOpen && (results.length > 0 || isSearching)" class="absolute z-50 w-full mt-2 bg-gray-100 rounded-2xl shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border border-gray-200 overflow-hidden" x-transition x-cloak>
         <template x-for="result in results" :key="result.id || result.name">

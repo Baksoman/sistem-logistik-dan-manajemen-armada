@@ -56,7 +56,7 @@
                     <div x-show="routeType === 'land'" x-transition class="mt-4 p-4 rounded-2xl bg-gray-50 border border-dashed border-gray-300">
                         <label class="block text-xs font-bold text-gray-500 mb-2">Add Intermediate Stop (Land Only)</label>
                         <div @@stop-selected.window="insertStop([parseFloat($event.detail.lng), parseFloat($event.detail.lat)])">
-                            <x-omni-search name="stop_search" placeholder="Search to add stop..." event-name="stop-selected" />
+                            <x-omni-search name="stop_search" placeholder="Search to add stop..." event-name="stop-selected" :required="false" />
                         </div>
                         <p class="text-[10px] text-gray-400 mt-1">Stops will be inserted before the destination.</p>
                     </div>
@@ -178,7 +178,11 @@
                         
                         const lon = e.latlng.lng;
                         const lat = e.latlng.lat;
-                        this.addWaypoint([lon, lat]);
+                        if (this.waypoints.length >= 2) {
+                            this.insertStop([lon, lat]);
+                        } else {
+                            this.addWaypoint([lon, lat]);
+                        }
                     });
                 },
 
@@ -274,7 +278,7 @@
 
                     if (this.calculationResult && this.calculationResult.geojson) {
                         let color = '#8b5cf6'; // auto
-                        if(this.routeType === 'land') color = '#f59e0b';
+                        if(this.routeType === 'land') color = '#dc2626'; // red for contrast
                         if(this.routeType === 'sea') color = '#3b82f6';
                         
                         this.routeLayer = L.geoJSON(this.calculationResult.geojson, {
