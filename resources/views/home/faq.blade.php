@@ -1,6 +1,6 @@
 @push('styles')
 <style>
-.faq-item { background: #e8ecef; border-radius: 1.5rem; box-shadow: 8px 8px 16px #c2c6cc, -8px -8px 16px #ffffff; overflow: hidden; transition: all 0.4s cubic-bezier(.23,1.5,.32,1); opacity: 0; transform: translateY(30px); }
+.faq-item { background: #e8ecef; border-radius: 0.75rem; box-shadow: 8px 8px 16px #c2c6cc, -8px -8px 16px #ffffff; overflow: hidden; transition: all 0.4s cubic-bezier(.23,1.5,.32,1); opacity: 0; transform: translateY(30px); }
 .faq-item.fade-in { animation: fadeInUp 0.8s ease-out forwards; }
 .faq-item.open { box-shadow: inset 6px 6px 12px #c2c6cc, inset -6px -6px 12px #ffffff; }
 .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), padding 0.3s; padding: 0 2rem; }
@@ -13,7 +13,7 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-.category-btn { padding: 0.5rem 1.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 700; color: #6b7280; background: #e8ecef; box-shadow: 6px 6px 12px #d1d5db, -6px -6px 12px #ffffff; transition: all 0.3s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+.category-btn { padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #6b7280; background: #e8ecef; box-shadow: 6px 6px 12px #d1d5db, -6px -6px 12px #ffffff; transition: all 0.3s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
 .category-btn:hover { color: #374151; }
 .category-btn.active { box-shadow: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff; color: #1f2937; }
 </style>
@@ -41,7 +41,7 @@
             <div class="faq-item" style="animation-delay: {{ $faq['idx'] * 0.1 }}s;" x-intersect.once="$el.classList.add('fade-in')">
                 <div class="faq-question px-8 py-6 cursor-pointer flex justify-between items-center select-none" @click="toggleFaq({{ $faq['idx'] }})">
                     <span class="font-black text-gray-800 text-sm pr-4 uppercase tracking-wide">{{ $faq['q'] }}</span>
-                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-full bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
+                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-lg bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
             <div class="faq-item" style="animation-delay: {{ ($faq['idx'] - 2) * 0.1 }}s;" x-intersect.once="$el.classList.add('fade-in')">
                 <div class="faq-question px-8 py-6 cursor-pointer flex justify-between items-center select-none" @click="toggleFaq({{ $faq['idx'] }})">
                     <span class="font-black text-gray-800 text-sm pr-4 uppercase tracking-wide">{{ $faq['q'] }}</span>
-                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-full bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
+                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-lg bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
             <div class="faq-item" style="animation-delay: {{ ($faq['idx'] - 4) * 0.1 }}s;" x-intersect.once="$el.classList.add('fade-in')">
                 <div class="faq-question px-8 py-6 cursor-pointer flex justify-between items-center select-none" @click="toggleFaq({{ $faq['idx'] }})">
                     <span class="font-black text-gray-800 text-sm pr-4 uppercase tracking-wide">{{ $faq['q'] }}</span>
-                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-full bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
+                    <div class="faq-chevron w-9 h-9 flex-shrink-0 rounded-lg bg-gray-100 shadow-[4px_4px_8px_#c2c6cc,-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>

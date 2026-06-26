@@ -1,6 +1,6 @@
 @push('styles')
 <style>
-.why-card { background: #e8ecef; border-radius: 1.5rem; padding: 2rem; box-shadow: 8px 8px 16px #c2c6cc, -8px -8px 16px #ffffff; display: flex; gap: 1.5rem; align-items: flex-start; transition: all 0.35s; }
+.why-card { background: #e8ecef; border-radius: 0.75rem; padding: 2rem; box-shadow: 8px 8px 16px #c2c6cc, -8px -8px 16px #ffffff; display: flex; gap: 1.5rem; align-items: flex-start; transition: all 0.35s; }
 .why-card:hover { box-shadow: 10px 10px 20px #b8bcc2, -10px -10px 20px #ffffff; transform: translateY(-3px); }
 @media (max-width: 768px) { .why-card { flex-direction: column; } }
 </style>
@@ -23,7 +23,7 @@
                 ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'title' => 'SLA Guarantee', 'desc' => 'Komitmen pengiriman tepat waktu dengan tracking SLA achievement di atas 90% secara konsisten.'],
             ] as $i => $why)
             <div class="why-card">
-                <div class="w-14 h-14 flex-shrink-0 rounded-full bg-gray-100 shadow-[inset_4px_4px_8px_#c2c6cc,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
+                <div class="w-14 h-14 flex-shrink-0 rounded-lg bg-gray-100 shadow-[inset_4px_4px_8px_#c2c6cc,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         @foreach(explode(' M', $why['icon']) as $j => $part)
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $j === 0 ? $part : 'M' . $part }}"></path>

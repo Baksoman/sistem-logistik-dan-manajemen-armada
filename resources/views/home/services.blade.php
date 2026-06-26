@@ -2,7 +2,7 @@
     <style>
         .service-card {
             background: #e8ecef;
-            border-radius: 2.5rem;
+            border-radius: 0.75rem;
             padding: 2.5rem 2rem;
             box-shadow: 10px 10px 20px #c2c6cc, -10px -10px 20px #ffffff;
             transition: all 0.4s cubic-bezier(.23, 1.5, .32, 1);
@@ -15,7 +15,7 @@
 
         .vehicle-card {
             background: #e8ecef;
-            border-radius: 2rem;
+            border-radius: 0.75rem;
             padding: 2rem 1.5rem;
             box-shadow: 10px 10px 20px #c2c6cc, -10px -10px 20px #ffffff;
             text-align: center;
@@ -55,7 +55,7 @@
 
         .mode-btn {
             padding: 0.5rem 1.5rem;
-            border-radius: 1rem;
+            border-radius: 0.5rem;
             font-size: 0.875rem;
             font-weight: 700;
             color: #6b7280;

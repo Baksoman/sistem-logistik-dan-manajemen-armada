@@ -20,7 +20,7 @@
 /* Social buttons */
 .social-btn {
     width: 2.75rem; height: 2.75rem;
-    border-radius: 50%;
+    border-radius: 0.5rem;
     background: var(--nm-bg);
     box-shadow: 5px 5px 10px var(--nm-dark), -5px -5px 10px var(--nm-light);
     display: flex; align-items: center; justify-content: center;
@@ -124,14 +124,14 @@
 .nm-pill {
     background: var(--nm-bg);
     box-shadow: 5px 5px 10px var(--nm-dark), -5px -5px 10px var(--nm-light);
-    border-radius: 9999px;
+    border-radius: 0.5rem;
     padding: 0.5rem 1.25rem;
 }
 
 .nm-text-link {
     font-size: 0.75rem; font-weight: 700; color: #9ca3af;
     padding: 0.4rem 0.875rem;
-    border-radius: 9999px;
+    border-radius: 0.5rem;
     background: var(--nm-bg);
     box-shadow: 4px 4px 8px var(--nm-dark), -4px -4px 8px var(--nm-light);
     transition: box-shadow 0.2s, color 0.2s;
@@ -144,7 +144,7 @@
 /* Divider */
 .nm-divider {
     height: 2px;
-    border-radius: 9999px;
+    border-radius: 0.25rem;
     box-shadow: inset 1px 1px 2px var(--nm-dark), inset -1px -1px 2px var(--nm-light);
     background: transparent;
 }
@@ -167,7 +167,7 @@
             {{-- Col 1 : Brand --}}
             <div class="reveal-left flex flex-col gap-5">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl nm-icon flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
+                    <div class="w-11 h-11 rounded-lg nm-icon flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
                         <img src="{{ asset('assets/logo/logix-logo-only.jpg') }}" alt="LogiX" class="w-full h-full object-contain mix-blend-multiply">
                     </div>
                     <span class="text-2xl font-black tracking-tight text-gray-800" style="font-family:'Inter',sans-serif;">
@@ -234,10 +234,10 @@
                         ['icon' => 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z', 'text' => 'Jl. Logistik Raya No. 123, Jakarta Selatan 12345'],
                         ['icon' => 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', 'text' => '+62 21 1234 5678'],
                         ['icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'text' => 'cs@logix.co.id'],
-                        ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Senin–Jumat 08.00–17.00 / Sabtu 08.00–12.00'],
+                        ['icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'text' => 'Senin - Sabtu 08.00 - 17.00'],
                     ] as $c)
                     <div class="nm-contact-row">
-                        <div class="w-8 h-8 rounded-full nm-icon flex items-center justify-center flex-shrink-0 text-gray-600">
+                        <div class="w-8 h-8 rounded-lg nm-icon flex items-center justify-center flex-shrink-0 text-gray-600">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 @foreach(explode(' M', $c['icon']) as $j => $part)
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $j === 0 ? $part : 'M'.$part }}"></path>

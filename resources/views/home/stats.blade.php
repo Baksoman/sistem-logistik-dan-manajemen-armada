@@ -1,6 +1,6 @@
 @push('styles')
 <style>
-.stat-card { background: #e8ecef; border-radius: 2rem; padding: 2.5rem 2rem; box-shadow: 12px 12px 24px #c2c6cc, -12px -12px 24px #ffffff; transition: all 0.3s; }
+.stat-card { background: #e8ecef; border-radius: 0.75rem; padding: 2.5rem 2rem; box-shadow: 12px 12px 24px #c2c6cc, -12px -12px 24px #ffffff; transition: all 0.3s; }
 .stat-card:hover { box-shadow: 16px 16px 32px #b8bcc2, -16px -16px 32px #ffffff; transform: translateY(-4px); }
 @media (max-width: 768px) { .stat-card { padding: 1.75rem 1.25rem; } }
 </style>
@@ -20,7 +20,7 @@
                 ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'count' => 96, 'label' => 'Tepat Waktu (SLA)', 'percent' => true]
             ] as $stat)
             <div class="stat-card text-center" x-intersect="startCount({{ $loop->index }}, {{ $stat['count'] }})">
-                <div class="w-16 h-16 mx-auto mb-5 rounded-full bg-gray-100 shadow-[inset_4px_4px_8px_#c2c6cc,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
+                <div class="w-16 h-16 mx-auto mb-5 rounded-lg bg-gray-100 shadow-[inset_4px_4px_8px_#c2c6cc,inset_-4px_-4px_8px_#ffffff] flex items-center justify-center text-gray-600">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         @foreach(explode(' M', $stat['icon']) as $j => $part)
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $j === 0 ? $part : 'M' . $part }}"></path>

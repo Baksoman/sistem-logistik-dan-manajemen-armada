@@ -43,7 +43,7 @@
 
         .neo-badge {
             background: #e8ecef;
-            border-radius: 999px;
+            border-radius: 0.5rem;
             padding: 0.35rem 1rem;
             font-size: 0.7rem;
             font-weight: 800;
@@ -91,17 +91,17 @@
             terpusat.
         </p>
 
-        <div id="hero-card" class="mt-12 mb-32 w-full max-w-3xl bg-gray-100 rounded-3xl p-8" x-data="qrScanner()">
+        <div id="hero-card" class="mt-12 mb-32 w-full max-w-3xl bg-gray-100 rounded-xl p-8" x-data="qrScanner()">
             <h2 class="text-xl font-bold text-gray-700 mb-6 tracking-tight">Cek Resi Pengiriman</h2>
             <form action="{{ route('track.search') }}" method="GET" class="flex flex-col sm:flex-row gap-4"
                 id="track-form">
                 <input id="tracking_id" name="tracking_id" value="{{ request('tracking_id') }}" x-model="trackingId"
                     type="text" placeholder="Contoh: ORD-12345678"
-                    class="flex-1 bg-gray-100 rounded-2xl px-6 py-4 text-base font-semibold text-gray-800 shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff] border-none focus:ring-0 focus:outline-none placeholder-gray-400 tracking-wide"
+                    class="flex-1 bg-gray-100 rounded-xl px-6 py-4 text-base font-semibold text-gray-800 shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff] border-none focus:ring-0 focus:outline-none placeholder-gray-400 tracking-wide"
                     required />
                 <div class="flex gap-3">
                     <button type="button" @click="openScanner"
-                        class="w-14 h-[56px] flex items-center justify-center text-gray-500 hover:text-gray-700 bg-gray-100 rounded-2xl shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff] active:shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] transition-all">
+                        class="w-14 h-[56px] flex items-center justify-center text-gray-500 hover:text-gray-700 bg-gray-100 rounded-xl shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff] active:shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] transition-all">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z">
@@ -109,12 +109,12 @@
                         </svg>
                     </button>
                     <button type="submit"
-                        class="flex-1 sm:w-32 bg-gray-100 text-gray-700 text-base font-bold tracking-wide rounded-2xl py-4 px-6 shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff] active:shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] hover:text-gray-900 transition-all">Lacak</button>
+                        class="flex-1 sm:w-32 bg-gray-100 text-gray-700 text-base font-bold tracking-wide rounded-xl py-4 px-6 shadow-[6px_6px_12px_#d1d5db,-6px_-6px_12px_#ffffff] active:shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] hover:text-gray-900 transition-all">Lacak</button>
                 </div>
             </form>
             @if(isset($error))
                 <div
-                    class="mt-8 p-5 bg-gray-100 rounded-2xl shadow-[inset_5px_5px_10px_#d1d5db,inset_-5px_-5px_10px_#ffffff] border-l-4 border-red-500 flex items-center gap-4 text-red-600 font-bold">
+                    class="mt-8 p-5 bg-gray-100 rounded-xl shadow-[inset_5px_5px_10px_#d1d5db,inset_-5px_-5px_10px_#ffffff] border-l-4 border-red-500 flex items-center gap-4 text-red-600 font-bold">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -128,11 +128,11 @@
             <div x-show="isScanning" x-cloak
                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md">
                 <div @click.away="closeScanner"
-                    class="bg-gray-100 rounded-[2.5rem] p-8 w-full max-w-lg shadow-[16px_16px_32px_#000000,-16px_-16px_32px_#ffffff]">
+                    class="bg-gray-100 rounded-3xl p-8 w-full max-w-lg shadow-[16px_16px_32px_#000000,-16px_-16px_32px_#ffffff]">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-black text-gray-700 uppercase tracking-widest">Scan QR Code</h3>
                         <button @click="closeScanner" type="button"
-                            class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] text-gray-600 hover:text-red-500 active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                            class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] text-gray-600 hover:text-red-500 active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                     d="M6 18L18 6M6 6l12 12"></path>
@@ -140,8 +140,8 @@
                         </button>
                     </div>
                     <div
-                        class="p-4 bg-gray-100 rounded-3xl shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff]">
-                        <div id="reader" class="w-full bg-black rounded-2xl overflow-hidden min-h-[300px]"></div>
+                        class="p-4 bg-gray-100 rounded-xl shadow-[inset_6px_6px_12px_#d1d5db,inset_-6px_-6px_12px_#ffffff]">
+                        <div id="reader" class="w-full bg-black rounded-xl overflow-hidden min-h-[300px]"></div>
                     </div>
                 </div>
             </div>
