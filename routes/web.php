@@ -167,21 +167,6 @@ Route::middleware('auth')->group(function () {
             Route::resource('tariffs', TariffController::class);
         });
 
-        Route::middleware('permission:manage_orders')->group(function () {
-            Route::prefix('orders')->group(function () {
-                Route::get('/export/excel', [OrderController::class, 'exportExcel'])->name('orders.export.excel');
-                Route::get('/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
-                Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-                Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
-                Route::post('/', [OrderController::class, 'store'])->name('orders.store');
-                Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
-                Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
-                Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
-                Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-                Route::get('/warehouse-items/{warehouse}', [OrderController::class, 'getWarehouseItems'])->name('orders.warehouse-items');
-            });
-        });
-
         Route::middleware('permission:manage_shipments')->group(function () {
             Route::prefix('shipments')->group(function () {
                 Route::get('/export/excel', [ShipmentController::class, 'exportExcel'])->name('shipments.export.excel');
@@ -194,6 +179,29 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{shipment}/complete', [ShipmentController::class, 'complete'])->name('shipments.complete');
                 Route::post('/{shipment}/unload', [ShipmentController::class, 'unload'])->name('shipments.unload');
             });
+        });
+    });
+
+    Route::prefix('orders')->group(function () {
+        Route::middleware('permission:manage_orders')->group(function () {
+            Route::get('/export/excel', [OrderController::class, 'exportExcel'])->name('orders.export.excel');
+            Route::get('/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
+            Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+            Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
+            Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        });
+
+        // Creation Access
+        Route::middleware('permission:create_order')->group(function () {
+            Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
+            Route::post('/', [OrderController::class, 'store'])->name('orders.store');
+        });
+
+        // Read-Only Access
+        Route::middleware('permission:view_orders')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/warehouse-items/{warehouse}', [OrderController::class, 'getWarehouseItems'])->name('orders.warehouse-items');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
         });
     });
 

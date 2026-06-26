@@ -1,4 +1,7 @@
-@extends('layouts.logistik')
+@php
+    $layout = auth()->user()->can('manage_orders') ? 'layouts.logistik' : 'layouts.warehouse';
+@endphp
+@extends($layout)
 
 @section('title', 'Order Details')
 
@@ -30,22 +33,24 @@
                 {{ $order->status }}
             </span>
 
-            <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="flex items-center gap-2">
-                @csrf
-                @method('PATCH')
-                <select name="status" class="bg-gray-100 rounded-xl px-4 py-2 font-bold text-gray-700 border-none focus:ring-2 focus:ring-blue-500 shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] text-sm outline-none">
-                    <option value="Pending Approval" {{ $order->status == 'Pending Approval' ? 'selected' : '' }}>Pending Approval</option>
-                    <option value="Confirmed" {{ $order->status == 'Confirmed' ? 'selected' : '' }}>Confirmed</option>
-                    <option value="Assigned" {{ $order->status == 'Assigned' ? 'selected' : '' }}>Assigned</option>
-                    <option value="Arrived at Hub" {{ $order->status == 'Arrived at Hub' ? 'selected' : '' }}>Arrived at Hub</option>
-                    <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Completed</option>
-                    <option value="Delivered" {{ $order->status == 'Delivered' ? 'selected' : '' }}>Delivered</option>
-                    <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#1e3a8a] transition-all text-sm">
-                    Update
-                </button>
-            </form>
+            @can('manage_orders')
+                <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="flex items-center gap-2">
+                    @csrf
+                    @method('PATCH')
+                    <select name="status" class="bg-gray-100 rounded-xl px-4 py-2 font-bold text-gray-700 border-none focus:ring-2 focus:ring-blue-500 shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] text-sm outline-none">
+                        <option value="Pending Approval" {{ $order->status == 'Pending Approval' ? 'selected' : '' }}>Pending Approval</option>
+                        <option value="Confirmed" {{ $order->status == 'Confirmed' ? 'selected' : '' }}>Confirmed</option>
+                        <option value="Assigned" {{ $order->status == 'Assigned' ? 'selected' : '' }}>Assigned</option>
+                        <option value="Arrived at Hub" {{ $order->status == 'Arrived at Hub' ? 'selected' : '' }}>Arrived at Hub</option>
+                        <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="Delivered" {{ $order->status == 'Delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#1e3a8a] transition-all text-sm">
+                        Update
+                    </button>
+                </form>
+            @endcan
         </div>
     </div>
 

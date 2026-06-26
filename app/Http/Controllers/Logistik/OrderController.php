@@ -12,6 +12,7 @@ use App\Models\Tariff;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Exception;
 use App\Exports\Logistik\OrderExport;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -28,6 +29,8 @@ class OrderController extends Controller
 
     public function index()
     {
+        Gate::authorize('view_orders');
+
         $orders = Order::with(['customer', 'originWarehouse', 'currentWarehouse'])
             ->latest()
             ->paginate(10);
@@ -37,6 +40,8 @@ class OrderController extends Controller
 
     public function create()
     {
+        Gate::authorize('create_order');
+
         $customers = Customer::all();
         $warehouses = Warehouse::all();
         $defaultTariff = Tariff::whereNull('route_id')->whereNull('vehicle_type_id')->first();
@@ -46,6 +51,8 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create_order');
+
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'origin_warehouse_id' => 'required|exists:warehouses,id',
@@ -103,12 +110,16 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        Gate::authorize('view_orders');
+
         $order->load(['customer', 'originWarehouse', 'currentWarehouse', 'items.stockItem', 'shipments.vehicle', 'shipments.routeVersion', 'histories.user']);
         return view('orders.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
     {
+        Gate::authorize('manage_orders');
+
         $validated = $request->validate([
             'status' => 'required|in:Pending Approval,Confirmed,Assigned,Arrived at Hub,Completed,Delivered,Cancelled'
         ]);
@@ -120,11 +131,15 @@ class OrderController extends Controller
 
     public function exportExcel()
     {
+        Gate::authorize('manage_orders');
+
         return Excel::download(new OrderExport, 'laporan-orders-' . now()->format('Ymd-His') . '.xlsx');
     }
 
     public function exportPdf()
     {
+        Gate::authorize('manage_orders');
+
         $orders = Order::with(['customer', 'originWarehouse', 'currentWarehouse', 'creator'])->latest()->get();
         $headings = ['Order Number', 'Customer', 'Origin', 'Destination', 'Weight (kg)', 'Price (IDR)', 'Status', 'Created At'];
         $data = $orders->map(fn($o) => [

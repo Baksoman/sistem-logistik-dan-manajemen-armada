@@ -1,4 +1,7 @@
-@extends('layouts.logistik')
+@php
+    $layout = auth()->user()->can('manage_orders') ? 'layouts.logistik' : 'layouts.warehouse';
+@endphp
+@extends($layout)
 
 @section('title', 'Create Order')
 
@@ -264,7 +267,7 @@
 
                     this.loadingItems = true;
                     try {
-                        const response = await fetch(`{{ url('logistik-panel/orders/warehouse-items') }}/${this.warehouseId}`);
+                        const response = await fetch(`{{ url('orders/warehouse-items') }}/${this.warehouseId}`);
                         const data = await response.json();
                         this.availableStockItems = data;
                     } catch (error) {
