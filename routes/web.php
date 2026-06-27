@@ -23,6 +23,7 @@ use App\Http\Controllers\Warehouse\InboundController;
 use App\Http\Controllers\Warehouse\OutboundController;
 use App\Http\Controllers\Warehouse\WarehouseDashboardController;
 use App\Http\Controllers\Logistik\DashboardController as LogistikDashboardController;
+use App\Http\Controllers\Logistik\OperationalCostController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\QuoteRequestController;
 
@@ -181,6 +182,10 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{shipment}/complete', [ShipmentController::class, 'complete'])->name('shipments.complete');
                 Route::post('/{shipment}/unload', [ShipmentController::class, 'unload'])->name('shipments.unload');
             });
+        });
+
+        Route::middleware('permission:view_costs')->group(function () {
+            Route::get('/operational-costs', [OperationalCostController::class, 'index'])->name('operational-costs.index');
         });
     });
 
