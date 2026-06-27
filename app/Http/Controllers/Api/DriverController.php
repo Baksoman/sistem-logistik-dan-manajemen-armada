@@ -48,4 +48,41 @@ class DriverController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function simulatorPing(Request $request)
+    {
+        $request->validate([
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'shipment_id' => 'required|exists:shipments,id'
+        ]);
+
+        $gpsData = [
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'shipment_id' => $request->shipment_id,
+            'driver_id' => null,
+            'latitude' => $request->lat,
+            'longitude' => $request->lng,
+            'speed' => null,
+            'heading' => null,
+            'recorded_at' => now()->toDateTimeString(),
+            'created_at' => now()->toDateTimeString(),
+            'updated_at' => now()->toDateTimeString(),
+        ];
+        
+        Redis::rpush('gps_buffer', json_encode($gpsData));
+        Redis::set("driver_last_location:{$request->shipment_id}", json_encode([
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'updated_at' => now()->toDateTimeString()
+        ]));
+
+        try {
+            broadcast(new \App\Events\DriverLocationUpdated($request->shipment_id, $request->lat, $request->lng));
+        } catch (\Exception $e) {
+            // Ignore broadcast errors for simulator
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -77,7 +77,7 @@
         }
 
         // Broadcast ke server (simpan ke gps_history)
-        fetch('/api/driver/location/ping', {
+        fetch('/api/simulator/location/ping', {
             method: 'POST',
             credentials: 'include',
             headers: {

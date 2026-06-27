@@ -17,6 +17,9 @@ Route::middleware(['web', 'auth', 'role:driver'])->group(function () {
         ->name('api.driver.location.ping');
 });
 
+// Endpoint untuk simulator (testing only)
+Route::post('/simulator/location/ping', [DriverController::class, 'simulatorPing']);
+
 Route::middleware(['web', 'auth'])->prefix('search')->name('api.search.')->group(function () {
     Route::get('/users',     UserSearchController::class)->middleware('permission:manage_users')->name('users');
     Route::get('/orders',    OrderSearchController::class)->middleware('permission:view_orders')->name('orders');
