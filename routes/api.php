@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverSearchController;
 use App\Http\Controllers\Api\LocationSearchController;
+use App\Http\Controllers\Api\OperationalCostSearchController;
 use App\Http\Controllers\Api\OrderSearchController;
 use App\Http\Controllers\Api\RouteSearchController;
 use App\Http\Controllers\Api\ShipmentSearchController;
@@ -24,5 +25,6 @@ Route::middleware(['web', 'auth'])->prefix('search')->name('api.search.')->group
     Route::get('/routes',    RouteSearchController::class)->middleware('permission:manage_routes')->name('routes');
     Route::get('/vehicles',  VehicleSearchController::class)->middleware('permission:manage_vehicles')->name('vehicles');
     Route::get('/drivers',   DriverSearchController::class)->middleware('permission:manage_drivers')->name('drivers');
+    Route::get('/operational-costs', OperationalCostSearchController::class)->middleware('permission:view_costs')->name('operational-costs');
 });
 
