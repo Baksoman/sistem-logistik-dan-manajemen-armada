@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Logistik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ShipmentResource;
 
 use App\Models\Shipment;
 use App\Models\Order;
@@ -29,7 +30,11 @@ class ShipmentController extends Controller
     public function index()
     {
         $shipments = Shipment::with(['driver.user', 'vehicle', 'orders'])->latest()->paginate(10);
-        return view('shipments.index', compact('shipments'));
+        $initialData = ShipmentResource::collection($shipments)->response()->getData(true);
+        $drivers = DriverProfile::with('user')->get();
+        $vehicles = Vehicle::orderBy('plate_number')->get(['id', 'plate_number']);
+        
+        return view('shipments.index', compact('shipments', 'initialData', 'drivers', 'vehicles'));
     }
 
     public function create(Request $request)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Logistik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 
 use App\Models\Order;
 use App\Models\Customer;
@@ -35,7 +36,11 @@ class OrderController extends Controller
             ->latest()
             ->paginate(10);
             
-        return view('orders.index', compact('orders'));
+        $initialData = OrderResource::collection($orders)->response()->getData(true);
+        $customers = Customer::orderBy('company_name')->get(['id', 'company_name']);
+        $warehouses = Warehouse::orderBy('name')->get(['id', 'name']);
+            
+        return view('orders.index', compact('initialData', 'orders', 'customers', 'warehouses'));
     }
 
     public function create()

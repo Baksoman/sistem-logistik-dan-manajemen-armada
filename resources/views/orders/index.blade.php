@@ -31,8 +31,58 @@
         </div>
     </div>
 
+    <div x-data="dataTable({
+            endpoint: '/api/search/orders',
+            initialData: {{ Js::from($initialData['data'] ?? []) }},
+            initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+        })">
 
+        <x-search-filter-bar placeholder="Search orders by number, location, or customer..." />
 
+        <x-filter-modal title="Filter Orders">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                <select x-model="filters.status" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Statuses</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Pending Approval">Pending Approval</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="Arrived at Hub">Arrived at Hub</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Warehouse</label>
+                <select x-model="filters.warehouse_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Warehouses</option>
+                    @foreach($warehouses as $warehouse)
+                        <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Customer</label>
+                <select x-model="filters.customer_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Customers</option>
+                    @foreach($customers as $customer)
+                        <option value="{{ $customer->id }}">{{ $customer->company_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">From Date</label>
+                    <input type="date" x-model="filters.created_from" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">To Date</label>
+                    <input type="date" x-model="filters.created_to" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+            </div>
+        </x-filter-modal>
 
     <x-card class="mb-8">
         <h3 class="text-xl font-bold text-gray-800 mb-6">Daftar Order</h3>
@@ -50,59 +100,58 @@
                     </tr>
                 </thead>
                 <tbody class="text-gray-700 font-medium">
-                    @forelse($orders as $order)
+                    <template x-for="order in data" :key="order.id">
                         <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
-                            <td class="py-4 px-4 font-bold text-gray-800 tracking-wider">{{ $order->order_number }}</td>
-                            <td class="py-4 px-4">{{ $order->customer->company_name ?? '-' }}</td>
-                            <td class="py-4 px-4 text-sm">{{ $order->originWarehouse->name ?? '-' }}</td>
+                            <td class="py-4 px-4 font-bold text-gray-800 tracking-wider" x-text="order.order_number"></td>
+                            <td class="py-4 px-4" x-text="order.customer?.company_name || '-'"></td>
+                            <td class="py-4 px-4 text-sm" x-text="order.origin_warehouse?.name || '-'"></td>
                             <td class="py-4 px-4">
                                 <div class="flex flex-col text-sm">
-                                    <span class="text-gray-800 truncate max-w-xs" title="{{ $order->destination_address }}">{{ $order->destination_address }}</span>
+                                    <span class="text-gray-800 truncate max-w-xs" :title="order.destination_address" x-text="order.destination_address"></span>
                                     <span class="text-xs text-blue-600 font-bold mt-1">
-                                        @if($order->currentWarehouse)
-                                            📍 Hub: {{ $order->currentWarehouse->name }}
-                                        @else
-                                            🚚 In Transit
-                                        @endif
+                                        <template x-if="order.current_warehouse">
+                                            <span x-text="'📍 Hub: ' + order.current_warehouse.name"></span>
+                                        </template>
+                                        <template x-if="!order.current_warehouse">
+                                            <span>🚚 In Transit</span>
+                                        </template>
                                     </span>
                                 </div>
                             </td>
                             <td class="py-4 px-4">
                                 <div class="font-black text-emerald-600">
-                                    {{ $order->quoted_price ? 'Rp ' . number_format($order->quoted_price, 0, ',', '.') : '-' }}
+                                    <span x-text="order.quoted_price ? 'Rp ' + Number(order.quoted_price).toLocaleString('id-ID') : '-'"></span>
                                 </div>
                             </td>
                             <td class="py-4 px-4">
-                                @php
-                                    $badgeClass = 'text-gray-700 bg-gray-100';
-                                    if ($order->status === 'Pending Approval') $badgeClass = 'text-amber-700 bg-amber-100';
-                                    if ($order->status === 'Confirmed') $badgeClass = 'text-blue-700 bg-blue-100';
-                                    if ($order->status === 'Assigned') $badgeClass = 'text-purple-700 bg-purple-100';
-                                    if ($order->status === 'Completed') $badgeClass = 'text-emerald-700 bg-emerald-100';
-                                @endphp
-                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $badgeClass }} uppercase">
-                                    {{ $order->status }}
+                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] uppercase"
+                                      :class="{
+                                          'text-amber-700 bg-amber-100': order.status === 'Pending Approval',
+                                          'text-blue-700 bg-blue-100': order.status === 'Confirmed',
+                                          'text-purple-700 bg-purple-100': order.status === 'Assigned',
+                                          'text-emerald-700 bg-emerald-100': order.status === 'Completed' || order.status === 'Delivered',
+                                          'text-gray-700 bg-gray-100': !['Pending Approval', 'Confirmed', 'Assigned', 'Completed', 'Delivered'].includes(order.status)
+                                      }"
+                                      x-text="order.status">
                                 </span>
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <a href="{{ route('orders.show', $order->id) }}" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <a :href="'{{ route('orders.index') }}/' + order.id" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     </a>
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="py-8 text-center text-gray-400">Belum ada order.</td>
-                        </tr>
-                    @endforelse
+                    </template>
+                    <tr x-show="data.length === 0" x-cloak>
+                        <td colspan="7" class="py-8 text-center text-gray-400">Belum ada order.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         
-        <div class="mt-4">
-            {{ $orders->links() }}
-        </div>
+        <x-pagination />
     </x-card>
+    </div>
 @endsection

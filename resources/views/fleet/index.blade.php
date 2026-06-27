@@ -45,85 +45,140 @@
                 </button>
             </div>
         </div>
+    <div x-data="dataTable({
+            endpoint: '/api/search/vehicles',
+            initialData: {{ Js::from($initialData['data'] ?? []) }},
+            initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+        })">
 
+        <x-search-filter-bar placeholder="Search vehicles by plate number, brand, or model..." />
+
+        <x-filter-modal title="Filter Vehicles">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Vehicle Type</label>
+                <select x-model="filters.vehicle_type_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Types</option>
+                    @foreach($vehicleTypes as $type)
+                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                <select x-model="filters.status" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Statuses</option>
+                    <option value="available">Available</option>
+                    <option value="on_trip">On Trip</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Fuel Type</label>
+                <select x-model="filters.fuel_type" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Fuel Types</option>
+                    <option value="Solar">Solar</option>
+                    <option value="Pertamax">Pertamax</option>
+                    <option value="Dexlite">Dexlite</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Min Cap (KG)</label>
+                    <input type="number" x-model="filters.capacity_min" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Max Cap (KG)</label>
+                    <input type="number" x-model="filters.capacity_max" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+            </div>
+        </x-filter-modal>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            @forelse($vehicles as $vehicle)
-                @php
-                    $isActive = in_array($vehicle->status, ['active', 'available']);
-                    $stsCls = $isActive ? 'text-emerald-700 bg-emerald-100/50' : 
-                             ($vehicle->status === 'maintenance' ? 'text-orange-700 bg-orange-100/50' : 
-                             'text-gray-500 bg-gray-200/50');
-                    $stsIcn = $isActive ? 'M5 13l4 4L19 7' : 
-                             ($vehicle->status === 'maintenance' ? 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' : 
-                             'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636');
-                             
-                    $kirDate = \Carbon\Carbon::parse($vehicle->kir_expired_at);
-                    $kirDiff = now()->diffInDays($kirDate, false);
-                    $kirBadge = $kirDiff < 0 ? 'bg-red-100 text-red-600' : ($kirDiff < 30 ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600');
-                    
-                    $stnkDate = \Carbon\Carbon::parse($vehicle->stnk_expired_at);
-                    $stnkDiff = now()->diffInDays($stnkDate, false);
-                    $stnkBadge = $stnkDiff < 0 ? 'bg-red-100 text-red-600' : ($stnkDiff < 30 ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600');
-                @endphp
+            <template x-for="vehicle in data" :key="vehicle.id">
                 <div class="p-6 rounded-[2rem] bg-gray-100 shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border border-gray-200/50 flex flex-col hover:shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] transition-all duration-300">
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">{{ $vehicle->vehicleType->name ?? 'N/A' }}</span>
-                            <h3 class="text-xl font-black text-gray-800 tracking-wider">{{ $vehicle->plate_number }}</h3>
-                            <p class="text-sm font-semibold text-gray-500">{{ $vehicle->brand }} {{ $vehicle->model }} ({{ $vehicle->year }})</p>
+                            <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase" x-text="vehicle.vehicle_type?.name || 'N/A'"></span>
+                            <h3 class="text-xl font-black text-gray-800 tracking-wider" x-text="vehicle.plate_number"></h3>
+                            <p class="text-sm font-semibold text-gray-500" x-text="vehicle.brand + ' ' + vehicle.model + ' (' + vehicle.year + ')'"></p>
                         </div>
-                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full uppercase tracking-widest text-[10px] font-black shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $stsCls }}">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $stsIcn }}"></path></svg>
-                            {{ str_replace('_', ' ', $vehicle->status) }}
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full uppercase tracking-widest text-[10px] font-black shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff]"
+                             :class="{
+                                 'text-emerald-700 bg-emerald-100/50': ['active', 'available'].includes(vehicle.status),
+                                 'text-orange-700 bg-orange-100/50': vehicle.status === 'maintenance',
+                                 'text-gray-500 bg-gray-200/50': !['active', 'available', 'maintenance'].includes(vehicle.status)
+                             }">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" 
+                                      :d="['active', 'available'].includes(vehicle.status) ? 'M5 13l4 4L19 7' : (vehicle.status === 'maintenance' ? 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' : 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636')"></path>
+                            </svg>
+                            <span x-text="vehicle.status.replace('_', ' ')"></span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200/50 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.02)]">
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Capacity</p>
-                            <p class="text-xs font-black text-gray-700">{{ number_format($vehicle->capacity_kg, 0) }} KG</p>
-                            <p class="text-xs font-black text-gray-700">{{ $vehicle->capacity_volume_cbm }} CBM</p>
+                            <p class="text-xs font-black text-gray-700" x-text="Number(vehicle.capacity_kg).toLocaleString('en-US') + ' KG'"></p>
+                            <p class="text-xs font-black text-gray-700" x-text="vehicle.capacity_volume_cbm + ' CBM'"></p>
                         </div>
                         <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200/50 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.02)]">
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Fuel Type</p>
-                            <p class="text-xs font-black text-gray-700 uppercase mt-2">{{ $vehicle->fuel_type }}</p>
+                            <p class="text-xs font-black text-gray-700 uppercase mt-2" x-text="vehicle.fuel_type"></p>
                         </div>
                     </div>
 
                     <div class="flex flex-col gap-3 mb-6">
                         <div class="flex items-center justify-between text-xs font-bold px-1">
                             <span class="text-gray-500">KIR Expiry</span>
-                            <span class="px-3 py-1 rounded-lg {{ $kirBadge }} shadow-[inset_1px_1px_2px_rgba(0,0,0,0.05)]">{{ $kirDate->format('d M Y') }}</span>
+                            <span class="px-3 py-1 rounded-lg shadow-[inset_1px_1px_2px_rgba(0,0,0,0.05)]"
+                                  :class="{
+                                      'bg-red-100 text-red-600': vehicle.kir_expired_at && (new Date(vehicle.kir_expired_at) - new Date()) < 0,
+                                      'bg-orange-100 text-orange-600': vehicle.kir_expired_at && (new Date(vehicle.kir_expired_at) - new Date()) >= 0 && (new Date(vehicle.kir_expired_at) - new Date()) < 30 * 24 * 60 * 60 * 1000,
+                                      'bg-emerald-100 text-emerald-600': !vehicle.kir_expired_at || (new Date(vehicle.kir_expired_at) - new Date()) >= 30 * 24 * 60 * 60 * 1000
+                                  }"
+                                  x-text="vehicle.kir_expired_at ? new Date(vehicle.kir_expired_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'">
+                            </span>
                         </div>
                         <div class="flex items-center justify-between text-xs font-bold px-1">
                             <span class="text-gray-500">STNK Expiry</span>
-                            <span class="px-3 py-1 rounded-lg {{ $stnkBadge }} shadow-[inset_1px_1px_2px_rgba(0,0,0,0.05)]">{{ $stnkDate->format('d M Y') }}</span>
+                            <span class="px-3 py-1 rounded-lg shadow-[inset_1px_1px_2px_rgba(0,0,0,0.05)]"
+                                  :class="{
+                                      'bg-red-100 text-red-600': vehicle.stnk_expired_at && (new Date(vehicle.stnk_expired_at) - new Date()) < 0,
+                                      'bg-orange-100 text-orange-600': vehicle.stnk_expired_at && (new Date(vehicle.stnk_expired_at) - new Date()) >= 0 && (new Date(vehicle.stnk_expired_at) - new Date()) < 30 * 24 * 60 * 60 * 1000,
+                                      'bg-emerald-100 text-emerald-600': !vehicle.stnk_expired_at || (new Date(vehicle.stnk_expired_at) - new Date()) >= 30 * 24 * 60 * 60 * 1000
+                                  }"
+                                  x-text="vehicle.stnk_expired_at ? new Date(vehicle.stnk_expired_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'">
+                            </span>
                         </div>
                     </div>
 
                     <div class="mt-auto flex gap-3 pt-5 border-t border-gray-200/50">
-                        <button type="button" @click="$dispatch('open-edit', { id: '{{ $vehicle->id }}', vehicle_type_id: '{{ $vehicle->vehicle_type_id }}', plate_number: '{{ $vehicle->plate_number }}', brand: '{{ $vehicle->brand }}', model: '{{ $vehicle->model }}', year: '{{ $vehicle->year }}', capacity_kg: '{{ $vehicle->capacity_kg }}', capacity_volume_cbm: '{{ $vehicle->capacity_volume_cbm }}', fuel_type: '{{ $vehicle->fuel_type }}', status: '{{ $vehicle->status }}', kir_expired_at: '{{ $vehicle->kir_expired_at ? \Carbon\Carbon::parse($vehicle->kir_expired_at)->format('Y-m-d') : '' }}', stnk_expired_at: '{{ $vehicle->stnk_expired_at ? \Carbon\Carbon::parse($vehicle->stnk_expired_at)->format('Y-m-d') : '' }}' })" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-blue-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-700">
+                        <button type="button" @click="$dispatch('open-edit', { id: vehicle.id, vehicle_type_id: vehicle.vehicle_type?.id || '', plate_number: vehicle.plate_number, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, capacity_kg: vehicle.capacity_kg, capacity_volume_cbm: vehicle.capacity_volume_cbm, fuel_type: vehicle.fuel_type, status: vehicle.status, kir_expired_at: vehicle.kir_expired_at || '', stnk_expired_at: vehicle.stnk_expired_at || '' })" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-blue-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             Edit
                         </button>
-                        <form id="delete-form-{{ $vehicle->id }}" action="{{ route('fleet.destroy', $vehicle->id) }}" method="POST" class="shrink-0 inline">
+                        <form :id="'delete-form-' + vehicle.id" :action="'{{ route('fleet.index') }}/' + vehicle.id" method="POST" class="shrink-0 inline">
                             @csrf
                             @method('DELETE')
-                            <button type="button" onclick="confirmDelete('delete-form-{{ $vehicle->id }}', 'Hapus kendaraan ini?')" class="w-[44px] h-[44px] rounded-xl flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
+                            <button type="button" @click="confirmDelete('delete-form-' + vehicle.id, 'Hapus kendaraan ini?')" class="w-[44px] h-[44px] rounded-xl flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </form>
                     </div>
                 </div>
-            @empty
-                <div class="col-span-full py-16 flex flex-col items-center justify-center text-gray-400 bg-gray-100 rounded-[2rem] shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]">
-                    <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
-                    <p class="text-lg font-bold text-gray-500">No vehicles found.</p>
-                    <p class="text-sm">Click "Add Vehicle" to register one.</p>
-                </div>
-            @endforelse
+            </template>
+            
+            <div x-show="data.length === 0" x-cloak class="col-span-full py-16 flex flex-col items-center justify-center text-gray-400 bg-gray-100 rounded-[2rem] shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]">
+                <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                <p class="text-lg font-bold text-gray-500">No vehicles found.</p>
+                <p class="text-sm">Click "Add Vehicle" to register one.</p>
+            </div>
         </div>
+        
+        <x-pagination />
+
 
         <!-- Create Slide-Over -->
         <x-slide-over title="Register Vehicle">
@@ -225,6 +280,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 @endsection

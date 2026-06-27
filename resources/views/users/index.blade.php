@@ -39,6 +39,34 @@
             </div>
         </div>
 
+        <div x-data="dataTable({
+                endpoint: '/api/search/users',
+                initialData: {{ Js::from($initialData['data'] ?? []) }},
+                initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+            })">
+
+            <x-search-filter-bar placeholder="Search users by name or email..." />
+
+            <x-filter-modal title="Filter Users">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Role</label>
+                    <select x-model="filters.role" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">All Roles</option>
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Admin Logistik">Admin Logistik</option>
+                        <option value="Warehouse">Warehouse</option>
+                        <option value="Driver">Driver</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                    <select x-model="filters.is_active" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">All Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+            </x-filter-modal>
 
         <x-card class="mb-8">
             <h3 class="text-xl font-bold text-gray-800 mb-6">Active Users</h3>
@@ -54,47 +82,48 @@
                     </tr>
                 </thead>
                 <tbody class="text-gray-700 font-medium">
-                    @forelse($users as $user)
+                    <template x-for="user in data" :key="user.id">
                         <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
-                            <td class="py-4 px-4 font-bold text-gray-800">{{ $user->name }}</td>
+                            <td class="py-4 px-4 font-bold text-gray-800" x-text="user.name"></td>
                             <td class="py-4 px-4">
-                                @foreach($user->roles as $role)
-                                    <span class="inline-block px-3 py-1 mr-1 text-xs font-bold rounded-full text-blue-700 bg-blue-100/50 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.7)]">{{ $role->name }}</span>
-                                @endforeach
+                                <template x-for="role in user.roles" :key="role">
+                                    <span class="inline-block px-3 py-1 mr-1 text-xs font-bold rounded-full text-blue-700 bg-blue-100/50 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.7)]" x-text="role"></span>
+                                </template>
                             </td>
-                            <td class="py-4 px-4">{{ $user->email }}</td>
+                            <td class="py-4 px-4" x-text="user.email"></td>
                             <td class="py-4 px-4">
-                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $user->is_active ? 'text-green-600' : 'text-red-500' }}">
-                                    {{ $user->is_active ? 'Active' : 'Inactive' }}
+                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff]"
+                                      :class="user.is_active ? 'text-green-600' : 'text-red-500'"
+                                      x-text="user.is_active ? 'Active' : 'Inactive'">
                                 </span>
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $user->id }}', name: '{{ $user->name }}', email: '{{ $user->email }}', role: '{{ $user->roles->first()?->name ?? '' }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                    <button type="button" @click="$dispatch('open-edit', { id: user.id, name: user.name, email: user.email, role: user.roles[0] || '' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <form id="delete-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
+                                    <form :id="'delete-form-' + user.id" :action="'{{ route('users.index') }}/' + user.id" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" onclick="confirmDelete('delete-form-{{ $user->id }}')" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
+                                        <button type="button" @click="confirmDelete('delete-form-' + user.id)" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="py-8 text-center text-gray-400">No users found.</td>
-                        </tr>
-                    @endforelse
+                    </template>
+                    <tr x-show="data.length === 0" x-cloak>
+                        <td colspan="5" class="py-8 text-center text-gray-400">No users found.</td>
+                    </tr>
                 </tbody>
             </table>
             </div>
-            <div class="mt-4">
-                {{ $users->links() }}
-            </div>
+            
+            <x-pagination />
+            
         </x-card>
+        </div>
 
         <!-- Create Form Slide-Over -->
         <x-slide-over title="Create New User">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Logistik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\VehicleResource;
 
 use App\Models\Vehicle;
 use App\Services\VehicleService;
@@ -18,9 +19,11 @@ class VehicleController extends Controller
 
     public function index()
     {
-        $vehicles = $this->vehicleService->getPaginatedVehicles(10);
+        $vehicles = collect($this->vehicleService->getPaginatedVehicles(10)->items());
+        $paginated = $this->vehicleService->getPaginatedVehicles(10);
+        $initialData = VehicleResource::collection($paginated)->response()->getData(true);
         $vehicleTypes = $this->vehicleService->getVehicleTypes();
-        return view('fleet.index', compact('vehicles', 'vehicleTypes'));
+        return view('fleet.index', ['vehicles' => $paginated, 'vehicleTypes' => $vehicleTypes, 'initialData' => $initialData]);
     }
 
     public function store(StoreVehicleRequest $request)

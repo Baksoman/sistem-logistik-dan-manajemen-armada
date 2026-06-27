@@ -9,6 +9,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Exports\UsersExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -16,8 +17,10 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = $this->userService->getPaginatedUsers(10);
-        return view('users.index', compact('users'));
+        $users = $this->userService->getPaginatedUsers(15);
+        $initialData = UserResource::collection($users)->response()->getData(true);
+        
+        return view('users.index', compact('initialData', 'users'));
     }
 
     public function store(StoreUserRequest $request)

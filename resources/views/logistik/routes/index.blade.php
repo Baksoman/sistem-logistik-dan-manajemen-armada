@@ -13,22 +13,51 @@
         </a>
     </div>
 
+    <div x-data="dataTable({
+            endpoint: '/api/search/routes',
+            initialData: {{ Js::from($initialData['data'] ?? []) }},
+            initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+        })">
+
+        <x-search-filter-bar placeholder="Search routes by code, origin, or destination..." />
+
+        <x-filter-modal title="Filter Routes">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Route Type</label>
+                <select x-model="filters.route_type" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Types</option>
+                    <option value="land">Land</option>
+                    <option value="sea">Sea</option>
+                    <option value="combined">Combined</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Source API</label>
+                <select x-model="filters.source_api" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                    <option value="">All Providers</option>
+                    <option value="OpenRouteService">OpenRouteService</option>
+                    <option value="OSRM">OSRM</option>
+                    <option value="Searoute">Searoute</option>
+                </select>
+            </div>
+        </x-filter-modal>
+
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        @forelse($routes as $route)
-            @php
-                $badgeClass = 'text-gray-700 bg-gray-100';
-                if ($route->route_type === 'land') $badgeClass = 'text-amber-700 bg-amber-100';
-                if ($route->route_type === 'sea') $badgeClass = 'text-blue-700 bg-blue-100';
-                if ($route->route_type === 'auto' || $route->route_type === 'combined') $badgeClass = 'text-purple-700 bg-purple-100';
-            @endphp
+        <template x-for="route in data" :key="route.id">
             <div class="p-6 rounded-[2rem] bg-gray-100 shadow-[8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff] border border-gray-200/50 flex flex-col hover:shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] transition-all duration-300">
                 <div class="flex justify-between items-start mb-6">
                     <div>
                         <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Route Code</span>
-                        <h3 class="text-xl font-black text-gray-800">{{ $route->route_code }}</h3>
+                        <h3 class="text-xl font-black text-gray-800" x-text="route.route_code"></h3>
                     </div>
-                    <div class="px-4 py-1.5 rounded-full text-xs font-bold shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $badgeClass }} uppercase tracking-widest">
-                        {{ $route->route_type === 'auto' ? 'Combined' : $route->route_type }}
+                    <div class="px-4 py-1.5 rounded-full text-xs font-bold shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] uppercase tracking-widest"
+                         :class="{
+                             'text-amber-700 bg-amber-100': route.route_type === 'land',
+                             'text-blue-700 bg-blue-100': route.route_type === 'sea',
+                             'text-purple-700 bg-purple-100': route.route_type === 'auto' || route.route_type === 'combined'
+                         }"
+                         x-text="route.route_type === 'auto' ? 'COMBINED' : route.route_type">
                     </div>
                 </div>
                 
@@ -42,7 +71,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Origin</p>
-                            <p class="text-sm font-bold text-gray-700 truncate w-48" title="{{ $route->origin_name }}">{{ $route->origin_name }}</p>
+                            <p class="text-sm font-bold text-gray-700 truncate w-48" :title="route.origin_name" x-text="route.origin_name"></p>
                         </div>
                     </div>
 
@@ -52,7 +81,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Destination</p>
-                            <p class="text-sm font-bold text-gray-700 truncate w-48" title="{{ $route->destination_name }}">{{ $route->destination_name }}</p>
+                            <p class="text-sm font-bold text-gray-700 truncate w-48" :title="route.destination_name" x-text="route.destination_name"></p>
                         </div>
                     </div>
                 </div>
@@ -62,43 +91,49 @@
                         <div class="flex items-center gap-2 text-gray-600">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                             <span class="text-sm font-black">
-                                @if($route->routeVersions->isNotEmpty())
-                                    {{ number_format($route->routeVersions->first()->distance_km, 1) }} <span class="text-[10px] text-gray-400 font-bold uppercase">KM</span>
-                                @else
-                                    -
-                                @endif
+                                <template x-if="route.latest_version">
+                                    <span>
+                                        <span x-text="Number(route.latest_version.distance_km).toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1})"></span>
+                                        <span class="text-[10px] text-gray-400 font-bold uppercase">KM</span>
+                                    </span>
+                                </template>
+                                <template x-if="!route.latest_version">
+                                    <span>-</span>
+                                </template>
                             </span>
                         </div>
                         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                            {{ $route->routeVersions->count() }} Version(s)
+                            <template x-if="route.latest_version">
+                                <span>1+ Version(s)</span>
+                            </template>
                         </div>
                     </div>
 
                     <div class="flex gap-3">
-                        <a href="{{ route('routes.show', $route->id) }}" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-blue-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-700">
+                        <a :href="'{{ route('routes.index') }}/' + route.id" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-blue-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             View Details
                         </a>
-                        <form id="delete-form-{{ $route->id }}" action="{{ route('routes.destroy', $route->id) }}" method="POST" class="shrink-0 inline">
+                        <form :id="'delete-form-' + route.id" :action="'{{ route('routes.index') }}/' + route.id" method="POST" class="shrink-0 inline">
                             @csrf
                             @method('DELETE')
-                            <button type="button" onclick="confirmDelete('delete-form-{{ $route->id }}', 'Hapus rute beserta riwayat versinya?')" class="w-[44px] h-[44px] rounded-xl flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
+                            <button type="button" @click="confirmDelete('delete-form-' + route.id, 'Hapus rute beserta riwayat versinya?')" class="w-[44px] h-[44px] rounded-xl flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-span-full py-16 flex flex-col items-center justify-center text-gray-400 bg-gray-100 rounded-[2rem] shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]">
-                <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                <p class="text-lg font-bold text-gray-500">No routes found.</p>
-                <p class="text-sm">Click "Create New Route" to add one.</p>
-            </div>
-        @endforelse
+        </template>
+        
+        <div x-show="data.length === 0" x-cloak class="col-span-full py-16 flex flex-col items-center justify-center text-gray-400 bg-gray-100 rounded-[2rem] shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff]">
+            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            <p class="text-lg font-bold text-gray-500">No routes found.</p>
+            <p class="text-sm">Click "Create New Route" to add one.</p>
+        </div>
     </div>
 
-    <div class="mt-8">
-        {{ $routes->links() }}
+    <x-pagination />
+    
     </div>
 @endsection

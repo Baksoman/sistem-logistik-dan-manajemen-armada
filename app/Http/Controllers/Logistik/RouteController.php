@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Logistik;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RouteResource;
 use Illuminate\Http\Request;
 use App\Services\RouteService;
 use App\Services\RoutingService;
@@ -14,11 +15,11 @@ class RouteController extends Controller
         protected RouteService $routeService,
         protected RoutingService $routingService
     ) {}
-
     public function index()
     {
-        $routes = $this->routeService->getPaginatedRoutes(10);
-        return view('logistik.routes.index', compact('routes'));
+        $paginated = $this->routeService->getPaginatedRoutes(10);
+        $initialData = RouteResource::collection($paginated)->response()->getData(true);
+        return view('logistik.routes.index', ['routes' => $paginated, 'initialData' => $initialData]);
     }
 
     public function create()
