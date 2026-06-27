@@ -8,18 +8,21 @@ use App\Models\StockItem;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Exports\Warehouse\OutboundExport;
+use App\Http\Controllers\Api\StockMovementSearchController;
+use App\Http\Requests\Search\StockMovementSearchRequest;
+use App\QueryFilters\StockMovementFilter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
 class OutboundController extends Controller
 {
-    public function index(\App\Http\Requests\Search\StockMovementSearchRequest $request, \App\QueryFilters\StockMovementFilter $filter)
+    public function index(StockMovementSearchRequest $request, StockMovementFilter $filter)
     {
         $user = auth()->user();
         
         // Force type to outbound
         $request->merge(['force_type' => 'outbound']);
-        $apiController = new \App\Http\Controllers\Api\StockMovementSearchController();
+        $apiController = new StockMovementSearchController();
         $initialData = $apiController($request, $filter)->response()->getData(true);
             
         $warehousesQuery = Warehouse::where('is_active', true);

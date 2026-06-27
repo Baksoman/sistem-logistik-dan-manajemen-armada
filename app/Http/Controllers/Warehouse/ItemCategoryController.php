@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Warehouse;
 
+use App\Http\Controllers\Api\ItemCategorySearchController;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Search\ItemCategorySearchRequest;
 use App\Models\ItemCategory;
+use App\Models\StockItem;
+use App\QueryFilters\ItemCategoryFilter;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ItemCategoryController extends Controller
 {
-    public function index(\App\Http\Requests\Search\ItemCategorySearchRequest $request, \App\QueryFilters\ItemCategoryFilter $filter)
+    public function index(ItemCategorySearchRequest $request, ItemCategoryFilter $filter)
     {
-        $apiController = new \App\Http\Controllers\Api\ItemCategorySearchController();
+        $apiController = new ItemCategorySearchController();
         $initialData = $apiController($request, $filter)->response()->getData(true);
         return view('warehouse.categories.index', compact('initialData'));
     }
@@ -46,7 +50,7 @@ class ItemCategoryController extends Controller
     public function destroy(ItemCategory $category)
     {
         // Check if items are attached
-        if (\App\Models\StockItem::where('category_id', $category->id)->count() > 0) {
+        if (StockItem::where('category_id', $category->id)->count() > 0) {
             return redirect()->route('warehouse.categories.index')->with('error', 'Cannot delete category because it has stock items.');
         }
 

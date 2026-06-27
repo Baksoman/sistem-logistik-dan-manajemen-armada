@@ -8,6 +8,9 @@ use App\Services\InventoryService;
 use App\Http\Requests\Warehouse\StoreStockItemRequest;
 use App\Http\Requests\Warehouse\UpdateStockItemRequest;
 use App\Exports\Warehouse\InventoryExport;
+use App\Http\Controllers\Api\InventorySearchController;
+use App\Http\Requests\Search\InventorySearchRequest;
+use App\QueryFilters\InventoryFilter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -15,9 +18,9 @@ class InventoryController extends Controller
 {
     public function __construct(protected InventoryService $inventoryService) {}
 
-    public function index(\App\Http\Requests\Search\InventorySearchRequest $request, \App\QueryFilters\InventoryFilter $filter)
+    public function index(InventorySearchRequest $request, InventoryFilter $filter)
     {
-        $apiController = new \App\Http\Controllers\Api\InventorySearchController();
+        $apiController = new InventorySearchController();
         $initialData = $apiController($request, $filter)->response()->getData(true);
         $warehouses = $this->inventoryService->getWarehouses();
         $categories = $this->inventoryService->getItemCategories();
