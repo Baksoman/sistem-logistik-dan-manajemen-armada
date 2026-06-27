@@ -54,7 +54,7 @@
                         <option value="">All Roles</option>
                         <option value="Super Admin">Super Admin</option>
                         <option value="Admin Logistik">Admin Logistik</option>
-                        <option value="Warehouse">Warehouse</option>
+                        <option value="Staff Warehouse">Warehouse</option>
                         <option value="Driver">Driver</option>
                     </select>
                 </div>
