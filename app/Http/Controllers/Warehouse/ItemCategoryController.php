@@ -9,10 +9,11 @@ use Illuminate\Validation\Rule;
 
 class ItemCategoryController extends Controller
 {
-    public function index()
+    public function index(\App\Http\Requests\Search\ItemCategorySearchRequest $request, \App\QueryFilters\ItemCategoryFilter $filter)
     {
-        $categories = ItemCategory::latest()->paginate(10);
-        return view('warehouse.categories.index', compact('categories'));
+        $apiController = new \App\Http\Controllers\Api\ItemCategorySearchController();
+        $initialData = $apiController($request, $filter)->response()->getData(true);
+        return view('warehouse.categories.index', compact('initialData'));
     }
 
     public function store(Request $request)

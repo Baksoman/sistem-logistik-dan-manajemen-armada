@@ -15,16 +15,17 @@ class InventoryController extends Controller
 {
     public function __construct(protected InventoryService $inventoryService) {}
 
-    public function index()
+    public function index(\App\Http\Requests\Search\InventorySearchRequest $request, \App\QueryFilters\InventoryFilter $filter)
     {
-        $inventory = $this->inventoryService->getPaginatedStockItems(10);
+        $apiController = new \App\Http\Controllers\Api\InventorySearchController();
+        $initialData = $apiController($request, $filter)->response()->getData(true);
         $warehouses = $this->inventoryService->getWarehouses();
         $categories = $this->inventoryService->getItemCategories();
         $unitTypes = $this->inventoryService->getUnitTypes();
         $zones = $this->inventoryService->getZones();
         $racks = $this->inventoryService->getRacks();
         
-        return view('warehouse.inventory.index', compact('inventory', 'warehouses', 'categories', 'unitTypes', 'zones', 'racks'));
+        return view('warehouse.inventory.index', compact('initialData', 'warehouses', 'categories', 'unitTypes', 'zones', 'racks'));
     }
 
     public function store(StoreStockItemRequest $request)

@@ -5,153 +5,181 @@
 @section('content')
     <x-topbar />
 
-    <div x-data="{ 
-            slideOverOpen: {{ $errors->any() && !old('inventory_id') ? 'true' : 'false' }}, 
-            editSlideOverOpen: {{ $errors->any() && old('inventory_id') ? 'true' : 'false' }}, 
-            editData: { 
-                id: '{{ old('inventory_id') }}', 
-                warehouse_id: '{{ old('warehouse_id') }}', 
-                category_id: '{{ old('category_id') }}', 
-                unit_type_id: '{{ old('unit_type_id') }}', 
-                sku: '{{ old('sku') }}', 
-                upc: '{{ old('upc') }}', 
-                brand: '{{ old('brand') }}',
-                name: '{{ old('name') }}', 
-                quantity: '{{ old('quantity') }}', 
-                min_quantity: '{{ old('min_quantity') }}', 
-                weight_kg: '{{ old('weight_kg') }}', 
-                volume_cbm: '{{ old('volume_cbm') }}', 
-                zone_id: '{{ old('zone_id') }}', 
-                rack_id: '{{ old('rack_id') }}' 
-            },
-            scannerActive: false,
-            scannerTarget: 'create',
-            startScanner(target) {
-                this.scannerTarget = target;
-                this.scannerActive = true;
-                this.$nextTick(() => {
-                    const scanner = new Html5Qrcode('barcode-reader');
-                    window.__barcodeScanner = scanner;
-                    scanner.start(
-                        { facingMode: 'environment' },
-                        { fps: 10, qrbox: { width: 250, height: 150 } },
-                        (decodedText) => {
-                            scanner.stop().then(() => {
-                                this.scannerActive = false;
-                                if (target === 'create') {
-                                    document.querySelector('[name=upc]').value = decodedText;
-                                    document.querySelector('[name=upc]').dispatchEvent(new Event('input'));
-                                } else {
-                                    this.editData.upc = decodedText;
-                                }
-                                Toastify({ text: 'Barcode detected: ' + decodedText, duration: 3000, gravity: 'top', position: 'right', style: { background: '#10b981', borderRadius: '12px', fontWeight: 'bold' } }).showToast();
-                            });
-                        },
-                        (err) => {}
-                    ).catch((err) => {
-                        this.scannerActive = false;
-                        Swal.fire('Camera Error', 'Unable to access camera. Please ensure camera permissions are granted and you are using HTTPS or localhost.', 'error');
-                    });
-                });
-            },
-            stopScanner() {
-                if (window.__barcodeScanner) {
-                    window.__barcodeScanner.stop().then(() => { this.scannerActive = false; }).catch(() => { this.scannerActive = false; });
-                } else {
-                    this.scannerActive = false;
-                }
-            }
-         }" 
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
-         @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false; stopScanner();">
+    <div x-data="dataTable({
+            endpoint: '/api/search/inventory',
+            initialData: {{ Js::from($initialData['data'] ?? []) }},
+            initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+        })" class="w-full">
         
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-            <p class="text-gray-500 text-lg font-medium">Manage stock items, quantities, and their storage locations.</p>
-            <div class="flex flex-col lg:flex-row w-full lg:w-auto gap-3 shrink-0">
-                <a href="{{ route('warehouse.inventory.export.excel') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-emerald-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-emerald-50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Excel
-                </a>
-                <a href="{{ route('warehouse.inventory.export.pdf') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-red-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-red-50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    PDF
-                </a>
-                <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add Stock Item
-                </button>
+        <div x-data="{ 
+                slideOverOpen: {{ $errors->any() && !old('inventory_id') ? 'true' : 'false' }}, 
+                editSlideOverOpen: {{ $errors->any() && old('inventory_id') ? 'true' : 'false' }}, 
+                editData: { 
+                    id: '{{ old('inventory_id') }}', 
+                    warehouse_id: '{{ old('warehouse_id') }}', 
+                    category_id: '{{ old('category_id') }}', 
+                    unit_type_id: '{{ old('unit_type_id') }}', 
+                    sku: '{{ old('sku') }}', 
+                    upc: '{{ old('upc') }}', 
+                    brand: '{{ old('brand') }}',
+                    name: '{{ old('name') }}', 
+                    quantity: '{{ old('quantity') }}', 
+                    min_quantity: '{{ old('min_quantity') }}', 
+                    weight_kg: '{{ old('weight_kg') }}', 
+                    volume_cbm: '{{ old('volume_cbm') }}', 
+                    zone_id: '{{ old('zone_id') }}', 
+                    rack_id: '{{ old('rack_id') }}' 
+                },
+                scannerActive: false,
+                scannerTarget: 'create',
+                startScanner(target) {
+                    this.scannerTarget = target;
+                    this.scannerActive = true;
+                    this.$nextTick(() => {
+                        const scanner = new Html5Qrcode('barcode-reader');
+                        window.__barcodeScanner = scanner;
+                        scanner.start(
+                            { facingMode: 'environment' },
+                            { fps: 10, qrbox: { width: 250, height: 150 } },
+                            (decodedText) => {
+                                scanner.stop().then(() => {
+                                    this.scannerActive = false;
+                                    if (target === 'create') {
+                                        document.querySelector('[name=upc]').value = decodedText;
+                                        document.querySelector('[name=upc]').dispatchEvent(new Event('input'));
+                                    } else {
+                                        this.editData.upc = decodedText;
+                                    }
+                                    Toastify({ text: 'Barcode detected: ' + decodedText, duration: 3000, gravity: 'top', position: 'right', style: { background: '#10b981', borderRadius: '12px', fontWeight: 'bold' } }).showToast();
+                                });
+                            },
+                            (err) => {}
+                        ).catch((err) => {
+                            this.scannerActive = false;
+                            Swal.fire('Camera Error', 'Unable to access camera. Please ensure camera permissions are granted and you are using HTTPS or localhost.', 'error');
+                        });
+                    });
+                },
+                stopScanner() {
+                    if (window.__barcodeScanner) {
+                        window.__barcodeScanner.stop().then(() => { this.scannerActive = false; }).catch(() => { this.scannerActive = false; });
+                    } else {
+                        this.scannerActive = false;
+                    }
+                }
+             }" 
+             @open-edit.window="editData = $event.detail; editSlideOverOpen = true;"
+             @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false; stopScanner();">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+                <p class="text-gray-500 text-lg font-medium">Manage stock items, quantities, and their storage locations.</p>
+                <div class="flex flex-col lg:flex-row w-full lg:w-auto gap-3 shrink-0">
+                    <a href="{{ route('warehouse.inventory.export.excel') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-emerald-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-emerald-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Excel
+                    </a>
+                    <a href="{{ route('warehouse.inventory.export.pdf') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-red-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-red-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        PDF
+                    </a>
+                    <button @click="slideOverOpen = true" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Stock Item
+                    </button>
+                </div>
             </div>
-        </div>
 
+            <x-search-filter-bar placeholder="Search inventory by SKU, name, or warehouse..." />
 
-        <x-card class="mb-8">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Inventory List</h3>
-            <div class="overflow-x-auto pb-4">
-            <table class="w-full text-left border-collapse min-w-max whitespace-nowrap">
-                <thead>
-                    <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
-                        <th class="py-4 px-4 font-bold">SKU</th>
-                        <th class="py-4 px-4 font-bold">UPC</th>
-                        <th class="py-4 px-4 font-bold">Brand</th>
-                        <th class="py-4 px-4 font-bold">Name</th>
-                        <th class="py-4 px-4 font-bold">Warehouse</th>
-                        <th class="py-4 px-4 font-bold">Category</th>
-                        <th class="py-4 px-4 font-bold">Qty (Fisik|Alokasi|Tersedia)</th>
-                        <th class="py-4 px-4 font-bold">Location</th>
-                        <th class="py-4 px-4 font-bold text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700 font-medium">
-                    @forelse($inventory as $item)
-                        <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
-                            <td class="py-4 px-4 font-bold text-gray-800 tracking-wider">{{ $item->sku }}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500 font-mono">{{ $item->upc ?? '-' }}</td>
-                            <td class="py-4 px-4">{{ $item->brand ?? '-' }}</td>
-                            <td class="py-4 px-4 font-bold">{{ $item->name }}</td>
-                            <td class="py-4 px-4">{{ $item->warehouse->name ?? '-' }}</td>
-                            <td class="py-4 px-4">{{ $item->category->name ?? '-' }}</td>
-                            <td class="py-4 px-4">
-                                @php
-                                    $availableQty = $item->quantity - $item->allocated_quantity;
-                                @endphp
-                                <div class="flex flex-col text-sm">
-                                    <span class="text-gray-500">Fisik: {{ number_format($item->quantity, 0) }} {{ $item->unitType->name ?? '' }}</span>
-                                    <span class="text-amber-600">Alokasi: {{ number_format($item->allocated_quantity, 0) }}</span>
-                                    <span class="font-bold {{ $availableQty <= $item->min_quantity ? 'text-red-600' : 'text-emerald-600' }}">
-                                        Tersedia: {{ number_format($availableQty, 0) }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-sm text-gray-500">
-                                Zone: {{ $item->zone->name ?? '-' }} | Rack: {{ $item->rack->name ?? '-' }}
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $item->id }}', warehouse_id: '{{ $item->warehouse_id }}', category_id: '{{ $item->category_id }}', unit_type_id: '{{ $item->unit_type_id }}', sku: '{{ $item->sku }}', upc: '{{ $item->upc }}', brand: '{{ $item->brand }}', name: '{{ $item->name }}', quantity: '{{ $item->quantity }}', min_quantity: '{{ $item->min_quantity }}', weight_kg: '{{ $item->weight_kg }}', volume_cbm: '{{ $item->volume_cbm }}', zone_id: '{{ $item->zone_id }}', rack_id: '{{ $item->rack_id }}' })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    </button>
-                                    <form id="delete-form-{{ $item->id }}" action="{{ route('warehouse.inventory.destroy', $item->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" onclick="confirmDelete('delete-form-{{ $item->id }}')" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            <x-filter-modal title="Filter Inventory">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Warehouse</label>
+                    <select x-model="filters.warehouse_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">All Warehouses</option>
+                        @foreach($warehouses as $warehouse)
+                            <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                    <select x-model="filters.category_id" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">All Categories</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Low Stock Only</label>
+                    <select x-model="filters.is_low_stock" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+            </x-filter-modal>
+
+            <x-card class="mb-8 relative min-h-[400px]">
+                <div x-show="loading" class="absolute inset-0 z-10 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm rounded-[2rem]">
+                    <div class="w-12 h-12 rounded-full border-4 border-gray-300 border-t-blue-500 animate-spin shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+                </div>
+
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Inventory List</h3>
+                <div class="overflow-x-auto pb-4">
+                <table class="w-full text-left border-collapse min-w-max whitespace-nowrap">
+                    <thead>
+                        <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
+                            <th class="py-4 px-4 font-bold">SKU</th>
+                            <th class="py-4 px-4 font-bold">UPC</th>
+                            <th class="py-4 px-4 font-bold">Brand</th>
+                            <th class="py-4 px-4 font-bold">Name</th>
+                            <th class="py-4 px-4 font-bold">Warehouse</th>
+                            <th class="py-4 px-4 font-bold">Category</th>
+                            <th class="py-4 px-4 font-bold">Qty (Fisik|Alokasi|Tersedia)</th>
+                            <th class="py-4 px-4 font-bold">Location</th>
+                            <th class="py-4 px-4 font-bold text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 font-medium">
+                        <template x-for="item in data" :key="item.id">
+                            <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
+                                <td class="py-4 px-4 font-bold text-gray-800 tracking-wider" x-text="item.sku"></td>
+                                <td class="py-4 px-4 text-sm text-gray-500 font-mono" x-text="item.upc || '-'"></td>
+                                <td class="py-4 px-4" x-text="item.brand || '-'"></td>
+                                <td class="py-4 px-4 font-bold" x-text="item.name"></td>
+                                <td class="py-4 px-4" x-text="item.warehouse?.name || '-'"></td>
+                                <td class="py-4 px-4" x-text="item.category?.name || '-'"></td>
+                                <td class="py-4 px-4">
+                                    <div class="flex flex-col text-sm">
+                                        <span class="text-gray-500" x-text="`Fisik: ${new Intl.NumberFormat().format(item.quantity)} ${item.unit_type?.name || ''}`"></span>
+                                        <span class="font-bold" :class="item.is_low_stock ? 'text-red-600' : 'text-emerald-600'" x-text="`Tersedia: ${new Intl.NumberFormat().format(item.quantity)}`"></span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 text-sm text-gray-500" x-text="`Zone: ${item.zone?.name || '-'} | Rack: ${item.rack?.name || '-'}`"></td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" @click="$dispatch('open-edit', { id: item.id, warehouse_id: item.warehouse?.id, category_id: item.category?.id, unit_type_id: item.unit_type?.id, sku: item.sku, upc: item.upc, brand: item.brand, name: item.name, quantity: item.quantity, min_quantity: item.min_quantity, weight_kg: item.weight_kg, volume_cbm: item.volume_cbm, zone_id: item.zone?.id, rack_id: item.rack?.id })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
+                                        <form :id="'delete-form-' + item.id" :action="'/warehouse-panel/inventory/' + item.id" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="confirmDelete('delete-form-' + item.id)" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="data.length === 0" x-cloak>
+                            <td colspan="9" class="py-8 text-center text-gray-400">No stock items found.</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="py-8 text-center text-gray-400">No stock items found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            </div>
-            <div class="mt-4">
-                {{ $inventory->links() }}
-            </div>
-        </x-card>
+                    </tbody>
+                </table>
+                </div>
+                <x-pagination />
+            </x-card>
 
         <!-- Barcode Scanner Modal -->
         <template x-if="scannerActive">

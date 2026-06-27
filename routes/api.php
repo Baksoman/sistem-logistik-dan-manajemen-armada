@@ -7,8 +7,12 @@ use App\Http\Controllers\Api\OperationalCostSearchController;
 use App\Http\Controllers\Api\OrderSearchController;
 use App\Http\Controllers\Api\RouteSearchController;
 use App\Http\Controllers\Api\ShipmentSearchController;
+use App\Http\Controllers\Api\InventorySearchController;
+use App\Http\Controllers\Api\ItemCategorySearchController;
+use App\Http\Controllers\Api\StockMovementSearchController;
 use App\Http\Controllers\Api\UserSearchController;
 use App\Http\Controllers\Api\VehicleSearchController;
+use App\Http\Controllers\Api\WarehouseSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/locations/search', [LocationSearchController::class, 'search']);
@@ -26,5 +30,9 @@ Route::middleware(['web', 'auth'])->prefix('search')->name('api.search.')->group
     Route::get('/vehicles',  VehicleSearchController::class)->middleware('permission:manage_vehicles')->name('vehicles');
     Route::get('/drivers',   DriverSearchController::class)->middleware('permission:manage_drivers')->name('drivers');
     Route::get('/operational-costs', OperationalCostSearchController::class)->middleware('permission:view_costs')->name('operational-costs');
+    Route::get('/warehouses', WarehouseSearchController::class)->middleware('permission:manage_inventory')->name('warehouses');
+    Route::get('/item-categories', ItemCategorySearchController::class)->middleware('permission:manage_inventory')->name('item-categories');
+    Route::get('/inventory', InventorySearchController::class)->middleware('permission:manage_inventory')->name('inventory');
+    Route::get('/inventory-movements', StockMovementSearchController::class)->middleware('permission:manage_inventory')->name('inventory-movements');
 });
 

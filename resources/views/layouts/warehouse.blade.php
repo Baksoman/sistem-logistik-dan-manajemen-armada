@@ -38,6 +38,89 @@
                 }
             }
         </script>
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('dataTable', (config) => ({
+                    data: config.initialData || [],
+                    meta: config.initialMeta || {},
+                    endpoint: config.endpoint || '',
+                    query: config.initialQuery || '',
+                    filters: config.initialFilters || {},
+                    page: config.initialMeta?.current_page || 1,
+                    isLoading: false,
+                    filterModalOpen: false,
+
+                    init() {
+                        this.$watch('query', () => { 
+                            this.page = 1; 
+                            this.fetchData(); 
+                        });
+                        
+                        this.$watch('filters', () => { 
+                            this.page = 1; 
+                            this.fetchData(); 
+                        }, { deep: true });
+                    },
+
+                    async fetchData() {
+                        if (!this.endpoint) return;
+                        this.isLoading = true;
+                        try {
+                            const url = new URL(this.endpoint, window.location.origin);
+                            if (this.query) url.searchParams.append('search', this.query);
+                            if (this.page > 1) url.searchParams.append('page', this.page);
+                            
+                            for (const [key, value] of Object.entries(this.filters)) {
+                                if (value !== '' && value !== null && value !== undefined) {
+                                    url.searchParams.append(key, value);
+                                }
+                            }
+
+                            const stateUrl = new URL(window.location.href);
+                            stateUrl.search = url.search;
+                            window.history.replaceState({}, '', stateUrl);
+
+                            const response = await fetch(url, {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            const result = await response.json();
+                            this.data = result.data;
+                            this.meta = result.meta;
+                        } catch (error) {
+                            console.error('Error fetching data:', error);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+                    
+                    changePage(urlStr) {
+                        if (!urlStr) return;
+                        const url = new URL(urlStr);
+                        const pageStr = url.searchParams.get('page');
+                        if (pageStr) {
+                            this.page = parseInt(pageStr);
+                            this.fetchData();
+                        }
+                    },
+
+                    resetFilters() {
+                        this.filters = {};
+                        this.filterModalOpen = false;
+                    },
+
+                    applyFilters() {
+                        this.filterModalOpen = false;
+                        this.page = 1;
+                        this.fetchData();
+                    }
+                }));
+            });
+        </script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
         <!-- Scripts -->
