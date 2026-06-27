@@ -13,22 +13,19 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class OutboundController extends Controller
 {
-    public function index()
+    public function index(\App\Http\Requests\Search\StockMovementSearchRequest $request, \App\QueryFilters\StockMovementFilter $filter)
     {
         $user = auth()->user();
         
-        $movementsQuery = StockMovement::with(['stockItem.warehouse', 'stockItem.unitType', 'creator'])
-            ->where('type', 'outbound')
-            ->latest();
+        // Force type to outbound
+        $request->merge(['force_type' => 'outbound']);
+        $apiController = new \App\Http\Controllers\Api\StockMovementSearchController();
+        $initialData = $apiController($request, $filter)->response()->getData(true);
             
         $warehousesQuery = Warehouse::where('is_active', true);
         $stockItemsQuery = StockItem::with(['warehouse', 'unitType'])->where('quantity', '>', 0);
 
         if ($user && !$user->hasRole('Super Admin')) {
-            $movementsQuery->whereHas('stockItem.warehouse.users', function ($q) use ($user) {
-                $q->where('users.id', $user->id);
-            });
-            
             $warehousesQuery->whereHas('users', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
             });
@@ -38,11 +35,10 @@ class OutboundController extends Controller
             });
         }
 
-        $movements = $movementsQuery->paginate(15);
         $warehouses = $warehousesQuery->get();
         $stockItems = $stockItemsQuery->get();
 
-        return view('warehouse.outbound.index', compact('movements', 'warehouses', 'stockItems'));
+        return view('warehouse.outbound.index', compact('initialData', 'warehouses', 'stockItems'));
     }
 
     public function store(Request $request)

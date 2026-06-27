@@ -17,9 +17,10 @@ class WarehouseController extends Controller
 {
     public function __construct(protected WarehouseService $warehouseService) {}
 
-    public function index()
+    public function index(\App\Http\Requests\Search\WarehouseSearchRequest $request, \App\QueryFilters\WarehouseFilter $filter)
     {
-        $warehouses = $this->warehouseService->getPaginatedWarehouses(10);
+        $apiController = new \App\Http\Controllers\Api\WarehouseSearchController();
+        $initialData = $apiController($request, $filter)->response()->getData(true);
 
         // Get users who can be assigned to warehouses (Staff Warehouse role)
         $warehouseRole = Role::where('name', 'Staff Warehouse')->first();
@@ -27,7 +28,7 @@ class WarehouseController extends Controller
             ? User::whereHas('roles', fn($q) => $q->where('roles.id', $warehouseRole->id))->get()
             : collect();
 
-        return view('warehouse.warehouses.index', compact('warehouses', 'assignableUsers'));
+        return view('warehouse.warehouses.index', compact('initialData', 'assignableUsers'));
     }
 
     public function store(StoreWarehouseRequest $request)

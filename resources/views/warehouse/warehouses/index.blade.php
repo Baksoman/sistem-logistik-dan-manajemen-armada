@@ -86,104 +86,122 @@
 @section('content')
     <x-topbar />
 
-    <div x-data="{
-            slideOverOpen: {{ $errors->any() && !old('warehouse_id') ? 'true' : 'false' }},
-            editSlideOverOpen: {{ $errors->any() && old('warehouse_id') ? 'true' : 'false' }},
-            editData: {
-                id: '{{ old('warehouse_id') }}',
-                code: '{{ old('code') }}',
-                name: '{{ old('name') }}',
-                address: '{{ old('address') }}',
-                latitude: '{{ old('latitude') }}',
-                longitude: '{{ old('longitude') }}',
-                is_active: '{{ old('is_active', 1) }}',
-                user_ids: []
-            }
-         }"
-         @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $nextTick(() => initEditMap(editData.latitude, editData.longitude))"
-         @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
+    <div x-data="dataTable({
+            endpoint: '/api/search/warehouses',
+            initialData: {{ Js::from($initialData['data'] ?? []) }},
+            initialMeta: {{ Js::from($initialData['meta'] ?? []) }}
+        })" class="w-full">
+        
+        <div x-data="{
+                slideOverOpen: {{ $errors->any() && !old('warehouse_id') ? 'true' : 'false' }},
+                editSlideOverOpen: {{ $errors->any() && old('warehouse_id') ? 'true' : 'false' }},
+                editData: {
+                    id: '{{ old('warehouse_id') }}',
+                    code: '{{ old('code') }}',
+                    name: '{{ old('name') }}',
+                    address: '{{ old('address') }}',
+                    latitude: '{{ old('latitude') }}',
+                    longitude: '{{ old('longitude') }}',
+                    is_active: '{{ old('is_active', 1) }}',
+                    user_ids: []
+                }
+             }"
+             @open-edit.window="editData = $event.detail; editSlideOverOpen = true; $nextTick(() => initEditMap(editData.latitude, editData.longitude))"
+             @keydown.escape.window="slideOverOpen = false; editSlideOverOpen = false">
 
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-            <p class="text-gray-500 text-lg font-medium">Manage warehouse locations and staff assignments.</p>
-            <div class="flex flex-col lg:flex-row w-full lg:w-auto gap-3 shrink-0">
-                <a href="{{ route('warehouse.warehouses.export.excel') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-emerald-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-emerald-50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Excel
-                </a>
-                <a href="{{ route('warehouse.warehouses.export.pdf') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-red-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-red-50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    PDF
-                </a>
-                <button @click="slideOverOpen = true; $nextTick(() => initCreateMap())" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add Warehouse
-                </button>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+                <p class="text-gray-500 text-lg font-medium">Manage warehouse locations and staff assignments.</p>
+                <div class="flex flex-col lg:flex-row w-full lg:w-auto gap-3 shrink-0">
+                    <a href="{{ route('warehouse.warehouses.export.excel') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-emerald-700 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-emerald-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Excel
+                    </a>
+                    <a href="{{ route('warehouse.warehouses.export.pdf') }}" class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-red-600 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db] transition-all hover:bg-red-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        PDF
+                    </a>
+                    <button @click="slideOverOpen = true; $nextTick(() => initCreateMap())" class="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold text-gray-800 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all hover:text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Warehouse
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <x-card class="mb-8">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Warehouses</h3>
-            <div class="overflow-x-auto pb-4">
-            <table class="w-full text-left border-collapse min-w-max whitespace-nowrap">
-                <thead>
-                    <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
-                        <th class="py-4 px-4 font-bold">Code</th>
-                        <th class="py-4 px-4 font-bold">Name</th>
-                        <th class="py-4 px-4 font-bold">Address</th>
-                        <th class="py-4 px-4 font-bold">Assigned Staff</th>
-                        <th class="py-4 px-4 font-bold">Status</th>
-                        <th class="py-4 px-4 font-bold text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700 font-medium">
-                    @forelse($warehouses as $warehouse)
-                        <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
-                            <td class="py-4 px-4 font-bold text-gray-800">{{ $warehouse->code }}</td>
-                            <td class="py-4 px-4 font-bold">{{ $warehouse->name }}</td>
-                            <td class="py-4 px-4 whitespace-normal min-w-[200px]">{{ $warehouse->address }}</td>
-                            <td class="py-4 px-4">
-                                @if($warehouse->users->count() > 0)
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach($warehouse->users as $user)
-                                            <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 shadow-[inset_1px_1px_2px_#d1d5db,inset_-1px_-1px_2px_#ffffff]">{{ $user->name }}</span>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span class="text-gray-400 text-sm">No staff</span>
-                                @endif
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] {{ $warehouse->is_active ? 'text-emerald-600' : 'text-red-500' }}">
-                                    {{ $warehouse->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="flex items-center justify-center gap-3">
-                                    <button type="button" @click="$dispatch('open-edit', { id: '{{ $warehouse->id }}', code: '{{ $warehouse->code }}', name: '{{ $warehouse->name }}', address: '{{ str_replace(["\r", "\n"], ["", " "], $warehouse->address) }}', latitude: '{{ $warehouse->latitude }}', longitude: '{{ $warehouse->longitude }}', is_active: '{{ $warehouse->is_active }}', user_ids: {{ json_encode($warehouse->users->pluck('id')->toArray()) }} })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                    </button>
-                                    <form id="delete-form-{{ $warehouse->id }}" action="{{ route('warehouse.warehouses.destroy', $warehouse->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" onclick="confirmDelete('delete-form-{{ $warehouse->id }}')" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+            <x-search-filter-bar placeholder="Search warehouses by code, name, or address..." />
+
+            <x-filter-modal title="Filter Warehouses">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                    <select x-model="filters.is_active" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                        <option value="">All Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Created From</label>
+                    <input type="date" x-model="filters.date_from" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Created To</label>
+                    <input type="date" x-model="filters.date_to" class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
+                </div>
+            </x-filter-modal>
+
+            <x-card class="mb-8 relative min-h-[400px]">
+                <div x-show="loading" class="absolute inset-0 z-10 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm rounded-[2rem]">
+                    <div class="w-12 h-12 rounded-full border-4 border-gray-300 border-t-blue-500 animate-spin shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+                </div>
+
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Warehouses</h3>
+                <div class="overflow-x-auto pb-4">
+                <table class="w-full text-left border-collapse min-w-max whitespace-nowrap">
+                    <thead>
+                        <tr class="border-b border-gray-300 text-gray-500 text-sm tracking-widest uppercase">
+                            <th class="py-4 px-4 font-bold">Code</th>
+                            <th class="py-4 px-4 font-bold">Name</th>
+                            <th class="py-4 px-4 font-bold">Address</th>
+                            <th class="py-4 px-4 font-bold">Assigned Staff</th>
+                            <th class="py-4 px-4 font-bold">Status</th>
+                            <th class="py-4 px-4 font-bold text-center">Action</th>
                         </tr>
-                    @empty
-                        <tr>
+                    </thead>
+                    <tbody class="text-gray-700 font-medium">
+                        <template x-for="warehouse in data" :key="warehouse.id">
+                            <tr class="border-b border-gray-200/50 hover:bg-gray-200/30 transition">
+                                <td class="py-4 px-4 font-bold text-gray-800" x-text="warehouse.code"></td>
+                                <td class="py-4 px-4 font-bold" x-text="warehouse.name"></td>
+                                <td class="py-4 px-4 whitespace-normal min-w-[200px]" x-text="warehouse.address"></td>
+                                <td class="py-4 px-4">
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff]"
+                                          :class="warehouse.is_active ? 'text-emerald-600' : 'text-red-500'"
+                                          x-text="warehouse.is_active ? 'Active' : 'Inactive'">
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button type="button" @click="$dispatch('open-edit', { id: warehouse.id, code: warehouse.code, name: warehouse.name, address: warehouse.address.replace(/[\r\n]+/g, ' '), latitude: warehouse.latitude, longitude: warehouse.longitude, is_active: warehouse.is_active, user_ids: warehouse.users ? warehouse.users.map(u => u.id) : [] })" class="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        <form :id="'delete-form-' + warehouse.id" :action="'/warehouse-panel/warehouses/' + warehouse.id" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="confirmDelete('delete-form-' + warehouse.id)" class="w-10 h-10 rounded-full flex items-center justify-center text-red-500 bg-gray-100 shadow-[4px_4px_8px_#d1d5db,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#d1d5db,inset_-2px_-2px_4px_#ffffff] hover:text-red-600 transition-all">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="data.length === 0" x-cloak>
                             <td colspan="6" class="py-8 text-center text-gray-400">No warehouses found.</td>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            </div>
-            <div class="mt-4">
-                {{ $warehouses->links() }}
-            </div>
-        </x-card>
+                    </tbody>
+                </table>
+                </div>
+                <x-pagination />
+            </x-card>
 
         {{-- ==================== CREATE FORM SLIDE-OVER ==================== --}}
         <x-slide-over title="Create New Warehouse">
