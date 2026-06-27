@@ -143,7 +143,7 @@
                         <select name="role" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none appearance-none">
                             <option value="Super Admin">Super Admin</option>
                             <option value="Admin Logistik">Admin Logistik</option>
-                            <option value="Warehouse">Warehouse</option>
+                            <option value="Staff Warehouse">Warehouse</option>
                             <option value="Driver">Driver</option>
                         </select>
                         <svg class="w-5 h-5 absolute right-4 top-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -181,7 +181,7 @@
                     <select name="role" x-model="editData.role" required class="w-full bg-gray-100 rounded-2xl px-5 py-4 font-medium text-gray-600 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] border-none focus:ring-0 focus:outline-none">
                         <option value="Super Admin">Super Admin</option>
                         <option value="Admin Logistik">Admin Logistik</option>
-                        <option value="Warehouse">Warehouse</option>
+                        <option value="Staff Warehouse">Warehouse</option>
                         <option value="Driver">Driver</option>
                     </select>
                 </div>
